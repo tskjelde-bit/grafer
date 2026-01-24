@@ -29,33 +29,40 @@
             color: #1a1a2e;
         }
 
+        /* Toolbar */
         .toolbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            padding: 1rem 2rem;
+            padding: 0.75rem 1.5rem;
             display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 0.6rem;
         }
 
         body.dark .toolbar {
-            background: rgba(15, 17, 20, 0.95);
+            background: rgba(15, 17, 20, 0.98);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         body.light .toolbar {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         .toolbar-title {
             font-weight: 600;
-            margin-right: auto;
+            font-size: 0.95rem;
         }
 
         body.dark .toolbar-title {
@@ -66,17 +73,111 @@
             color: #2563eb;
         }
 
+        .toolbar-spacer {
+            flex: 1;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 28px;
+            margin: 0 0.25rem;
+        }
+
+        body.dark .toolbar-divider {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        body.light .toolbar-divider {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Common control styles */
+        .control {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .control label {
+            white-space: nowrap;
+        }
+
+        body.dark .control label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light .control label {
+            color: #6b7280;
+        }
+
+        .control select,
+        .control input[type="number"] {
+            padding: 0.5rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            height: 34px;
+        }
+
+        body.dark .control select,
+        body.dark .control input[type="number"] {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        body.light .control select,
+        body.light .control input[type="number"] {
+            background: #f3f4f6;
+            color: #1a1a2e;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .control input[type="number"] {
+            width: 50px;
+            text-align: center;
+        }
+
+        .control input[type="range"] {
+            width: 60px;
+            cursor: pointer;
+        }
+
+        .control input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .control-value {
+            min-width: 24px;
+            text-align: center;
+        }
+
+        body.dark .control-value {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .control-value {
+            color: #9ca3af;
+        }
+
+        /* Buttons */
         .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             border: none;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            height: 34px;
         }
 
         .btn-primary {
@@ -97,54 +198,238 @@
             background: #059669;
         }
 
-        .btn-toggle {
+        .btn-highlight {
+            background: #2ECC9A;
+            color: #000;
+        }
+
+        .btn-highlight:hover {
+            background: #25b085;
+        }
+
+        .btn-outline {
             background: transparent;
-            border: 1px solid;
         }
 
-        body.dark .btn-toggle {
+        body.dark .btn-outline {
             color: #e4e4e7;
-            border-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        body.dark .btn-toggle:hover {
+        body.dark .btn-outline:hover {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        body.light .btn-toggle {
-            color: #1a1a2e;
-            border-color: rgba(0, 0, 0, 0.2);
+        body.light .btn-outline {
+            color: #374151;
+            border: 1px solid rgba(0, 0, 0, 0.15);
         }
 
-        body.light .btn-toggle:hover {
+        body.light .btn-outline:hover {
             background: rgba(0, 0, 0, 0.05);
         }
 
-        .btn-back {
-            text-decoration: none;
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -360px;
+            width: 360px;
+            height: 100vh;
+            z-index: 1100;
+            padding: 1.5rem;
+            transition: right 0.3s ease;
+            overflow-y: auto;
         }
 
-        body.dark .btn-back {
-            color: #a1a1aa;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .settings-panel.show {
+            right: 0;
         }
 
-        body.light .btn-back {
+        body.dark .settings-panel {
+            background: #1a1d21;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .settings-panel {
+            background: #ffffff;
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .settings-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        body.dark .settings-close {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light .settings-close {
             color: #6b7280;
-            background: rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
+        .settings-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        body.dark .settings-section-title {
+            color: #60a5fa;
+        }
+
+        body.light .settings-section-title {
+            color: #2563eb;
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .settings-input-group label {
+            font-size: 0.7rem;
+        }
+
+        body.dark .settings-input-group label {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .settings-input-group label {
+            color: #9ca3af;
+        }
+
+        .settings-input-group input[type="number"] {
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        body.dark .settings-input-group input[type="number"] {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .settings-input-group input[type="number"] {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .border-side-row {
+            display: grid;
+            grid-template-columns: 50px 50px 70px 40px;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        body.dark .border-side-row {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light .border-side-row {
+            color: #6b7280;
+        }
+
+        .border-side-row input[type="number"],
+        .border-side-row select {
+            padding: 0.35rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        body.dark .border-side-row input[type="number"],
+        body.dark .border-side-row select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .border-side-row input[type="number"],
+        body.light .border-side-row select {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .border-side-row input[type="color"] {
+            width: 100%;
+            height: 26px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            display: none;
+        }
+
+        .settings-overlay.show {
+            display: block;
+        }
+
+        /* Chart container */
         .chart-container {
             max-width: 1200px;
-            margin: 100px auto 40px;
-            padding: 30px;
+            margin: 140px auto 40px;
+            padding: 20px;
         }
 
         #captureArea {
-            padding: 30px;
-            border-radius: 16px;
+            padding: 0;
         }
 
         body.dark #captureArea {
@@ -215,45 +500,10 @@
 
         #chart {
             width: 100%;
-            aspect-ratio: 1.33;
+            aspect-ratio: 1.78;
         }
 
-        .size-selector {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .size-selector label {
-            font-size: 0.875rem;
-        }
-
-        body.dark .size-selector label {
-            color: #a1a1aa;
-        }
-
-        body.light .size-selector label {
-            color: #6b7280;
-        }
-
-        .size-selector select {
-            padding: 0.5rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-        }
-
-        body.dark .size-selector select {
-            background: #1f2937;
-            color: #e4e4e7;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        body.light .size-selector select {
-            background: #f3f4f6;
-            color: #1a1a2e;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
+        /* Loading overlay */
         .loading {
             position: fixed;
             top: 0;
@@ -273,7 +523,8 @@
             display: flex;
         }
 
-        .embed-modal {
+        /* Modal */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -286,284 +537,242 @@
             z-index: 2000;
         }
 
-        .embed-modal.show {
+        .modal.show {
             display: flex;
         }
 
-        .embed-content {
-            background: #1f2937;
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 700px;
+        .modal-content {
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
             width: 90%;
         }
 
-        .embed-content h3 {
-            margin: 0 0 0.5rem 0;
-            color: #60a5fa;
+        body.dark .modal-content {
+            background: #1f2937;
         }
 
-        .embed-content p {
-            margin: 0 0 1rem 0;
-            color: #a1a1aa;
+        body.light .modal-content {
+            background: #ffffff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
             font-size: 0.9rem;
         }
 
-        .embed-content textarea {
+        body.dark .modal-content p {
+            color: #a1a1aa;
+        }
+
+        body.light .modal-content p {
+            color: #6b7280;
+        }
+
+        .modal-content textarea {
             width: 100%;
-            height: 120px;
-            background: #0f1114;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 100px;
+            padding: 0.75rem;
             border-radius: 8px;
-            color: #e4e4e7;
-            padding: 1rem;
-            font-family: 'Monaco', 'Menlo', monospace;
+            font-family: monospace;
             font-size: 0.8rem;
             resize: none;
+            margin-bottom: 1rem;
         }
 
-        .embed-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        .color-customizer {
-            max-width: 1200px;
-            margin: 70px auto 0;
-            padding: 0 30px;
-        }
-
-        .customizer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            user-select: none;
-        }
-
-        body.dark .customizer-header {
-            background: rgba(255, 255, 255, 0.05);
-            color: #a1a1aa;
-        }
-
-        body.light .customizer-header {
-            background: rgba(0, 0, 0, 0.05);
-            color: #6b7280;
-        }
-
-        .customizer-header:hover {
-            opacity: 0.8;
-        }
-
-        .customizer-content {
-            display: none;
-            padding: 1rem;
-            border-radius: 0 0 8px 8px;
-            margin-top: -4px;
-        }
-
-        .customizer-content.show {
-            display: block;
-        }
-
-        body.dark .customizer-content {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        body.light .customizer-content {
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        .color-row {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .color-row label {
-            min-width: 100px;
-            font-size: 0.875rem;
-        }
-
-        body.dark .color-row label {
-            color: #a1a1aa;
-        }
-
-        body.light .color-row label {
-            color: #6b7280;
-        }
-
-        .color-row input[type="color"] {
-            width: 40px;
-            height: 32px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .color-row input[type="text"] {
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-family: monospace;
-        }
-
-        body.dark .color-row input[type="text"] {
-            background: #1f2937;
+        body.dark .modal-content textarea {
+            background: #111827;
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #e4e4e7;
         }
 
-        body.light .color-row input[type="text"] {
-            background: #f3f4f6;
+        body.light .modal-content textarea {
+            background: #f9fafb;
             border: 1px solid rgba(0, 0, 0, 0.1);
             color: #1a1a2e;
         }
 
-        .color-row select {
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
         }
 
-        body.dark .color-row select {
-            background: #1f2937;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e4e4e7;
-        }
-
-        body.light .color-row select {
-            background: #f3f4f6;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: #1a1a2e;
-        }
-
-        .btn-small {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .toolbar {
-                padding: 0.75rem 1rem;
+                padding: 0.5rem 1rem;
             }
-
-            .toolbar-title {
-                width: 100%;
-                margin-bottom: 0.5rem;
-            }
-
             .chart-container {
-                margin-top: 140px;
+                margin-top: 180px;
                 padding: 15px;
-            }
-
-            #captureArea {
-                padding: 20px;
-            }
-
-            .chart-header {
-                font-size: 1.4rem;
-            }
-
-            .chart-subheader {
-                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body class="dark">
     <div class="toolbar">
-        <span class="toolbar-title">Generer graf - Boliger solgt</span>
-        <a href="admin.html" class="btn btn-back">Tilbake</a>
-        <button class="btn btn-toggle" id="themeToggle">
-            <span id="themeIcon">&#9728;</span>
-            <span id="themeText">Light mode</span>
-        </button>
-        <div class="size-selector">
-            <label for="paletteSelect">Farger:</label>
-            <select id="paletteSelect">
-                <option value="default">Standard (blå)</option>
-                <option value="a1">A1 Blå/grå sekvensiell</option>
-                <option value="a2">A2 Blå/grå utvidet</option>
-                <option value="b1">B1 Fargerik sekvensiell</option>
-                <option value="b2">B2 Fargerik utvidet</option>
-            </select>
+        <div class="toolbar-row">
+            <span class="toolbar-title">Generer - Boliger solgt</span>
+            <span class="toolbar-spacer"></span>
+            <a href="admin.html" class="btn btn-outline">Tilbake</a>
+            <button class="btn btn-outline" id="themeToggle">
+                <span id="themeIcon">&#9728;</span>
+                <span id="themeText">Light</span>
+            </button>
         </div>
-        <div class="size-selector">
-            <label for="opacityInput">Opacity:</label>
-            <input type="range" id="opacityInput" min="0.3" max="1" step="0.1" value="0.7" style="width: 80px;">
-            <span id="opacityValue">0.7</span>
+        <div class="toolbar-row">
+            <div class="control">
+                <label>Farger:</label>
+                <select id="paletteSelect">
+                    <option value="default">Standard</option>
+                    <option value="a1">A1 Blå/grå</option>
+                    <option value="a2">A2 Utvidet</option>
+                    <option value="b1">B1 Fargerik</option>
+                    <option value="b2">B2 Utvidet</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>Opacity:</label>
+                <input type="range" id="opacityInput" min="0.3" max="1" step="0.1" value="0.7">
+                <span class="control-value" id="opacityValue">0.7</span>
+            </div>
+            <div class="control">
+                <label>
+                    <input type="checkbox" id="avgToggle" checked>
+                    Snitt
+                </label>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
+                <label>Highlight:</label>
+                <select id="highlightYearSelect"></select>
+                <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
+                <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
+                <label>Aspect:</label>
+                <select id="aspectSelect">
+                    <option value="1.78" selected>16:9</option>
+                    <option value="2.0">2:1</option>
+                    <option value="1.33">4:3</option>
+                    <option value="1.25">5:4</option>
+                    <option value="0.75">3:4</option>
+                </select>
+            </div>
+            <button class="btn btn-outline" id="settingsBtn">Margin & Border</button>
         </div>
-        <div class="size-selector">
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                <input type="checkbox" id="avgToggle" checked style="width: 16px; height: 16px; cursor: pointer;">
-                Gjennomsnitt
-            </label>
+        <div class="toolbar-row">
+            <div class="control">
+                <label>Oppløsning:</label>
+                <select id="sizeSelect">
+                    <option value="1">1x</option>
+                    <option value="2" selected>2x</option>
+                    <option value="3">3x</option>
+                </select>
+            </div>
+            <span class="toolbar-spacer"></span>
+            <button class="btn btn-success" id="downloadBtn">Last ned PNG</button>
+            <button class="btn btn-primary" id="embedBtn">Embed-kode</button>
         </div>
-        <div class="size-selector">
-            <label for="aspectSelect">Aspect:</label>
-            <select id="aspectSelect">
-                <option value="1.78">16:9 Standard web</option>
-                <option value="2.0">2:1 Analyse</option>
-                <option value="1.33" selected>4:3 Dashboard</option>
-                <option value="1.25">5:4 Mobil</option>
-                <option value="0.75">3:4 Vertikal</option>
-            </select>
-        </div>
-        <div class="size-selector">
-            <label for="sizeSelect">Oppløsning:</label>
-            <select id="sizeSelect">
-                <option value="1">1x (standard)</option>
-                <option value="2" selected>2x (høy oppløsning)</option>
-                <option value="3">3x (ekstra høy)</option>
-            </select>
-        </div>
-        <button class="btn btn-success" id="downloadBtn">
-            Last ned PNG
-        </button>
-        <button class="btn btn-primary" id="embedBtn">
-            Vis embed-kode
-        </button>
     </div>
 
-    <div class="embed-modal" id="embedModal">
-        <div class="embed-content">
+    <!-- Settings Panel Overlay -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h3>Margin & Border</h3>
+            <button class="settings-close" id="settingsClose">&times;</button>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">Margins (px)</div>
+            <div class="settings-row">
+                <div class="settings-input-group">
+                    <label>Top</label>
+                    <input type="number" id="marginTop" value="0" min="0" max="100">
+                </div>
+                <div class="settings-input-group">
+                    <label>Right</label>
+                    <input type="number" id="marginRight" value="0" min="0" max="100">
+                </div>
+                <div class="settings-input-group">
+                    <label>Bottom</label>
+                    <input type="number" id="marginBottom" value="0" min="0" max="100">
+                </div>
+                <div class="settings-input-group">
+                    <label>Left</label>
+                    <input type="number" id="marginLeft" value="0" min="0" max="100">
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">Borders</div>
+            <label class="settings-toggle">
+                <input type="checkbox" id="borderToggle">
+                Vis border rundt visualisering
+            </label>
+            <div id="borderControls" style="display: none;">
+                <div class="border-side-row">
+                    <span>Top</span>
+                    <input type="number" id="borderTopWidth" value="1" min="0" max="20">
+                    <select id="borderTopStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderTopColor" value="#cccccc">
+                </div>
+                <div class="border-side-row">
+                    <span>Right</span>
+                    <input type="number" id="borderRightWidth" value="1" min="0" max="20">
+                    <select id="borderRightStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderRightColor" value="#cccccc">
+                </div>
+                <div class="border-side-row">
+                    <span>Bottom</span>
+                    <input type="number" id="borderBottomWidth" value="1" min="0" max="20">
+                    <select id="borderBottomStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderBottomColor" value="#cccccc">
+                </div>
+                <div class="border-side-row">
+                    <span>Left</span>
+                    <input type="number" id="borderLeftWidth" value="1" min="0" max="20">
+                    <select id="borderLeftStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderLeftColor" value="#cccccc">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="embedModal">
+        <div class="modal-content">
             <h3>Embed-kode</h3>
             <p>Kopier denne koden for å embedde grafen:</p>
             <textarea id="embedCode" readonly></textarea>
-            <div class="embed-actions">
+            <div class="modal-actions">
                 <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
-                <button class="btn btn-toggle" id="closeEmbedBtn">Lukk</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="color-customizer" id="colorCustomizer">
-        <div class="customizer-header" id="customizerToggle">
-            <span>Tilpass farger</span>
-            <span id="customizerArrow">▼</span>
-        </div>
-        <div class="customizer-content" id="customizerContent">
-            <div class="color-row">
-                <label>Gjennomsnitt:</label>
-                <input type="color" id="avgColorPicker" value="#a0fab2">
-                <input type="text" id="avgColorHex" value="#a0fab2" placeholder="#hex" style="width: 80px;">
-            </div>
-            <div class="color-row">
-                <label>Highlight år:</label>
-                <select id="highlightYearSelect"></select>
-                <input type="color" id="highlightColorPicker" value="#ff6b6b">
-                <input type="text" id="highlightColorHex" value="#ff6b6b" placeholder="#hex" style="width: 80px;">
-                <button class="btn btn-small" id="applyHighlightBtn">Bruk</button>
-                <button class="btn btn-small" id="resetHighlightBtn">Reset</button>
+                <button class="btn btn-outline" id="closeEmbedBtn">Lukk</button>
             </div>
         </div>
     </div>
@@ -590,17 +799,105 @@
             isDark = !isDark;
             document.body.className = isDark ? 'dark' : 'light';
             themeIcon.innerHTML = isDark ? '&#9728;' : '&#9790;';
-            themeText.textContent = isDark ? 'Light mode' : 'Dark mode';
+            themeText.textContent = isDark ? 'Light' : 'Dark';
             updateChartTheme();
+        });
+
+        // Settings panel
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const settingsClose = document.getElementById('settingsClose');
+
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('show');
+            settingsOverlay.classList.add('show');
+        });
+
+        function closeSettings() {
+            settingsPanel.classList.remove('show');
+            settingsOverlay.classList.remove('show');
+        }
+
+        settingsClose.addEventListener('click', closeSettings);
+        settingsOverlay.addEventListener('click', closeSettings);
+
+        // Margin controls
+        const captureArea = document.getElementById('captureArea');
+        const marginTop = document.getElementById('marginTop');
+        const marginRight = document.getElementById('marginRight');
+        const marginBottom = document.getElementById('marginBottom');
+        const marginLeft = document.getElementById('marginLeft');
+
+        function updateMargins() {
+            captureArea.style.paddingTop = marginTop.value + 'px';
+            captureArea.style.paddingRight = marginRight.value + 'px';
+            captureArea.style.paddingBottom = marginBottom.value + 'px';
+            captureArea.style.paddingLeft = marginLeft.value + 'px';
+        }
+
+        [marginTop, marginRight, marginBottom, marginLeft].forEach(input => {
+            input.addEventListener('input', updateMargins);
+        });
+
+        // Border controls
+        const borderToggle = document.getElementById('borderToggle');
+        const borderControls = document.getElementById('borderControls');
+
+        const borderInputs = {
+            top: {
+                width: document.getElementById('borderTopWidth'),
+                style: document.getElementById('borderTopStyle'),
+                color: document.getElementById('borderTopColor')
+            },
+            right: {
+                width: document.getElementById('borderRightWidth'),
+                style: document.getElementById('borderRightStyle'),
+                color: document.getElementById('borderRightColor')
+            },
+            bottom: {
+                width: document.getElementById('borderBottomWidth'),
+                style: document.getElementById('borderBottomStyle'),
+                color: document.getElementById('borderBottomColor')
+            },
+            left: {
+                width: document.getElementById('borderLeftWidth'),
+                style: document.getElementById('borderLeftStyle'),
+                color: document.getElementById('borderLeftColor')
+            }
+        };
+
+        borderToggle.addEventListener('change', () => {
+            borderControls.style.display = borderToggle.checked ? 'block' : 'none';
+            updateBorders();
+        });
+
+        function updateBorders() {
+            if (borderToggle.checked) {
+                captureArea.style.borderTop = `${borderInputs.top.width.value}px ${borderInputs.top.style.value} ${borderInputs.top.color.value}`;
+                captureArea.style.borderRight = `${borderInputs.right.width.value}px ${borderInputs.right.style.value} ${borderInputs.right.color.value}`;
+                captureArea.style.borderBottom = `${borderInputs.bottom.width.value}px ${borderInputs.bottom.style.value} ${borderInputs.bottom.color.value}`;
+                captureArea.style.borderLeft = `${borderInputs.left.width.value}px ${borderInputs.left.style.value} ${borderInputs.left.color.value}`;
+            } else {
+                captureArea.style.border = 'none';
+            }
+        }
+
+        Object.values(borderInputs).forEach(side => {
+            side.width.addEventListener('input', updateBorders);
+            side.style.addEventListener('change', updateBorders);
+            side.color.addEventListener('input', updateBorders);
         });
 
         // Aspect ratio handling
         const aspectSelect = document.getElementById('aspectSelect');
         aspectSelect.addEventListener('change', () => {
-            const ratio = parseFloat(aspectSelect.value);
-            document.getElementById('chart').style.aspectRatio = ratio;
+            const chartDiv = document.getElementById('chart');
+            chartDiv.style.aspectRatio = aspectSelect.value;
             if (chartEl) {
-                Plotly.Plots.resize(chartEl);
+                setTimeout(() => {
+                    Plotly.Plots.resize(chartEl);
+                }, 50);
             }
         });
 
@@ -608,7 +905,7 @@
         const avgToggle = document.getElementById('avgToggle');
         avgToggle.addEventListener('change', () => {
             if (chartEl && years.length > 0) {
-                const avgTraceIdx = years.length; // Average trace is last
+                const avgTraceIdx = years.length;
                 Plotly.restyle(chartEl, { visible: avgToggle.checked }, [avgTraceIdx]);
                 updateLegend();
             }
@@ -626,92 +923,26 @@
         });
 
         // Palette change
+        let currentPalette = 'default';
         const paletteSelect = document.getElementById('paletteSelect');
         paletteSelect.addEventListener('change', () => {
             currentPalette = paletteSelect.value;
             updateChartColors();
         });
 
-        function updateChartColors() {
-            colorPalette = getColorPalette(currentPalette, currentOpacity);
-            colorPaletteLight = getColorPalette(currentPalette, Math.min(currentOpacity + 0.15, 1));
-
-            if (chartEl && years.length > 0) {
-                const palette = isDark ? colorPalette : colorPaletteLight;
-                years.forEach((year, i) => {
-                    // Keep custom colors if set
-                    if (!customYearColors[year]) {
-                        yearColors[year] = palette[i % palette.length];
-                    }
-                });
-                const barColors = years.map(year => yearColors[year]);
-                Plotly.restyle(chartEl, { 'marker.color': barColors }, years.map((_, i) => i));
-                updateLegend();
-            }
-        }
-
-        // Color customizer toggle
-        const customizerToggle = document.getElementById('customizerToggle');
-        const customizerContent = document.getElementById('customizerContent');
-        const customizerArrow = document.getElementById('customizerArrow');
-
-        customizerToggle.addEventListener('click', () => {
-            customizerContent.classList.toggle('show');
-            customizerArrow.textContent = customizerContent.classList.contains('show') ? '▲' : '▼';
-        });
-
-        // Average color customization
-        let customAvgColor = null;
-        const avgColorPicker = document.getElementById('avgColorPicker');
-        const avgColorHex = document.getElementById('avgColorHex');
-
-        avgColorPicker.addEventListener('input', () => {
-            avgColorHex.value = avgColorPicker.value;
-            customAvgColor = avgColorPicker.value;
-            updateAvgLineColor();
-        });
-
-        avgColorHex.addEventListener('change', () => {
-            if (/^#[0-9A-Fa-f]{6}$/.test(avgColorHex.value)) {
-                avgColorPicker.value = avgColorHex.value;
-                customAvgColor = avgColorHex.value;
-                updateAvgLineColor();
-            }
-        });
-
-        function updateAvgLineColor() {
-            if (chartEl && years.length > 0) {
-                const avgTraceIdx = years.length;
-                Plotly.restyle(chartEl, { 'line.color': customAvgColor }, [avgTraceIdx]);
-            }
-        }
-
-        // Highlight year color customization
+        // Highlight year
         let customYearColors = {};
         const highlightYearSelect = document.getElementById('highlightYearSelect');
-        const highlightColorPicker = document.getElementById('highlightColorPicker');
-        const highlightColorHex = document.getElementById('highlightColorHex');
-        const applyHighlightBtn = document.getElementById('applyHighlightBtn');
+        const quickHighlightBtn = document.getElementById('quickHighlightBtn');
         const resetHighlightBtn = document.getElementById('resetHighlightBtn');
+        const HIGHLIGHT_COLOR = '#2ECC9A';
 
-        highlightColorPicker.addEventListener('input', () => {
-            highlightColorHex.value = highlightColorPicker.value;
-        });
-
-        highlightColorHex.addEventListener('change', () => {
-            if (/^#[0-9A-Fa-f]{6}$/.test(highlightColorHex.value)) {
-                highlightColorPicker.value = highlightColorHex.value;
-            }
-        });
-
-        applyHighlightBtn.addEventListener('click', () => {
+        quickHighlightBtn.addEventListener('click', () => {
             const year = highlightYearSelect.value;
-            const color = highlightColorPicker.value;
-            if (year && color) {
-                // Convert hex to rgba
-                const r = parseInt(color.slice(1, 3), 16);
-                const g = parseInt(color.slice(3, 5), 16);
-                const b = parseInt(color.slice(5, 7), 16);
+            if (year) {
+                const r = parseInt(HIGHLIGHT_COLOR.slice(1, 3), 16);
+                const g = parseInt(HIGHLIGHT_COLOR.slice(3, 5), 16);
+                const b = parseInt(HIGHLIGHT_COLOR.slice(5, 7), 16);
                 customYearColors[year] = `rgba(${r}, ${g}, ${b}, ${currentOpacity})`;
                 yearColors[year] = customYearColors[year];
 
@@ -734,38 +965,31 @@
         const months = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
 
         // Color palettes
-        const palettes = {
-            default: ['#093a60', '#1869b8', '#2196f5', '#4bc3fe'],
-            a1: ['#D6DEE6', '#B7C6D4', '#8FAFC4', '#5F9FCF', '#4FAEF6', '#2F7DB8', '#0B4F6C'],
-            a2: ['#E6ECF1', '#D9E2EA', '#CCD7E3', '#BFCBDD', '#B2C0D6', '#A4B5CF', '#97A9C9', '#8A9EC2', '#7C92BB', '#6F87B5', '#627CAE', '#5470A7', '#4765A1', '#3A599A', '#2C4E93', '#1F428D', '#143A82', '#0F336F', '#0C2C5C', '#0B4F6C'],
-            b1: ['#9FB3C8', '#6FA7C9', '#4FAEF6', '#2CB1BC', '#6BCF9C', '#F2A541'],
-            b2: ['#1F77B4', '#AEC7E8', '#2CA02C', '#98DF8A', '#FF7F0E', '#FFBB78', '#9467BD', '#C5B0D5', '#17BECF', '#9EDAE5', '#8C564B', '#C49C94', '#E377C2', '#F7B6D2', '#7F7F7F', '#C7C7C7', '#BCBD22', '#DBDB8D', '#F2A541', '#4FAEF6']
-        };
+        function getColorPalette(palette, opacity) {
+            const palettes = {
+                default: ['#093a60', '#1869b8', '#2196f5', '#4bc3fe'],
+                a1: ['#D6DEE6', '#B7C6D4', '#8FAFC4', '#5F9FCF', '#4FAEF6', '#2F7DB8', '#0B4F6C'],
+                a2: ['#E6ECF1', '#D9E2EA', '#C9D6E1', '#B7C6D4', '#A5BAC9', '#8FAFC4', '#7AA3BE', '#6398B8', '#5090B5', '#4088B3', '#3080B0', '#2078AD', '#1070AA', '#0068A7', '#0060A0', '#005898', '#00508F', '#004885', '#00407A', '#00386F'],
+                b1: ['#9FB3C8', '#6FA7C9', '#4FAEF6', '#2CB1BC', '#6BCF9C', '#F2A541'],
+                b2: ['#1F77B4', '#AEC7E8', '#FF7F0E', '#FFBB78', '#2CA02C', '#98DF8A', '#D62728', '#FF9896', '#9467BD', '#C5B0D5', '#8C564B', '#C49C94', '#E377C2', '#F7B6D2', '#7F7F7F', '#C7C7C7', '#BCBD22', '#DBDB8D', '#17BECF', '#9EDAE5']
+            };
 
-        function getColorPalette(paletteId, opacity = 0.7) {
-            const colors = palettes[paletteId] || palettes.default;
-            return colors.map(c => {
-                // Convert hex to rgba
-                const r = parseInt(c.slice(1, 3), 16);
-                const g = parseInt(c.slice(3, 5), 16);
-                const b = parseInt(c.slice(5, 7), 16);
+            const colors = palettes[palette] || palettes.default;
+            return colors.map(hex => {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
                 return `rgba(${r}, ${g}, ${b}, ${opacity})`;
             });
         }
 
-        let currentPalette = 'default';
         let colorPalette = getColorPalette(currentPalette, 0.7);
         let colorPaletteLight = getColorPalette(currentPalette, 0.85);
-        let customYearColors = {};
 
         let dataByYear = {};
         let years = [];
         let yearColors = {};
         let chartEl;
-
-        function getMaxYearsToShow() {
-            return 6; // Always show 6 years for export
-        }
 
         function updateChartTheme() {
             if (!chartEl || years.length === 0) return;
@@ -775,28 +999,27 @@
             const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
             const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
             const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
-            const avgLineColor = customAvgColor || (isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)');
+            const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
 
-            // Update palettes based on theme
             colorPalette = getColorPalette(currentPalette, currentOpacity);
             colorPaletteLight = getColorPalette(currentPalette, Math.min(currentOpacity + 0.15, 1));
             const palette = isDark ? colorPalette : colorPaletteLight;
 
-            // Update year colors
             years.forEach((year, i) => {
                 if (!customYearColors[year]) {
                     yearColors[year] = palette[i % palette.length];
                 }
             });
 
-            // Update bar colors
             const barColors = years.map(year => yearColors[year]);
+            years.forEach((year, i) => {
+                Plotly.restyle(chartEl, { 'marker.color': barColors[i] }, [i]);
+            });
 
-            Plotly.update(chartEl,
-                { 'marker.color': barColors.concat([null]) }, // null for average line
+            Plotly.relayout(chartEl,
                 {
-                    paper_bgcolor: bgColor,
-                    plot_bgcolor: bgColor,
+                    'paper_bgcolor': bgColor,
+                    'plot_bgcolor': bgColor,
                     'font.color': textColor,
                     'xaxis.tickfont.color': mutedColor,
                     'xaxis.linecolor': lineColor,
@@ -806,10 +1029,28 @@
                 }
             );
 
-            // Update average line color
             Plotly.restyle(chartEl, { 'line.color': avgLineColor }, [years.length]);
+            updateLegend();
+        }
 
-            // Update legend
+        function updateChartColors() {
+            if (!chartEl || years.length === 0) return;
+
+            colorPalette = getColorPalette(currentPalette, currentOpacity);
+            colorPaletteLight = getColorPalette(currentPalette, Math.min(currentOpacity + 0.15, 1));
+            const palette = isDark ? colorPalette : colorPaletteLight;
+
+            years.forEach((year, i) => {
+                if (!customYearColors[year]) {
+                    yearColors[year] = palette[i % palette.length];
+                }
+            });
+
+            const barColors = years.map(year => yearColors[year]);
+            years.forEach((year, i) => {
+                Plotly.restyle(chartEl, { 'marker.color': barColors[i] }, [i]);
+            });
+
             updateLegend();
         }
 
@@ -825,7 +1066,6 @@
                 legendEl.appendChild(item);
             });
 
-            // Add average to legend (only if toggle is checked)
             if (avgToggle.checked) {
                 const avgItem = document.createElement('div');
                 avgItem.className = 'legend-item';
@@ -840,7 +1080,7 @@
                 .then(csvText => {
                     const lines = csvText.trim().split('\n');
 
-                    // Parse header
+                    // Parse header to find column indices
                     let headerLine = lines[0];
                     if (headerLine.charCodeAt(0) === 0xFEFF) {
                         headerLine = headerLine.slice(1);
@@ -866,8 +1106,7 @@
                     }
 
                     const allYears = Object.keys(dataByYear).sort();
-                    const maxYearsToShow = getMaxYearsToShow();
-                    years = allYears.slice(-maxYearsToShow);
+                    years = allYears.slice(-6);
 
                     const palette = isDark ? colorPalette : colorPaletteLight;
                     years.forEach((year, i) => {
@@ -929,7 +1168,7 @@
                             color: textColor,
                             size: 14
                         },
-                        margin: { l: 50, r: 20, t: 30, b: 160 },
+                        margin: { l: 0, r: 0, t: 30, b: 40 },
                         xaxis: {
                             showgrid: false,
                             showline: true,
@@ -947,8 +1186,11 @@
                             linecolor: lineColor,
                             tickfont: { color: mutedColor },
                             zeroline: false,
-                            ticks: '',
-                            dtick: 500
+                            ticks: 'outside',
+                            ticklen: 8,
+                            tickcolor: 'rgba(0,0,0,0)',
+                            dtick: 500,
+                            automargin: true
                         },
                         showlegend: false,
                         hovermode: false
@@ -974,7 +1216,6 @@
 
             try {
                 const scale = parseInt(document.getElementById('sizeSelect').value);
-                const captureArea = document.getElementById('captureArea');
 
                 const canvas = await html2canvas(captureArea, {
                     scale: scale,
@@ -1003,7 +1244,6 @@
         const copyEmbedBtn = document.getElementById('copyEmbedBtn');
         const closeEmbedBtn = document.getElementById('closeEmbedBtn');
 
-        // GitHub Pages base URL - update this to your actual GitHub Pages URL
         const GITHUB_PAGES_BASE = 'https://tskjelde-bit.github.io/grafer';
 
         function generateEmbedCode() {
@@ -1013,24 +1253,12 @@
             const palette = paletteSelect.value;
             const chartUrl = `${GITHUB_PAGES_BASE}/volum/solgt/solgt.html?theme=${theme}&aspect=${aspect}&avg=${avg}&palette=${palette}`;
 
-            const iframe = `<iframe
-    src="${chartUrl}"
-    width="100%"
-    height="500"
-    frameborder="0"
-    style="border-radius: 12px; aspect-ratio: ${aspect};">
-</iframe>`;
-
-            return iframe;
+            return `<iframe src="${chartUrl}" width="100%" style="aspect-ratio: ${aspect}; min-height: 400px; border: none; border-radius: 8px;"></iframe>`;
         }
 
         embedBtn.addEventListener('click', () => {
             embedCode.value = generateEmbedCode();
             embedModal.classList.add('show');
-        });
-
-        closeEmbedBtn.addEventListener('click', () => {
-            embedModal.classList.remove('show');
         });
 
         copyEmbedBtn.addEventListener('click', () => {
@@ -1040,6 +1268,10 @@
             setTimeout(() => {
                 copyEmbedBtn.textContent = 'Kopier';
             }, 2000);
+        });
+
+        closeEmbedBtn.addEventListener('click', () => {
+            embedModal.classList.remove('show');
         });
 
         embedModal.addEventListener('click', (e) => {

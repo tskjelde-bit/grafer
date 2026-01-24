@@ -31,7 +31,6 @@
 
     #chart {
       width: 100%;
-      aspect-ratio: 4 / 3;
     }
 
     /* Tooltip */
@@ -93,7 +92,6 @@
     .chart-wrapper {
       position: relative;
       width: 100%;
-      aspect-ratio: 4 / 3;
     }
 
     @media (max-width: 768px) {
@@ -235,18 +233,25 @@
       document.body.style.color = '#1a1a2e';
     }
 
-    // Apply aspect ratio from URL parameter
-    if (aspectParam) {
-      document.getElementById('chart').style.aspectRatio = aspectParam;
-    }
+    // Apply aspect ratio from URL parameter (default 16:9)
+    const aspectValue = aspectParam || '1.78';
+    document.getElementById('chart').style.aspectRatio = aspectValue;
+    document.querySelector('.chart-wrapper').style.aspectRatio = aspectValue;
 
-    // Preview mode - hide headers and legend when embedded
-    if (window.location.search.includes('preview=true') || window.self !== window.top) {
+    // Preview mode - only hide headers and legend if explicitly requested via URL
+    if (window.location.search.includes('minimal=true')) {
       document.querySelector('.chart-header')?.style.setProperty('display', 'none');
       document.querySelector('.chart-subheader')?.style.setProperty('display', 'none');
       document.querySelector('.legend-container')?.style.setProperty('display', 'none');
       document.querySelector('.wrap')?.style.setProperty('padding', '0');
       document.querySelector('.wrap')?.style.setProperty('margin', '0');
+    }
+
+    // Embed mode - no margins for iframes
+    if (window.self !== window.top) {
+      document.querySelector('.wrap')?.style.setProperty('margin', '0');
+      document.querySelector('.wrap')?.style.setProperty('padding', '0');
+      document.querySelector('.wrap')?.style.setProperty('max-width', 'none');
     }
   </script>
 
@@ -386,7 +391,7 @@
               color: textColor,
               size: 14
             },
-            margin: { l: 50, r: 20, t: 30, b: 160 },
+            margin: { l: 0, r: 0, t: 30, b: 40 },
             xaxis: {
               showgrid: false,
               showline: true,
@@ -406,10 +411,12 @@
               linecolor: lineColor,
               tickfont: { color: mutedColor },
               zeroline: false,
-              ticks: '',
-              tickcolor: lineColor,
+              ticks: 'outside',
+              ticklen: 8,
+              tickcolor: 'rgba(0,0,0,0)',
               dtick: 500,
-              mirror: false
+              mirror: false,
+              automargin: true
             },
             legend: {
               orientation: 'h',
