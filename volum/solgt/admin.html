@@ -324,6 +324,7 @@
             <div style="margin-bottom: 1rem;">
                 <button class="btn" id="refreshPreviewBtn">Oppdater forhåndsvisning</button>
                 <button class="btn" id="openFullBtn" style="background: #6366f1;">Åpne i ny fane</button>
+                <button class="btn" id="generateBtn" style="background: #8b5cf6;">Generer PNG</button>
             </div>
             <div class="chart-preview-container">
                 <iframe id="chartPreview" src="" style="width: 100%; height: 600px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: #0f1114;"></iframe>
@@ -798,6 +799,12 @@
 
         openFullBtn.addEventListener('click', () => {
             window.open('solgt.html', '_blank');
+        });
+
+        // Generate PNG page
+        const generateBtn = document.getElementById('generateBtn');
+        generateBtn.addEventListener('click', () => {
+            window.open('generer.html', '_blank');
         });
 
         // GitHub push
