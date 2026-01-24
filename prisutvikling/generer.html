@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generer graf - Boligprisindeks</title>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark {
+            background: #0f1114;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        body.light {
+            background: #ffffff;
+            color: #1a1a2e;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        body.dark .toolbar {
+            background: rgba(15, 17, 20, 0.98);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .toolbar {
+            background: rgba(255, 255, 255, 0.98);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        body.dark .toolbar-title {
+            color: #60a5fa;
+        }
+
+        body.light .toolbar-title {
+            color: #2563eb;
+        }
+
+        .toolbar-spacer {
+            flex: 1;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 28px;
+            margin: 0 0.25rem;
+        }
+
+        body.dark .toolbar-divider {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        body.light .toolbar-divider {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Common control styles */
+        .control {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .control label {
+            white-space: nowrap;
+        }
+
+        body.dark .control label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light .control label {
+            color: #6b7280;
+        }
+
+        .control select,
+        .control input[type="number"] {
+            padding: 0.5rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            height: 34px;
+        }
+
+        body.dark .control select,
+        body.dark .control input[type="number"] {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        body.light .control select,
+        body.light .control input[type="number"] {
+            background: #f3f4f6;
+            color: #1a1a2e;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .control input[type="number"] {
+            width: 50px;
+            text-align: center;
+        }
+
+        .control input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            height: 34px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: transparent;
+        }
+
+        body.dark .btn-outline {
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .btn-outline {
+            color: #374151;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        body.light .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -360px;
+            width: 360px;
+            height: 100vh;
+            z-index: 1100;
+            padding: 1.5rem;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .settings-panel.show {
+            right: 0;
+        }
+
+        body.dark .settings-panel {
+            background: #1a1d21;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .settings-panel {
+            background: #ffffff;
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .settings-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        body.dark .settings-close {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light .settings-close {
+            color: #6b7280;
+        }
+
+        .settings-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        body.dark .settings-section-title {
+            color: #60a5fa;
+        }
+
+        body.light .settings-section-title {
+            color: #2563eb;
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .settings-input-group label {
+            font-size: 0.7rem;
+        }
+
+        body.dark .settings-input-group label {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .settings-input-group label {
+            color: #9ca3af;
+        }
+
+        .settings-input-group input[type="number"] {
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        body.dark .settings-input-group input[type="number"] {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .settings-input-group input[type="number"] {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .border-side-row {
+            display: grid;
+            grid-template-columns: 50px 50px 70px 40px;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        body.dark .border-side-row {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light .border-side-row {
+            color: #6b7280;
+        }
+
+        .border-side-row input[type="number"],
+        .border-side-row select {
+            padding: 0.35rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        body.dark .border-side-row input[type="number"],
+        body.dark .border-side-row select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .border-side-row input[type="number"],
+        body.light .border-side-row select {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .border-side-row input[type="color"] {
+            width: 100%;
+            height: 26px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            display: none;
+        }
+
+        .settings-overlay.show {
+            display: block;
+        }
+
+        /* Chart container */
+        .chart-container {
+            max-width: 1200px;
+            margin: 160px auto 40px;
+            padding: 20px;
+        }
+
+        #captureArea {
+            padding: 0;
+        }
+
+        body.dark #captureArea {
+            background: #0f1114;
+        }
+
+        body.light #captureArea {
+            background: #ffffff;
+        }
+
+        .chart-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.02em;
+        }
+
+        body.dark .chart-header {
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        body.light .chart-header {
+            color: #1a1a2e;
+        }
+
+        .chart-subheader {
+            font-size: 1.1rem;
+            line-height: 1.2;
+            font-weight: normal;
+            margin: 0 0 20px 0;
+        }
+
+        body.dark .chart-subheader {
+            color: rgba(255, 255, 255, 0.60);
+        }
+
+        body.light .chart-subheader {
+            color: #6b7280;
+        }
+
+        .legend-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s;
+        }
+
+        body.dark .legend-item {
+            color: rgba(255, 255, 255, 0.60);
+        }
+
+        body.light .legend-item {
+            color: #6b7280;
+        }
+
+        .legend-item:hover {
+            opacity: 0.8;
+        }
+
+        .legend-item.disabled {
+            opacity: 0.4;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        #chart {
+            width: 100%;
+            aspect-ratio: 1.33;
+        }
+
+        /* Loading overlay */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        body.dark .modal-content {
+            background: #1f2937;
+        }
+
+        body.light .modal-content {
+            background: #ffffff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        body.dark .modal-content p {
+            color: #a1a1aa;
+        }
+
+        body.light .modal-content p {
+            color: #6b7280;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            height: 100px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            resize: none;
+            margin-bottom: 1rem;
+        }
+
+        body.dark .modal-content textarea {
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e4e4e7;
+        }
+
+        body.light .modal-content textarea {
+            background: #f9fafb;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .modal-wide {
+            max-width: 800px;
+        }
+
+        .save-version-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .save-version-row input[type="text"] {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        body.dark .save-version-row input[type="text"] {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .save-version-row input[type="text"] {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .versions-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .version-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        body.dark .version-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .version-item {
+            background: #f9fafb;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .version-date {
+            font-size: 0.75rem;
+        }
+
+        body.dark .version-date {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .version-date {
+            color: #9ca3af;
+        }
+
+        .version-embed {
+            font-family: monospace;
+            font-size: 0.7rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            word-break: break-all;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        body.dark .version-embed {
+            background: rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body.light .version-embed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .version-actions .btn {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            height: auto;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .no-versions {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        body.dark .no-versions {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .no-versions {
+            color: #9ca3af;
+        }
+
+        @media (max-width: 900px) {
+            .toolbar {
+                padding: 0.5rem 1rem;
+            }
+            .chart-container {
+                margin-top: 180px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body class="dark">
+    <div class="toolbar">
+        <div class="toolbar-row">
+            <span class="toolbar-title">Generer - Boligprisindeks</span>
+            <span class="toolbar-spacer"></span>
+            <a href="../index.html" class="btn btn-outline">Tilbake</a>
+            <button class="btn btn-outline" id="themeToggle">
+                <span id="themeIcon">&#9728;</span>
+                <span id="themeText">Light</span>
+            </button>
+        </div>
+        <div class="toolbar-row">
+            <div class="control">
+                <label>Aspect:</label>
+                <select id="aspectSelect">
+                    <option value="1.33" selected>4:3</option>
+                    <option value="1.78">16:9</option>
+                    <option value="2.0">2:1</option>
+                    <option value="1.25">5:4</option>
+                    <option value="0.75">3:4</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>
+                    <input type="checkbox" id="transparentToggle">
+                    Transparent
+                </label>
+            </div>
+            <button class="btn btn-outline" id="settingsBtn">Margin & Border</button>
+        </div>
+        <div class="toolbar-row">
+            <div class="control">
+                <label>Opplosning:</label>
+                <select id="sizeSelect">
+                    <option value="1">1x</option>
+                    <option value="2" selected>2x</option>
+                    <option value="3">3x</option>
+                </select>
+            </div>
+            <span class="toolbar-spacer"></span>
+            <button class="btn btn-success" id="downloadBtn">Last ned PNG</button>
+            <button class="btn btn-primary" id="embedBtn">Embed-kode</button>
+        </div>
+    </div>
+
+    <!-- Settings Panel Overlay -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h3>Margin & Border</h3>
+            <button class="settings-close" id="settingsClose">&times;</button>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">Margins (px)</div>
+            <div class="settings-row">
+                <div class="settings-input-group">
+                    <label>Top</label>
+                    <input type="number" id="marginTop" value="0" min="0" max="100">
+                </div>
+                <div class="settings-input-group">
+                    <label>Right</label>
+                    <input type="number" id="marginRight" value="0" min="0" max="100">
+                </div>
+                <div class="settings-input-group">
+                    <label>Bottom</label>
+                    <input type="number" id="marginBottom" value="0" min="0" max="100">
+                </div>
+                <div class="settings-input-group">
+                    <label>Left</label>
+                    <input type="number" id="marginLeft" value="0" min="0" max="100">
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">Borders</div>
+            <label class="settings-toggle">
+                <input type="checkbox" id="borderToggle">
+                Vis border rundt visualisering
+            </label>
+            <div id="borderControls" style="display: none;">
+                <div class="border-side-row">
+                    <span>Top</span>
+                    <input type="number" id="borderTopWidth" value="1" min="0" max="20">
+                    <select id="borderTopStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderTopColor" value="#cccccc">
+                </div>
+                <div class="border-side-row">
+                    <span>Right</span>
+                    <input type="number" id="borderRightWidth" value="1" min="0" max="20">
+                    <select id="borderRightStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderRightColor" value="#cccccc">
+                </div>
+                <div class="border-side-row">
+                    <span>Bottom</span>
+                    <input type="number" id="borderBottomWidth" value="1" min="0" max="20">
+                    <select id="borderBottomStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderBottomColor" value="#cccccc">
+                </div>
+                <div class="border-side-row">
+                    <span>Left</span>
+                    <input type="number" id="borderLeftWidth" value="1" min="0" max="20">
+                    <select id="borderLeftStyle">
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                    <input type="color" id="borderLeftColor" value="#cccccc">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="embedModal">
+        <div class="modal-content">
+            <h3>Embed-kode</h3>
+            <p>Kopier denne koden for a embedde grafen:</p>
+            <textarea id="embedCode" readonly></textarea>
+            <div class="save-version-row">
+                <input type="text" id="versionName" placeholder="Versjonsnavn (f.eks. 'Mork 4:3')">
+                <button class="btn btn-primary" id="saveVersionBtn">Lagre versjon</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
+                <button class="btn btn-outline" id="showVersionsBtn">Se versjoner</button>
+                <button class="btn btn-outline" id="closeEmbedBtn">Lukk</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="versionsModal">
+        <div class="modal-content modal-wide">
+            <h3>Lagrede versjoner</h3>
+            <div id="versionsList" class="versions-list"></div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="closeVersionsBtn">Lukk</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div id="captureArea">
+            <h1 class="chart-header">Boligprisindeks - Oslo</h1>
+            <div class="chart-subheader">Utforsk prisutviklingen i Oslos bydeler over tid</div>
+            <div class="legend-container" id="legendContainer"></div>
+            <div id="chart"></div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">Genererer bilde...</div>
+
+    <script>
+        // Theme handling
+        let isDark = true;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.className = isDark ? 'dark' : 'light';
+            themeIcon.innerHTML = isDark ? '&#9728;' : '&#9790;';
+            themeText.textContent = isDark ? 'Light' : 'Dark';
+            updateChartTheme();
+        });
+
+        // Settings panel
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const settingsClose = document.getElementById('settingsClose');
+
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('show');
+            settingsOverlay.classList.add('show');
+        });
+
+        function closeSettings() {
+            settingsPanel.classList.remove('show');
+            settingsOverlay.classList.remove('show');
+        }
+
+        settingsClose.addEventListener('click', closeSettings);
+        settingsOverlay.addEventListener('click', closeSettings);
+
+        // Margin controls
+        const captureArea = document.getElementById('captureArea');
+        const marginTop = document.getElementById('marginTop');
+        const marginRight = document.getElementById('marginRight');
+        const marginBottom = document.getElementById('marginBottom');
+        const marginLeft = document.getElementById('marginLeft');
+
+        function updateMargins() {
+            captureArea.style.paddingTop = marginTop.value + 'px';
+            captureArea.style.paddingRight = marginRight.value + 'px';
+            captureArea.style.paddingBottom = marginBottom.value + 'px';
+            captureArea.style.paddingLeft = marginLeft.value + 'px';
+        }
+
+        [marginTop, marginRight, marginBottom, marginLeft].forEach(input => {
+            input.addEventListener('input', updateMargins);
+        });
+
+        // Border controls
+        const borderToggle = document.getElementById('borderToggle');
+        const borderControls = document.getElementById('borderControls');
+
+        const borderInputs = {
+            top: {
+                width: document.getElementById('borderTopWidth'),
+                style: document.getElementById('borderTopStyle'),
+                color: document.getElementById('borderTopColor')
+            },
+            right: {
+                width: document.getElementById('borderRightWidth'),
+                style: document.getElementById('borderRightStyle'),
+                color: document.getElementById('borderRightColor')
+            },
+            bottom: {
+                width: document.getElementById('borderBottomWidth'),
+                style: document.getElementById('borderBottomStyle'),
+                color: document.getElementById('borderBottomColor')
+            },
+            left: {
+                width: document.getElementById('borderLeftWidth'),
+                style: document.getElementById('borderLeftStyle'),
+                color: document.getElementById('borderLeftColor')
+            }
+        };
+
+        borderToggle.addEventListener('change', () => {
+            borderControls.style.display = borderToggle.checked ? 'block' : 'none';
+            updateBorders();
+        });
+
+        function updateBorders() {
+            if (borderToggle.checked) {
+                captureArea.style.borderTop = `${borderInputs.top.width.value}px ${borderInputs.top.style.value} ${borderInputs.top.color.value}`;
+                captureArea.style.borderRight = `${borderInputs.right.width.value}px ${borderInputs.right.style.value} ${borderInputs.right.color.value}`;
+                captureArea.style.borderBottom = `${borderInputs.bottom.width.value}px ${borderInputs.bottom.style.value} ${borderInputs.bottom.color.value}`;
+                captureArea.style.borderLeft = `${borderInputs.left.width.value}px ${borderInputs.left.style.value} ${borderInputs.left.color.value}`;
+            } else {
+                captureArea.style.border = 'none';
+            }
+        }
+
+        Object.values(borderInputs).forEach(side => {
+            side.width.addEventListener('input', updateBorders);
+            side.style.addEventListener('change', updateBorders);
+            side.color.addEventListener('input', updateBorders);
+        });
+
+        // Aspect ratio handling
+        const aspectSelect = document.getElementById('aspectSelect');
+        aspectSelect.addEventListener('change', () => {
+            const chartDiv = document.getElementById('chart');
+            chartDiv.style.aspectRatio = aspectSelect.value;
+            if (chartEl) {
+                setTimeout(() => {
+                    Plotly.Plots.resize(chartEl);
+                }, 50);
+            }
+        });
+
+        // Transparent background toggle
+        let isTransparent = false;
+        const transparentToggle = document.getElementById('transparentToggle');
+        transparentToggle.addEventListener('change', () => {
+            isTransparent = transparentToggle.checked;
+            updateTransparency();
+        });
+
+        function updateTransparency() {
+            if (isTransparent) {
+                captureArea.style.background = 'transparent';
+                if (chartEl) {
+                    Plotly.relayout(chartEl, {
+                        'paper_bgcolor': 'rgba(0,0,0,0)',
+                        'plot_bgcolor': 'rgba(0,0,0,0)'
+                    });
+                }
+            } else {
+                const bgColor = isDark ? '#0f1114' : '#ffffff';
+                captureArea.style.background = bgColor;
+                if (chartEl) {
+                    Plotly.relayout(chartEl, {
+                        'paper_bgcolor': bgColor,
+                        'plot_bgcolor': bgColor
+                    });
+                }
+            }
+        }
+
+        // Chart data
+        let chartEl;
+        let areaNames = [];
+        let areaColors = {};
+        let visibleAreas = new Set();
+        let chartData = [];
+        let chartLayout = {};
+
+        function updateChartTheme() {
+            if (!chartEl) return;
+
+            const bgColor = isDark ? '#0f1114' : '#ffffff';
+            const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
+            const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
+            const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+            const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+
+            Plotly.relayout(chartEl, {
+                'paper_bgcolor': isTransparent ? 'rgba(0,0,0,0)' : bgColor,
+                'plot_bgcolor': isTransparent ? 'rgba(0,0,0,0)' : bgColor,
+                'font.color': textColor,
+                'xaxis.tickfont.color': mutedColor,
+                'xaxis.linecolor': lineColor,
+                'yaxis.tickfont.color': mutedColor,
+                'yaxis.linecolor': lineColor,
+                'yaxis.gridcolor': gridColor
+            });
+
+            if (!isTransparent) {
+                captureArea.style.background = bgColor;
+            }
+
+            updateLegend();
+        }
+
+        function updateLegend() {
+            const legendEl = document.getElementById('legendContainer');
+            legendEl.innerHTML = '';
+
+            areaNames.forEach(area => {
+                const item = document.createElement('div');
+                item.className = 'legend-item' + (visibleAreas.has(area) ? '' : ' disabled');
+                item.dataset.area = area;
+                item.innerHTML = `<div class="legend-dot" style="background:${areaColors[area]}"></div><span>${area}</span>`;
+                item.addEventListener('click', () => toggleArea(area, item));
+                legendEl.appendChild(item);
+            });
+        }
+
+        function toggleArea(area, item) {
+            if (visibleAreas.has(area)) {
+                visibleAreas.delete(area);
+                item.classList.add('disabled');
+            } else {
+                visibleAreas.add(area);
+                item.classList.remove('disabled');
+            }
+
+            // Find trace index and toggle visibility
+            const traceIdx = chartEl.data.findIndex(t => t.name === area);
+            if (traceIdx >= 0) {
+                Plotly.restyle(chartEl, { visible: visibleAreas.has(area) }, [traceIdx]);
+            }
+        }
+
+        function loadChart() {
+            Promise.all([
+                fetch('data.csv').then(r => r.text()),
+                fetch('layout.json').then(r => r.json()),
+                fetch('config.json').then(r => r.json())
+            ]).then(([csvText, layoutJson, configJson]) => {
+                areaColors = configJson.colors;
+                const HERO = configJson.hero;
+
+                // Parse CSV
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',');
+                areaNames = headers.slice(1);
+
+                const dates = [];
+                const areaValues = {};
+                areaNames.forEach(a => areaValues[a] = []);
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const cols = line.split(',');
+                    dates.push(cols[0]);
+                    for (let j = 1; j < cols.length; j++) {
+                        const val = cols[j] === '' ? null : parseFloat(cols[j]);
+                        areaValues[areaNames[j - 1]].push(val);
+                    }
+                }
+
+                // Build traces
+                const traces = areaNames.map(name => {
+                    const isHero = name === HERO;
+                    return {
+                        x: dates,
+                        y: areaValues[name],
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: name,
+                        line: {
+                            color: areaColors[name] || '#999',
+                            shape: 'spline',
+                            smoothing: 1.2,
+                            width: isHero ? 3.5 : 2.4
+                        },
+                        opacity: isHero ? 1.0 : 0.85,
+                        hoverinfo: 'none'
+                    };
+                });
+
+                // Initialize all areas as visible
+                areaNames.forEach(a => visibleAreas.add(a));
+
+                const bgColor = isDark ? '#0f1114' : '#ffffff';
+                const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
+                const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
+                const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+                const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+
+                // Use layout from JSON but override some settings
+                chartLayout = { ...layoutJson };
+                chartLayout.showlegend = false;
+                chartLayout.paper_bgcolor = bgColor;
+                chartLayout.plot_bgcolor = bgColor;
+                chartLayout.font = {
+                    family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+                    color: textColor,
+                    size: 14
+                };
+                if (chartLayout.title) chartLayout.title = undefined;
+
+                if (chartLayout.xaxis) {
+                    chartLayout.xaxis.tickfont = { color: mutedColor };
+                    chartLayout.xaxis.linecolor = lineColor;
+                }
+                if (chartLayout.yaxis) {
+                    chartLayout.yaxis.tickfont = { color: mutedColor };
+                    chartLayout.yaxis.linecolor = lineColor;
+                    chartLayout.yaxis.gridcolor = gridColor;
+                }
+
+                const config = {
+                    responsive: true,
+                    displaylogo: false,
+                    displayModeBar: false,
+                    staticPlot: true
+                };
+
+                chartEl = document.getElementById('chart');
+                Plotly.newPlot(chartEl, traces, chartLayout, config);
+                updateLegend();
+            });
+        }
+
+        // Download functionality
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const loading = document.getElementById('loading');
+            loading.classList.add('show');
+
+            try {
+                const scale = parseInt(document.getElementById('sizeSelect').value);
+
+                const canvas = await html2canvas(captureArea, {
+                    scale: scale,
+                    backgroundColor: isTransparent ? null : (isDark ? '#0f1114' : '#ffffff'),
+                    useCORS: true,
+                    logging: false
+                });
+
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().split('T')[0];
+                link.download = `boligprisindeks-${isDark ? 'dark' : 'light'}-${timestamp}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                console.error('Error generating image:', error);
+                alert('Kunne ikke generere bilde. Prov igjen.');
+            } finally {
+                loading.classList.remove('show');
+            }
+        });
+
+        // Embed code functionality
+        const embedBtn = document.getElementById('embedBtn');
+        const embedModal = document.getElementById('embedModal');
+        const embedCode = document.getElementById('embedCode');
+        const copyEmbedBtn = document.getElementById('copyEmbedBtn');
+        const closeEmbedBtn = document.getElementById('closeEmbedBtn');
+
+        const GITHUB_PAGES_BASE = 'https://tskjelde-bit.github.io/grafer';
+
+        function generateEmbedCode() {
+            const theme = isDark ? 'dark' : 'light';
+            const aspect = aspectSelect.value;
+            const transparent = isTransparent ? '1' : '0';
+            const chartUrl = `${GITHUB_PAGES_BASE}/prisutvikling/prisutvikling.html?theme=${theme}&aspect=${aspect}&transparent=${transparent}`;
+
+            return `<div class="grafer-embed" data-src="${chartUrl}"><script src="${GITHUB_PAGES_BASE}/embed.js"><\/script></div>`;
+        }
+
+        embedBtn.addEventListener('click', () => {
+            embedCode.value = generateEmbedCode();
+            embedModal.classList.add('show');
+        });
+
+        copyEmbedBtn.addEventListener('click', () => {
+            embedCode.select();
+            document.execCommand('copy');
+            copyEmbedBtn.textContent = 'Kopiert!';
+            setTimeout(() => {
+                copyEmbedBtn.textContent = 'Kopier';
+            }, 2000);
+        });
+
+        closeEmbedBtn.addEventListener('click', () => {
+            embedModal.classList.remove('show');
+        });
+
+        embedModal.addEventListener('click', (e) => {
+            if (e.target === embedModal) {
+                embedModal.classList.remove('show');
+            }
+        });
+
+        // Version management
+        const VERSIONS_KEY = 'grafer-prisutvikling-versions';
+        const versionNameInput = document.getElementById('versionName');
+        const saveVersionBtn = document.getElementById('saveVersionBtn');
+        const showVersionsBtn = document.getElementById('showVersionsBtn');
+        const versionsModal = document.getElementById('versionsModal');
+        const versionsList = document.getElementById('versionsList');
+        const closeVersionsBtn = document.getElementById('closeVersionsBtn');
+
+        function getVersions() {
+            const stored = localStorage.getItem(VERSIONS_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveVersions(versions) {
+            localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
+        }
+
+        function getCurrentConfig() {
+            return {
+                theme: isDark ? 'dark' : 'light',
+                aspect: aspectSelect.value,
+                transparent: isTransparent
+            };
+        }
+
+        saveVersionBtn.addEventListener('click', () => {
+            const name = versionNameInput.value.trim();
+            if (!name) {
+                alert('Vennligst skriv inn et versjonsnavn');
+                return;
+            }
+
+            const versions = getVersions();
+            const newVersion = {
+                id: Date.now(),
+                name: name,
+                embedCode: generateEmbedCode(),
+                config: getCurrentConfig(),
+                createdAt: new Date().toISOString()
+            };
+
+            versions.unshift(newVersion);
+            saveVersions(versions);
+
+            versionNameInput.value = '';
+            alert('Versjon lagret!');
+        });
+
+        showVersionsBtn.addEventListener('click', () => {
+            renderVersionsList();
+            versionsModal.classList.add('show');
+        });
+
+        closeVersionsBtn.addEventListener('click', () => {
+            versionsModal.classList.remove('show');
+        });
+
+        versionsModal.addEventListener('click', (e) => {
+            if (e.target === versionsModal) {
+                versionsModal.classList.remove('show');
+            }
+        });
+
+        function renderVersionsList() {
+            const versions = getVersions();
+
+            if (versions.length === 0) {
+                versionsList.innerHTML = '<div class="no-versions">Ingen lagrede versjoner enna</div>';
+                return;
+            }
+
+            versionsList.innerHTML = versions.map(v => {
+                const date = new Date(v.createdAt).toLocaleDateString('nb-NO', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="version-item" data-id="${v.id}">
+                        <div class="version-header">
+                            <span class="version-name">${v.name}</span>
+                            <span class="version-date">${date}</span>
+                        </div>
+                        <div class="version-embed">${v.embedCode}</div>
+                        <div class="version-actions">
+                            <button class="btn btn-success copy-version-btn">Kopier embed</button>
+                            <button class="btn btn-danger delete-version-btn">Slett</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners
+            versionsList.querySelectorAll('.copy-version-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const item = e.target.closest('.version-item');
+                    const id = parseInt(item.dataset.id);
+                    const version = versions.find(v => v.id === id);
+                    if (version) {
+                        navigator.clipboard.writeText(version.embedCode).then(() => {
+                            btn.textContent = 'Kopiert!';
+                            setTimeout(() => btn.textContent = 'Kopier embed', 2000);
+                        });
+                    }
+                });
+            });
+
+            versionsList.querySelectorAll('.delete-version-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!confirm('Er du sikker pa at du vil slette denne versjonen?')) return;
+                    const item = e.target.closest('.version-item');
+                    const id = parseInt(item.dataset.id);
+                    const updatedVersions = versions.filter(v => v.id !== id);
+                    saveVersions(updatedVersions);
+                    renderVersionsList();
+                });
+            });
+        }
+
+        // Initialize
+        loadChart();
+    </script>
+</body>
+</html>

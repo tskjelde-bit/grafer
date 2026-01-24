@@ -112,15 +112,15 @@
 
     /* Header */
     .chart-header {
-      font-size: 1.6rem;
+      font-size: 1.25rem;
       font-weight: 600;
       margin: 0 0 10px 0;
-      color: rgba(255, 255, 255, 0.92);
+      color: var(--text);
       letter-spacing: -0.02em;
     }
 
     .chart-subheader {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       line-height: 1.2;
       font-weight: normal;
       color: var(--muted);
@@ -304,13 +304,49 @@
   <div id="miTooltip" class="mi-tooltip"></div>
 
   <script>
-    // Preview mode - hide headers and controls when embedded
-    if (window.location.search.includes('preview=true') || window.self !== window.top) {
+    // URL parameters handling
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = urlParams.get('theme');
+    const aspectParam = urlParams.get('aspect');
+    const isTransparent = urlParams.get('transparent') === '1';
+
+    // Apply theme from URL parameter
+    if (themeParam === 'light') {
+      document.documentElement.style.setProperty('--bg', '#ffffff');
+      document.documentElement.style.setProperty('--text', '#1a1a2e');
+      document.documentElement.style.setProperty('--muted', '#6b7280');
+      document.body.style.background = '#ffffff';
+      document.body.style.color = '#1a1a2e';
+    }
+
+    // Apply aspect ratio from URL parameter (default 4:3)
+    const aspectValue = aspectParam || '1.33';
+    document.getElementById('chart').style.aspectRatio = aspectValue;
+    document.querySelector('.chart-wrapper').style.aspectRatio = aspectValue;
+
+    // Preview mode - only hide headers and controls if explicitly requested via URL
+    if (window.location.search.includes('minimal=true')) {
       document.querySelector('.chart-header')?.style.setProperty('display', 'none');
       document.querySelector('.chart-subheader')?.style.setProperty('display', 'none');
       document.querySelector('.controls-header')?.style.setProperty('display', 'none');
       document.querySelector('.wrap')?.style.setProperty('padding', '0');
       document.querySelector('.wrap')?.style.setProperty('margin', '0');
+    }
+
+    // Embed mode - no margins for iframes, inherit fonts
+    if (window.self !== window.top) {
+      document.querySelector('.wrap')?.style.setProperty('margin', '0');
+      document.querySelector('.wrap')?.style.setProperty('padding', '0');
+      document.querySelector('.wrap')?.style.setProperty('max-width', 'none');
+      document.body.style.fontFamily = 'inherit';
+    }
+
+    // Apply transparent background if requested
+    if (isTransparent) {
+      document.documentElement.style.background = 'transparent';
+      document.body.style.background = 'transparent';
+      document.querySelector('.wrap').style.background = 'transparent';
+      document.querySelector('.chart-wrapper').style.background = 'transparent';
     }
   </script>
 
@@ -391,6 +427,29 @@
         FIG.layout.showlegend = false;
         // Move title to HTML so we can place dropdown under it
         if (FIG.layout.title) FIG.layout.title = undefined;
+
+        // Check for transparent background from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTransparent = urlParams.get('transparent') === '1';
+        const themeParam = urlParams.get('theme');
+
+        if (isTransparent) {
+          FIG.layout.paper_bgcolor = 'rgba(0,0,0,0)';
+          FIG.layout.plot_bgcolor = 'rgba(0,0,0,0)';
+        } else if (themeParam === 'light') {
+          FIG.layout.paper_bgcolor = '#ffffff';
+          FIG.layout.plot_bgcolor = '#ffffff';
+          if (FIG.layout.font) FIG.layout.font.color = '#1a1a2e';
+          if (FIG.layout.xaxis) {
+            FIG.layout.xaxis.tickfont = { color: '#6b7280' };
+            FIG.layout.xaxis.linecolor = 'rgba(0,0,0,0.15)';
+          }
+          if (FIG.layout.yaxis) {
+            FIG.layout.yaxis.tickfont = { color: '#6b7280' };
+            FIG.layout.yaxis.linecolor = 'rgba(0,0,0,0.15)';
+            FIG.layout.yaxis.gridcolor = 'rgba(0,0,0,0.06)';
+          }
+        }
 
         const LOOKUP = {
           dates: dates,
@@ -808,6 +867,44 @@
 
     // Start initialization
     initChart();
+
+    // Send height to parent for embed auto-resize
+    function sendHeight() {
+      if (window.self !== window.top) {
+        const wrap = document.querySelector('.wrap');
+        const height = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          wrap ? wrap.offsetHeight : 0
+        );
+        window.parent.postMessage({ type: 'grafer-resize', height: height }, '*');
+      }
+    }
+
+    // Send height after load and on resize
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 200);
+      setTimeout(sendHeight, 500);
+      setTimeout(sendHeight, 1000);
+      setTimeout(sendHeight, 2000);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(sendHeight, 100);
+    });
+
+    const resizeObserver = new ResizeObserver(() => {
+      sendHeight();
+    });
+    resizeObserver.observe(document.body);
+
+    // Send periodically for first few seconds to catch Plotly render
+    let attempts = 0;
+    const interval = setInterval(() => {
+      sendHeight();
+      attempts++;
+      if (attempts > 10) clearInterval(interval);
+    }, 300);
   </script>
 </body>
 
