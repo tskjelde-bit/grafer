@@ -1,0 +1,21 @@
+{
+  "colors": {
+    "Oslo Fylke": "#1E88FF",
+    "Oslo: Alna": "#4CC9F0",
+    "Oslo: Bjerke": "#22C55E",
+    "Oslo: Frogner": "#A78BFA",
+    "Oslo: Gamle Oslo": "#F59E0B",
+    "Oslo: Grorud": "#FB7185",
+    "Oslo: Gr\u00fcnerl\u00f8kka": "#60A5FA",
+    "Oslo: Nordre Aker": "#34D399",
+    "Oslo: Nordstrand": "#93C5FD",
+    "Oslo: Sagene": "#86EFAC",
+    "Oslo: St.Hanshaugen": "#C4B5FD",
+    "Oslo: Stovner": "#FCD34D",
+    "Oslo: S\u00f8ndre Nordstrand": "#FDA4AF",
+    "Oslo: Ullern": "#38BDF8",
+    "Oslo: Vestre Aker": "#10B981",
+    "Oslo: \u00d8stensj\u00f8": "#818CF8"
+  },
+  "hero": "Oslo Fylke"
+}

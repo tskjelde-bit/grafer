@@ -304,17 +304,6 @@
   <div id="miTooltip" class="mi-tooltip"></div>
 
   <script>
-    // Preview mode - hide headers and controls when embedded
-    if (window.location.search.includes('preview=true') || window.self !== window.top) {
-      document.querySelector('.chart-header')?.style.setProperty('display', 'none');
-      document.querySelector('.chart-subheader')?.style.setProperty('display', 'none');
-      document.querySelector('.controls-header')?.style.setProperty('display', 'none');
-      document.querySelector('.wrap')?.style.setProperty('padding', '0');
-      document.querySelector('.wrap')?.style.setProperty('margin', '0');
-    }
-  </script>
-
-  <script>
     // Async Plotly loading wrapper
     function initChart() {
       if (typeof Plotly === 'undefined') {

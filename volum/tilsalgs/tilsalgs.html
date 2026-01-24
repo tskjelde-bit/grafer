@@ -221,6 +221,17 @@
   <div id="miTooltip" class="mi-tooltip"></div>
 
   <script>
+    // Preview mode - hide headers and legend when embedded
+    if (window.location.search.includes('preview=true') || window.self !== window.top) {
+      document.querySelector('.chart-header')?.style.setProperty('display', 'none');
+      document.querySelector('.chart-subheader')?.style.setProperty('display', 'none');
+      document.querySelector('.legend-container')?.style.setProperty('display', 'none');
+      document.querySelector('.wrap')?.style.setProperty('padding', '0');
+      document.querySelector('.wrap')?.style.setProperty('margin', '0');
+    }
+  </script>
+
+  <script>
     function initChart() {
       if (typeof Plotly === 'undefined') {
         setTimeout(initChart, 50);

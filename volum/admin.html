@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volum Kontrollpanel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e4e4e7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #60a5fa;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel h2 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: #a5b4fc;
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(96, 165, 250, 0.5);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .upload-zone p {
+            color: #a1a1aa;
+            margin-top: 0.5rem;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            margin-right: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+        }
+
+        .status.info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+        }
+
+        .data-preview {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(96, 165, 250, 0.1);
+            color: #60a5fa;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        tr.new-row {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        tr.updated-row {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            color: #a1a1aa;
+            margin-top: 0.5rem;
+        }
+
+        .log {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry.success { color: #10b981; }
+        .log-entry.warning { color: #f59e0b; }
+        .log-entry.error { color: #ef4444; }
+        .log-entry.info { color: #60a5fa; }
+
+        .hidden {
+            display: none;
+        }
+
+        .column-mapping {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .mapping-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+        }
+
+        .mapping-item select {
+            flex: 1;
+            background: #1f2937;
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .mapping-item label {
+            min-width: 140px;
+            font-size: 0.875rem;
+        }
+
+        .arrow {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" style="position: absolute; top: 1.5rem; left: 1.5rem; color: #a1a1aa; text-decoration: none; font-size: 0.875rem;">← Tilbake til oversikt</a>
+
+    <div class="container">
+        <h1>Volum Kontrollpanel</h1>
+
+        <!-- Upload Section -->
+        <div class="panel">
+            <h2>1. Last opp rådata</h2>
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📁</div>
+                <strong>Dra og slipp fil her, eller klikk for å velge</strong>
+                <p>Støtter CSV, Excel (.xlsx, .xls) og tekstfiler</p>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.txt">
+            </div>
+            <div class="status" id="uploadStatus"></div>
+        </div>
+
+        <!-- Column Mapping Section -->
+        <div class="panel hidden" id="mappingPanel">
+            <h2>2. Kolonnemapping</h2>
+            <p>Velg hvilke kolonner i filen som inneholder dato, område og indeksverdi:</p>
+            <div class="column-mapping" id="columnMapping">
+                <div class="mapping-item">
+                    <label>Dato-kolonne</label>
+                    <span class="arrow">←</span>
+                    <select id="mapDate"></select>
+                </div>
+                <div class="mapping-item">
+                    <label>Område-kolonne</label>
+                    <span class="arrow">←</span>
+                    <select id="mapOmraade"></select>
+                </div>
+                <div class="mapping-item">
+                    <label>Indeks-kolonne</label>
+                    <span class="arrow">←</span>
+                    <select id="mapIndeks"></select>
+                </div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <button class="btn" id="applyMappingBtn">Transformer og rensk data</button>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="panel hidden" id="previewPanel">
+            <h2>3. Forhåndsvisning av endringer</h2>
+            <div class="stats" id="stats"></div>
+            <div class="log" id="processingLog"></div>
+            <div class="data-preview" id="dataPreview"></div>
+            <div style="margin-top: 1.5rem;">
+                <button class="btn btn-success" id="downloadBtn">Last ned oppdatert data.csv</button>
+                <button class="btn btn-warning" id="saveBtn">Lagre direkte til data.csv</button>
+                <button class="btn" id="githubBtn" style="background: #238636;">Push til GitHub</button>
+            </div>
+            <div class="status" id="saveStatus"></div>
+        </div>
+
+        <!-- Chart Preview Section -->
+        <div class="panel hidden" id="chartPreviewPanel">
+            <h2>4. Forhåndsvisning av graf</h2>
+            <p>Slik vil grafen se ut med de nye dataene:</p>
+            <div style="margin-bottom: 1rem;">
+                <button class="btn" id="refreshPreviewBtn">Oppdater forhåndsvisning</button>
+                <button class="btn" id="openFullBtn" style="background: #6366f1;">Åpne i ny fane</button>
+            </div>
+            <div class="chart-preview-container">
+                <iframe id="chartPreview" src="" style="width: 100%; height: 600px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: white;"></iframe>
+            </div>
+        </div>
+
+        <!-- Current Data Section -->
+        <div class="panel">
+            <h2>Eksisterende data</h2>
+            <button class="btn" id="loadCurrentBtn">Last inn gjeldende data.csv</button>
+            <div class="data-preview" id="currentDataPreview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Expected columns in data.csv
+        const TARGET_COLUMNS = [
+            'Date',
+            'Oslo Fylke',
+            'Oslo: Alna',
+            'Oslo: Bjerke',
+            'Oslo: Frogner',
+            'Oslo: Gamle Oslo',
+            'Oslo: Grorud',
+            'Oslo: Grünerløkka',
+            'Oslo: Nordre Aker',
+            'Oslo: Nordstrand',
+            'Oslo: Sagene',
+            'Oslo: St.Hanshaugen',
+            'Oslo: Stovner',
+            'Oslo: Søndre Nordstrand',
+            'Oslo: Ullern',
+            'Oslo: Vestre Aker',
+            'Oslo: Østensjø'
+        ];
+
+        // State
+        let currentData = [];
+        let uploadedData = [];
+        let uploadedHeaders = [];
+        let mergedData = [];
+        let columnMapping = {};
+
+        // DOM Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const mappingPanel = document.getElementById('mappingPanel');
+        const columnMappingDiv = document.getElementById('columnMapping');
+        const applyMappingBtn = document.getElementById('applyMappingBtn');
+        const previewPanel = document.getElementById('previewPanel');
+        const statsDiv = document.getElementById('stats');
+        const processingLog = document.getElementById('processingLog');
+        const dataPreview = document.getElementById('dataPreview');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const saveStatus = document.getElementById('saveStatus');
+        const loadCurrentBtn = document.getElementById('loadCurrentBtn');
+        const currentDataPreview = document.getElementById('currentDataPreview');
+        const chartPreviewPanel = document.getElementById('chartPreviewPanel');
+        const chartPreview = document.getElementById('chartPreview');
+        const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
+        const openFullBtn = document.getElementById('openFullBtn');
+
+        // Utility functions
+        function showStatus(element, message, type) {
+            element.textContent = message;
+            element.className = `status show ${type}`;
+        }
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            processingLog.appendChild(entry);
+            processingLog.scrollTop = processingLog.scrollHeight;
+        }
+
+        function clearLog() {
+            processingLog.innerHTML = '';
+        }
+
+        // Parse CSV
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const rawHeaders = parseCSVLine(lines[0]);
+            // Trim all headers to remove trailing/leading spaces
+            const headers = rawHeaders.map(h => h.trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = parseCSVLine(lines[i]);
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] ? values[index].trim() : '';
+                    });
+                    data.push(row);
+                }
+            }
+
+            return { headers, data };
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        // Load current data.csv
+        async function loadCurrentData() {
+            try {
+                const response = await fetch('data.csv?t=' + Date.now()); // Cache bust
+                const text = await response.text();
+                const { headers, data } = parseCSV(text);
+                currentData = data;
+
+                console.log('Loaded currentData:', currentData.length, 'rows');
+                console.log('First row:', currentData[0]);
+                console.log('Last row:', currentData[currentData.length - 1]);
+
+                renderTable(currentDataPreview, headers, data.slice(-10), 'Siste 10 rader:');
+                showStatus(uploadStatus, `Lastet ${data.length} rader fra data.csv`, 'success');
+                return true;
+            } catch (error) {
+                showStatus(uploadStatus, `Feil ved lasting: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        loadCurrentBtn.addEventListener('click', loadCurrentData);
+
+        // File upload handling
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        async function handleFile(file) {
+            showStatus(uploadStatus, `Leser fil: ${file.name}...`, 'info');
+
+            try {
+                let text;
+
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    // For Excel files, we'd need a library - show message
+                    showStatus(uploadStatus, 'Excel-filer støttes ikke direkte. Eksporter til CSV først.', 'error');
+                    return;
+                } else {
+                    text = await file.text();
+                }
+
+                // Try to detect delimiter
+                const firstLine = text.split('\n')[0];
+                let delimiter = ',';
+                if (firstLine.includes(';') && !firstLine.includes(',')) {
+                    delimiter = ';';
+                    text = text.replace(/;/g, ',');
+                } else if (firstLine.includes('\t') && !firstLine.includes(',')) {
+                    delimiter = '\t';
+                    text = text.replace(/\t/g, ',');
+                }
+
+                const { headers, data } = parseCSV(text);
+                uploadedHeaders = headers;
+                uploadedData = data;
+
+                showStatus(uploadStatus, `Lastet ${data.length} rader med ${headers.length} kolonner`, 'success');
+
+                // Load current data first and wait for it
+                const loaded = await loadCurrentData();
+                if (!loaded) {
+                    showStatus(uploadStatus, 'Kunne ikke laste eksisterende data.csv', 'error');
+                    return;
+                }
+
+                log(`Eksisterende data klar: ${currentData.length} rader`, 'info');
+
+                // Show mapping panel
+                createColumnMapping(headers);
+                mappingPanel.classList.remove('hidden');
+
+            } catch (error) {
+                showStatus(uploadStatus, `Feil: ${error.message}`, 'error');
+            }
+        }
+
+        // Column mapping - simplified for long format data
+        function createColumnMapping(sourceHeaders) {
+            const mapDate = document.getElementById('mapDate');
+            const mapOmraade = document.getElementById('mapOmraade');
+            const mapIndeks = document.getElementById('mapIndeks');
+
+            [mapDate, mapOmraade, mapIndeks].forEach(select => {
+                select.innerHTML = '<option value="">-- Velg kolonne --</option>';
+                sourceHeaders.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+
+                    const colLower = col.toLowerCase();
+
+                    // Auto-select based on column name
+                    if (select === mapDate && (colLower.includes('dato') || colLower.includes('date') || colLower.includes('tid'))) {
+                        option.selected = true;
+                    }
+                    if (select === mapOmraade && (colLower.includes('område') || colLower.includes('omrade') || colLower.includes('region') || colLower.includes('bydel'))) {
+                        option.selected = true;
+                    }
+                    if (select === mapIndeks && (colLower.includes('indeks') || colLower.includes('index') || colLower.includes('verdi') || colLower.includes('value'))) {
+                        option.selected = true;
+                    }
+
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Apply mapping and process data
+        applyMappingBtn.addEventListener('click', () => {
+            clearLog();
+            log('Starter dataprosessering...', 'info');
+
+            // Get column mapping from the 3 selects
+            const dateCol = document.getElementById('mapDate').value;
+            const omraadeCol = document.getElementById('mapOmraade').value;
+            const indeksCol = document.getElementById('mapIndeks').value;
+
+            // Check required columns
+            if (!dateCol || !omraadeCol || !indeksCol) {
+                log('FEIL: Alle tre kolonner må være valgt!', 'error');
+                return;
+            }
+
+            log(`Dato-kolonne: "${dateCol}"`, 'info');
+            log(`Område-kolonne: "${omraadeCol}"`, 'info');
+            log(`Indeks-kolonne: "${indeksCol}"`, 'info');
+
+            // Pivot data from long to wide format
+            pivotAndProcessData(dateCol, omraadeCol, indeksCol);
+        });
+
+        // Mapping from raw area names to target column names
+        const AREA_NAME_MAP = {
+            // Exact matches from file
+            'oslo fylke': 'Oslo Fylke',
+            'oslo: alna': 'Oslo: Alna',
+            'oslo: bjerke': 'Oslo: Bjerke',
+            'oslo: frogner': 'Oslo: Frogner',
+            'oslo: gamle oslo': 'Oslo: Gamle Oslo',
+            'oslo: grorud': 'Oslo: Grorud',
+            'oslo: grünerløkka': 'Oslo: Grünerløkka',
+            'oslo: nordre aker': 'Oslo: Nordre Aker',
+            'oslo: nordstrand': 'Oslo: Nordstrand',
+            'oslo: sagene': 'Oslo: Sagene',
+            'oslo: st.hanshaugen': 'Oslo: St.Hanshaugen',
+            'oslo: stovner': 'Oslo: Stovner',
+            'oslo: søndre nordstrand': 'Oslo: Søndre Nordstrand',
+            'oslo: ullern': 'Oslo: Ullern',
+            'oslo: vestre aker': 'Oslo: Vestre Aker',
+            'oslo: østensjø': 'Oslo: Østensjø',
+            // Alternative spellings
+            'oslo i alt': 'Oslo Fylke',
+            'oslo': 'Oslo Fylke',
+            'alna': 'Oslo: Alna',
+            'bjerke': 'Oslo: Bjerke',
+            'frogner': 'Oslo: Frogner',
+            'gamle oslo': 'Oslo: Gamle Oslo',
+            'grorud': 'Oslo: Grorud',
+            'grünerløkka': 'Oslo: Grünerløkka',
+            'grunerlokka': 'Oslo: Grünerløkka',
+            'grunerløkka': 'Oslo: Grünerløkka',
+            'nordre aker': 'Oslo: Nordre Aker',
+            'nordstrand': 'Oslo: Nordstrand',
+            'sagene': 'Oslo: Sagene',
+            'st. hanshaugen': 'Oslo: St.Hanshaugen',
+            'st.hanshaugen': 'Oslo: St.Hanshaugen',
+            'sankt hanshaugen': 'Oslo: St.Hanshaugen',
+            'stovner': 'Oslo: Stovner',
+            'søndre nordstrand': 'Oslo: Søndre Nordstrand',
+            'sondre nordstrand': 'Oslo: Søndre Nordstrand',
+            'ullern': 'Oslo: Ullern',
+            'vestre aker': 'Oslo: Vestre Aker',
+            'østensjø': 'Oslo: Østensjø',
+            'ostensjo': 'Oslo: Østensjø'
+        };
+
+        function normalizeAreaName(rawName) {
+            if (!rawName) return null;
+
+            // Clean up the name
+            let name = String(rawName).trim();
+            let nameLower = name.toLowerCase();
+
+            // Direct match (case insensitive)
+            if (AREA_NAME_MAP[nameLower]) {
+                return AREA_NAME_MAP[nameLower];
+            }
+
+            // Check if it's already a valid target column
+            if (TARGET_COLUMNS.includes(name)) {
+                return name;
+            }
+
+            // Fuzzy match - check if name contains key
+            for (const [key, value] of Object.entries(AREA_NAME_MAP)) {
+                if (nameLower.includes(key) || key.includes(nameLower)) {
+                    return value;
+                }
+            }
+
+            return null;
+        }
+
+        function pivotAndProcessData(dateCol, omraadeCol, indeksCol) {
+            // Check if current data is loaded
+            log(`Eksisterende data lastet: ${currentData.length} rader`, 'info');
+            if (currentData.length > 0) {
+                log(`Første dato i eksisterende: ${currentData[0].Date}`, 'info');
+                log(`Siste dato i eksisterende: ${currentData[currentData.length - 1].Date}`, 'info');
+            }
+
+            // Group data by date
+            const dateGroups = {};
+            let unmatchedAreas = new Set();
+
+            uploadedData.forEach((row, index) => {
+                const rawDate = row[dateCol];
+                const rawArea = row[omraadeCol];
+                const rawValue = row[indeksCol];
+
+                // Clean date
+                const cleanedDate = cleanDate(rawDate);
+                if (!cleanedDate) {
+                    if (index < 5) log(`Rad ${index + 1}: Ugyldig dato "${rawDate}"`, 'warning');
+                    return;
+                }
+
+                // Map area name to target column
+                const targetColumn = normalizeAreaName(rawArea);
+                if (!targetColumn) {
+                    unmatchedAreas.add(rawArea);
+                    return;
+                }
+
+                // Clean value
+                const cleanedValue = cleanNumber(rawValue);
+                if (!cleanedValue) {
+                    return;
+                }
+
+                // Add to date group
+                if (!dateGroups[cleanedDate]) {
+                    dateGroups[cleanedDate] = { Date: cleanedDate };
+                }
+                dateGroups[cleanedDate][targetColumn] = cleanedValue;
+            });
+
+            // Log unmatched areas
+            if (unmatchedAreas.size > 0) {
+                log(`Områder som ikke ble gjenkjent:`, 'warning');
+                unmatchedAreas.forEach(area => log(`  - "${area}"`, 'warning'));
+            }
+
+            // Convert to array
+            const pivotedData = Object.values(dateGroups);
+            log(`Pivotering fullført: ${pivotedData.length} datoer funnet`, 'info');
+
+            // Now process and merge with existing data
+            processDataWithPivoted(pivotedData);
+        }
+
+        function processDataWithPivoted(pivotedData) {
+            const newRows = [];
+            const updatedRows = [];
+
+            pivotedData.forEach((row) => {
+                const date = row.Date;
+
+                // Check if date exists in current data
+                const existingIndex = currentData.findIndex(r => r.Date === date);
+
+                if (existingIndex >= 0) {
+                    // Check if there are any changes
+                    const existingRow = currentData[existingIndex];
+                    let changed = false;
+
+                    TARGET_COLUMNS.slice(1).forEach(col => {
+                        if (row[col] && row[col] !== existingRow[col]) {
+                            changed = true;
+                        }
+                    });
+
+                    if (changed) {
+                        updatedRows.push({ date, row });
+                        log(`Oppdaterer: ${date}`, 'warning');
+                    }
+                } else {
+                    newRows.push({ date, row });
+                    log(`Ny dato: ${date}`, 'success');
+                }
+            });
+
+            log(`Resultat: ${newRows.length} nye, ${updatedRows.length} oppdaterte`, 'info');
+
+            // Merge data
+            mergedData = [...currentData];
+
+            // Apply updates
+            updatedRows.forEach(({ date, row }) => {
+                const index = mergedData.findIndex(r => r.Date === date);
+                if (index >= 0) {
+                    TARGET_COLUMNS.slice(1).forEach(col => {
+                        if (row[col]) {
+                            mergedData[index][col] = row[col];
+                        }
+                    });
+                }
+            });
+
+            // Add new rows
+            newRows.forEach(({ row }) => {
+                // Ensure all columns exist
+                TARGET_COLUMNS.forEach(col => {
+                    if (!row[col]) row[col] = '';
+                });
+                mergedData.push(row);
+            });
+
+            // Sort by date
+            mergedData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+            // Show preview
+            showPreview(newRows, updatedRows);
+        }
+
+        function processData() {
+            const newRows = [];
+            const updatedRows = [];
+            let skippedRows = 0;
+
+            uploadedData.forEach((row, index) => {
+                // Get and clean date
+                const rawDate = row[columnMapping['Date']];
+                const cleanedDate = cleanDate(rawDate);
+
+                if (!cleanedDate) {
+                    log(`Rad ${index + 1}: Ugyldig dato "${rawDate}" - hoppet over`, 'warning');
+                    skippedRows++;
+                    return;
+                }
+
+                // Create cleaned row
+                const cleanedRow = { Date: cleanedDate };
+                let hasValues = false;
+
+                TARGET_COLUMNS.slice(1).forEach(col => {
+                    if (columnMapping[col]) {
+                        const rawValue = row[columnMapping[col]];
+                        const cleanedValue = cleanNumber(rawValue);
+                        cleanedRow[col] = cleanedValue;
+                        if (cleanedValue) hasValues = true;
+                    } else {
+                        cleanedRow[col] = '';
+                    }
+                });
+
+                if (!hasValues) {
+                    if (index < 3) {
+                        // Debug first few rows
+                        log(`Rad ${index + 1}: Debug - rå verdier:`, 'warning');
+                        TARGET_COLUMNS.slice(1).forEach(col => {
+                            if (columnMapping[col]) {
+                                const rawValue = row[columnMapping[col]];
+                                log(`  ${col}: "${rawValue}" → "${cleanNumber(rawValue)}"`, 'warning');
+                            }
+                        });
+                    }
+                    log(`Rad ${index + 1}: Ingen verdier funnet - hoppet over`, 'warning');
+                    skippedRows++;
+                    return;
+                }
+
+                // Check if date exists in current data
+                const existingIndex = currentData.findIndex(r => r.Date === cleanedDate);
+
+                if (existingIndex >= 0) {
+                    // Update existing row
+                    const existingRow = currentData[existingIndex];
+                    let changed = false;
+
+                    TARGET_COLUMNS.slice(1).forEach(col => {
+                        if (cleanedRow[col] && cleanedRow[col] !== existingRow[col]) {
+                            changed = true;
+                        }
+                    });
+
+                    if (changed) {
+                        updatedRows.push({ date: cleanedDate, row: cleanedRow });
+                        log(`Oppdaterer eksisterende rad for ${cleanedDate}`, 'warning');
+                    }
+                } else {
+                    // New row
+                    newRows.push({ date: cleanedDate, row: cleanedRow });
+                    log(`Ny rad for ${cleanedDate}`, 'success');
+                }
+            });
+
+            log(`Prosessering fullført: ${newRows.length} nye, ${updatedRows.length} oppdaterte, ${skippedRows} hoppet over`, 'info');
+
+            // Merge data
+            mergedData = [...currentData];
+
+            // Apply updates
+            updatedRows.forEach(({ date, row }) => {
+                const index = mergedData.findIndex(r => r.Date === date);
+                if (index >= 0) {
+                    TARGET_COLUMNS.slice(1).forEach(col => {
+                        if (row[col]) {
+                            mergedData[index][col] = row[col];
+                        }
+                    });
+                }
+            });
+
+            // Add new rows
+            newRows.forEach(({ row }) => {
+                mergedData.push(row);
+            });
+
+            // Sort by date
+            mergedData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+            // Show preview
+            showPreview(newRows, updatedRows);
+        }
+
+        function cleanDate(rawDate) {
+            if (!rawDate) return null;
+
+            const str = String(rawDate).trim();
+
+            // Try different date formats
+
+            // ISO format with timestamp: 2024-01-01 00:00:00
+            let match = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+\d{1,2}:\d{2}:\d{2}/);
+            if (match) {
+                return formatDate(match[1], match[2]);
+            }
+
+            // ISO format: 2024-01-01
+            match = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (match) {
+                return formatDate(match[1], match[2]);
+            }
+
+            // Norwegian: 01.01.2024
+            match = str.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+            if (match) {
+                return formatDate(match[3], match[2]);
+            }
+
+            // Quarter format: 2024K1, 2024-K1, Q1 2024, 1. kvartal 2024
+            match = str.match(/(\d{4})\s*[KQ]\s*(\d)/i);
+            if (match) {
+                const quarter = parseInt(match[2]);
+                const month = (quarter - 1) * 3 + 1;
+                return formatDate(match[1], month);
+            }
+
+            match = str.match(/[KQ]\s*(\d)\s*(\d{4})/i);
+            if (match) {
+                const quarter = parseInt(match[1]);
+                const month = (quarter - 1) * 3 + 1;
+                return formatDate(match[2], month);
+            }
+
+            match = str.match(/(\d)\.\s*kvartal\s*(\d{4})/i);
+            if (match) {
+                const quarter = parseInt(match[1]);
+                const month = (quarter - 1) * 3 + 1;
+                return formatDate(match[2], month);
+            }
+
+            // Just year and month: 2024-01
+            match = str.match(/^(\d{4})-(\d{1,2})$/);
+            if (match) {
+                return formatDate(match[1], match[2]);
+            }
+
+            // Excel date number
+            if (/^\d+$/.test(str) && parseInt(str) > 30000) {
+                const date = new Date((parseInt(str) - 25569) * 86400 * 1000);
+                return formatDate(date.getFullYear(), date.getMonth() + 1);
+            }
+
+            return null;
+        }
+
+        function formatDate(year, month) {
+            const m = String(month).padStart(2, '0');
+            return `${year}-${m}-01`;
+        }
+
+        function cleanNumber(rawValue) {
+            if (!rawValue) return '';
+
+            let str = String(rawValue).trim();
+
+            // Remove spaces and replace comma with dot
+            str = str.replace(/\s/g, '').replace(',', '.');
+
+            // Extract number
+            const match = str.match(/-?\d+\.?\d*/);
+            if (match) {
+                return match[0];
+            }
+
+            return '';
+        }
+
+        function showPreview(newRows, updatedRows) {
+            previewPanel.classList.remove('hidden');
+
+            // Stats
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${currentData.length}</div>
+                    <div class="stat-label">Eksisterende rader</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #10b981;">${newRows.length}</div>
+                    <div class="stat-label">Nye rader</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;">${updatedRows.length}</div>
+                    <div class="stat-label">Oppdaterte rader</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${mergedData.length}</div>
+                    <div class="stat-label">Totalt etter merge</div>
+                </div>
+            `;
+
+            // Show last rows including new ones
+            const newDates = new Set(newRows.map(r => r.date));
+            const updatedDates = new Set(updatedRows.map(r => r.date));
+
+            let tableHTML = '<p>Siste 15 rader (grønn = ny, gul = oppdatert):</p><table><thead><tr>';
+            TARGET_COLUMNS.forEach(col => {
+                tableHTML += `<th>${col}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            mergedData.slice(-15).forEach(row => {
+                let rowClass = '';
+                if (newDates.has(row.Date)) rowClass = 'new-row';
+                else if (updatedDates.has(row.Date)) rowClass = 'updated-row';
+
+                tableHTML += `<tr class="${rowClass}">`;
+                TARGET_COLUMNS.forEach(col => {
+                    const val = row[col] || '';
+                    const displayVal = col === 'Date' ? val : (val ? parseFloat(val).toFixed(2) : '');
+                    tableHTML += `<td>${displayVal}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            dataPreview.innerHTML = tableHTML;
+        }
+
+        function renderTable(container, headers, data, title = '') {
+            let html = title ? `<p>${title}</p>` : '';
+            html += '<table><thead><tr>';
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(h => {
+                    const val = row[h] || '';
+                    const displayVal = h === 'Date' ? val : (val && !isNaN(val) ? parseFloat(val).toFixed(2) : val);
+                    html += `<td>${displayVal}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Download merged CSV
+        downloadBtn.addEventListener('click', () => {
+            const csv = generateCSV();
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'data.csv';
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showStatus(saveStatus, 'Fil lastet ned. Erstatt eksisterende data.csv med denne filen.', 'success');
+        });
+
+        function generateCSV() {
+            let csv = TARGET_COLUMNS.join(',') + '\n';
+
+            mergedData.forEach(row => {
+                const values = TARGET_COLUMNS.map(col => row[col] || '');
+                csv += values.join(',') + '\n';
+            });
+
+            return csv;
+        }
+
+        // Save button - save directly to server
+        saveBtn.addEventListener('click', async () => {
+            const csv = generateCSV();
+
+            try {
+                showStatus(saveStatus, 'Lagrer...', 'info');
+
+                const response = await fetch('/save-csv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ csv: csv, folder: 'volum' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(saveStatus, 'data.csv er oppdatert! En backup ble lagret som data_backup.csv', 'success');
+                    // Reload current data to show the update
+                    await loadCurrentData();
+                    // Show chart preview
+                    showChartPreview();
+                } else {
+                    showStatus(saveStatus, `Feil: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(saveStatus, `Kunne ikke lagre: ${error.message}. Bruk "Last ned" knappen i stedet.`, 'error');
+            }
+        });
+
+        // Chart preview functions
+        function showChartPreview() {
+            chartPreviewPanel.classList.remove('hidden');
+            // Add cache-busting timestamp to reload the iframe
+            chartPreview.src = 'volum.html?t=' + Date.now();
+        }
+
+        refreshPreviewBtn.addEventListener('click', () => {
+            chartPreview.src = 'volum.html?t=' + Date.now();
+        });
+
+        openFullBtn.addEventListener('click', () => {
+            window.open('volum.html', '_blank');
+        });
+
+        // GitHub push button
+        const githubBtn = document.getElementById('githubBtn');
+        githubBtn.addEventListener('click', async () => {
+            const today = new Date().toISOString().split('T')[0];
+            const message = `Oppdatert prisindeks data ${today}`;
+
+            try {
+                showStatus(saveStatus, 'Pusher til GitHub...', 'info');
+
+                const response = await fetch('/git-push', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message, folder: 'volum' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(saveStatus, result.message, 'success');
+                } else {
+                    showStatus(saveStatus, `Git feil: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(saveStatus, `Kunne ikke pushe: ${error.message}`, 'error');
+            }
+        });
+
+        // Initial load
+        loadCurrentData();
+    </script>
+</body>
+</html>
