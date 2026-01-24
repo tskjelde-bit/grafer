@@ -255,7 +255,7 @@
         return 6;
       }
 
-      fetch('../data_lagt_ut.csv')
+      fetch('../data_lagt_ut.csv?t=' + Date.now())
         .then(r => r.text())
         .then(csvText => {
           const lines = csvText.trim().split('\n');
