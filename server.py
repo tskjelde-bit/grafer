@@ -26,11 +26,18 @@ class AdminHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 csv_content = data.get('csv', '')
+                folder = data.get('folder', '')  # subfolder like 'prisutvikling'
+
+                # Determine target directory
+                if folder:
+                    target_dir = os.path.join(DIRECTORY, folder)
+                else:
+                    target_dir = DIRECTORY
 
                 # Backup existing file
-                data_file = os.path.join(DIRECTORY, 'data.csv')
+                data_file = os.path.join(target_dir, 'data.csv')
                 if os.path.exists(data_file):
-                    backup_file = os.path.join(DIRECTORY, 'data_backup.csv')
+                    backup_file = os.path.join(target_dir, 'data_backup.csv')
                     with open(data_file, 'r', encoding='utf-8') as f:
                         with open(backup_file, 'w', encoding='utf-8') as bf:
                             bf.write(f.read())
@@ -61,12 +68,19 @@ class AdminHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 commit_message = data.get('message', 'Oppdatert data.csv')
+                folder = data.get('folder', '')  # subfolder like 'prisutvikling'
+
+                # Determine file path for git add
+                if folder:
+                    data_file_path = os.path.join(folder, 'data.csv')
+                else:
+                    data_file_path = 'data.csv'
 
                 # Run git commands
                 os.chdir(DIRECTORY)
 
                 # Git add
-                result_add = subprocess.run(['git', 'add', 'data.csv'],
+                result_add = subprocess.run(['git', 'add', data_file_path],
                                            capture_output=True, text=True, cwd=DIRECTORY)
 
                 # Git commit

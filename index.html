@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafer - Oversikt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e4e4e7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #a1a1aa;
+            font-size: 1.1rem;
+        }
+
+        .admin-link {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #a1a1aa;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        .graphs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .graph-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .graph-card:hover {
+            border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .graph-preview {
+            width: 100%;
+            height: 250px;
+            border: none;
+            pointer-events: none;
+            background: #fff;
+        }
+
+        .graph-info {
+            padding: 1.5rem;
+        }
+
+        .graph-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 0.5rem;
+        }
+
+        .graph-description {
+            color: #a1a1aa;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .graph-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #71717a;
+        }
+
+        .graph-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .coming-soon {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .coming-soon .graph-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: #4b5563;
+            font-size: 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .badge.new {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .graph-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn-view {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-view:hover {
+            background: rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-update {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-update:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        @media (max-width: 500px) {
+            .graphs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="prisutvikling/admin.html" class="admin-link">Kontrollpanel</a>
+
+    <div class="container">
+        <header>
+            <h1>Grafer</h1>
+            <p class="subtitle">Visualisering av boligprisstatistikk for Oslo</p>
+        </header>
+
+        <div class="graphs-grid">
+            <!-- Prisutvikling -->
+            <div class="graph-card">
+                <iframe class="graph-preview" src="prisutvikling/prisutvikling.html" loading="lazy"></iframe>
+                <div class="graph-info">
+                    <div class="graph-title">
+                        Prisutvikling
+                        <span class="badge new">Aktiv</span>
+                    </div>
+                    <p class="graph-description">
+                        Prisindeks for boliger i Oslo fylke og bydeler. Viser utvikling fra 2003 til i dag med 2010 som basisår (indeks = 100).
+                    </p>
+                    <div class="graph-meta">
+                        <span>Oslo + 15 bydeler</span>
+                        <span>Kvartalsvis</span>
+                    </div>
+                    <div class="graph-actions">
+                        <a href="prisutvikling/prisutvikling.html" class="btn btn-view">Se graf</a>
+                        <a href="prisutvikling/admin.html" class="btn btn-update">Oppdater data</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder for future graphs -->
+            <div class="graph-card coming-soon">
+                <div class="graph-preview">Kommer snart</div>
+                <div class="graph-info">
+                    <div class="graph-title">
+                        Ny graf
+                        <span class="badge">Planlagt</span>
+                    </div>
+                    <p class="graph-description">
+                        Flere grafer vil bli lagt til etter hvert. Kontakt administrator for forespørsler.
+                    </p>
+                    <div class="graph-meta">
+                        <span>-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

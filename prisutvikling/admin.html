@@ -260,6 +260,8 @@
     </style>
 </head>
 <body>
+    <a href="../index.html" style="position: absolute; top: 1.5rem; left: 1.5rem; color: #a1a1aa; text-decoration: none; font-size: 0.875rem;">← Tilbake til oversikt</a>
+
     <div class="container">
         <h1>Prisindeks Kontrollpanel</h1>
 
@@ -1084,7 +1086,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ csv: csv })
+                    body: JSON.stringify({ csv: csv, folder: 'prisutvikling' })
                 });
 
                 const result = await response.json();
@@ -1132,7 +1134,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message: message, folder: 'prisutvikling' })
                 });
 
                 const result = await response.json();
