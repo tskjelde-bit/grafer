@@ -603,6 +603,135 @@
             justify-content: flex-end;
         }
 
+        .modal-wide {
+            max-width: 800px;
+        }
+
+        .save-version-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .save-version-row input[type="text"] {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        body.dark .save-version-row input[type="text"] {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .save-version-row input[type="text"] {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .versions-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .version-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        body.dark .version-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .version-item {
+            background: #f9fafb;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .version-date {
+            font-size: 0.75rem;
+        }
+
+        body.dark .version-date {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .version-date {
+            color: #9ca3af;
+        }
+
+        .version-embed {
+            font-family: monospace;
+            font-size: 0.7rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            word-break: break-all;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        body.dark .version-embed {
+            background: rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body.light .version-embed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .version-actions .btn {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            height: auto;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .no-versions {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        body.dark .no-versions {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .no-versions {
+            color: #9ca3af;
+        }
+
         @media (max-width: 900px) {
             .toolbar {
                 padding: 0.5rem 1rem;
@@ -776,9 +905,24 @@
             <h3>Embed-kode</h3>
             <p>Kopier denne koden for å embedde grafen:</p>
             <textarea id="embedCode" readonly></textarea>
+            <div class="save-version-row">
+                <input type="text" id="versionName" placeholder="Versjonsnavn (f.eks. 'Mørk 16:9')">
+                <button class="btn btn-primary" id="saveVersionBtn">Lagre versjon</button>
+            </div>
             <div class="modal-actions">
                 <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
+                <button class="btn btn-outline" id="showVersionsBtn">Se versjoner</button>
                 <button class="btn btn-outline" id="closeEmbedBtn">Lukk</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="versionsModal">
+        <div class="modal-content modal-wide">
+            <h3>Lagrede versjoner</h3>
+            <div id="versionsList" class="versions-list"></div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="closeVersionsBtn">Lukk</button>
             </div>
         </div>
     </div>
@@ -1315,6 +1459,134 @@
                 embedModal.classList.remove('show');
             }
         });
+
+        // Version management
+        const VERSIONS_KEY = 'grafer-solgt-versions';
+        const versionNameInput = document.getElementById('versionName');
+        const saveVersionBtn = document.getElementById('saveVersionBtn');
+        const showVersionsBtn = document.getElementById('showVersionsBtn');
+        const versionsModal = document.getElementById('versionsModal');
+        const versionsList = document.getElementById('versionsList');
+        const closeVersionsBtn = document.getElementById('closeVersionsBtn');
+
+        function getVersions() {
+            const stored = localStorage.getItem(VERSIONS_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveVersions(versions) {
+            localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
+        }
+
+        function getCurrentConfig() {
+            return {
+                theme: isDark ? 'dark' : 'light',
+                aspect: aspectSelect.value,
+                avg: avgToggle.checked,
+                palette: paletteSelect.value,
+                transparent: isTransparent,
+                opacity: currentOpacity,
+                highlightYear: highlightYearSelect.value,
+                hasHighlight: Object.keys(customYearColors).length > 0
+            };
+        }
+
+        saveVersionBtn.addEventListener('click', () => {
+            const name = versionNameInput.value.trim();
+            if (!name) {
+                alert('Vennligst skriv inn et versjonsnavn');
+                return;
+            }
+
+            const versions = getVersions();
+            const newVersion = {
+                id: Date.now(),
+                name: name,
+                embedCode: generateEmbedCode(),
+                config: getCurrentConfig(),
+                createdAt: new Date().toISOString()
+            };
+
+            versions.unshift(newVersion);
+            saveVersions(versions);
+
+            versionNameInput.value = '';
+            alert('Versjon lagret!');
+        });
+
+        showVersionsBtn.addEventListener('click', () => {
+            renderVersionsList();
+            versionsModal.classList.add('show');
+        });
+
+        closeVersionsBtn.addEventListener('click', () => {
+            versionsModal.classList.remove('show');
+        });
+
+        versionsModal.addEventListener('click', (e) => {
+            if (e.target === versionsModal) {
+                versionsModal.classList.remove('show');
+            }
+        });
+
+        function renderVersionsList() {
+            const versions = getVersions();
+
+            if (versions.length === 0) {
+                versionsList.innerHTML = '<div class="no-versions">Ingen lagrede versjoner ennå</div>';
+                return;
+            }
+
+            versionsList.innerHTML = versions.map(v => {
+                const date = new Date(v.createdAt).toLocaleDateString('nb-NO', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="version-item" data-id="${v.id}">
+                        <div class="version-header">
+                            <span class="version-name">${v.name}</span>
+                            <span class="version-date">${date}</span>
+                        </div>
+                        <div class="version-embed">${v.embedCode}</div>
+                        <div class="version-actions">
+                            <button class="btn btn-success copy-version-btn">Kopier embed</button>
+                            <button class="btn btn-danger delete-version-btn">Slett</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners
+            versionsList.querySelectorAll('.copy-version-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const item = e.target.closest('.version-item');
+                    const id = parseInt(item.dataset.id);
+                    const version = versions.find(v => v.id === id);
+                    if (version) {
+                        navigator.clipboard.writeText(version.embedCode).then(() => {
+                            btn.textContent = 'Kopiert!';
+                            setTimeout(() => btn.textContent = 'Kopier embed', 2000);
+                        });
+                    }
+                });
+            });
+
+            versionsList.querySelectorAll('.delete-version-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!confirm('Er du sikker på at du vil slette denne versjonen?')) return;
+                    const item = e.target.closest('.version-item');
+                    const id = parseInt(item.dataset.id);
+                    const updatedVersions = versions.filter(v => v.id !== id);
+                    saveVersions(updatedVersions);
+                    renderVersionsList();
+                });
+            });
+        }
 
         // Initialize
         loadChart();
