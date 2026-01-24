@@ -269,11 +269,12 @@
         'sep': 'September', 'okt': 'Oktober', 'nov': 'November', 'des': 'Desember'
       };
 
-      // Check theme, avg and palette from URL
+      // Check theme, avg, palette and transparent from URL
       const urlParams = new URLSearchParams(window.location.search);
       const isLightTheme = urlParams.get('theme') === 'light';
       const showAvg = urlParams.get('avg') !== '0'; // Show by default unless explicitly set to 0
       const paletteParam = urlParams.get('palette') || 'default';
+      const isTransparent = urlParams.get('transparent') === '1';
 
       // Color palettes
       const palettes = {
@@ -296,7 +297,13 @@
 
       const colorPalette = getColorPalette(paletteParam, isLightTheme ? 0.85 : 0.7);
 
-      const bgColor = isLightTheme ? '#ffffff' : '#0f1114';
+      const bgColor = isTransparent ? 'rgba(0,0,0,0)' : (isLightTheme ? '#ffffff' : '#0f1114');
+
+      // Apply transparent background if requested
+      if (isTransparent) {
+        document.body.style.background = 'transparent';
+        document.querySelector('.wrap').style.background = 'transparent';
+      }
       const textColor = isLightTheme ? '#1a1a2e' : 'rgba(255,255,255,0.92)';
       const mutedColor = isLightTheme ? '#6b7280' : 'rgba(255,255,255,0.40)';
       const gridColor = isLightTheme ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';

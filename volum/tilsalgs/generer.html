@@ -665,6 +665,12 @@
                     <option value="0.75">3:4</option>
                 </select>
             </div>
+            <div class="control">
+                <label>
+                    <input type="checkbox" id="transparentToggle">
+                    Transparent
+                </label>
+            </div>
             <button class="btn btn-outline" id="settingsBtn">Margin & Border</button>
         </div>
         <div class="toolbar-row">
@@ -929,6 +935,35 @@
             currentPalette = paletteSelect.value;
             updateChartColors();
         });
+
+        // Transparent background toggle
+        let isTransparent = false;
+        const transparentToggle = document.getElementById('transparentToggle');
+        transparentToggle.addEventListener('change', () => {
+            isTransparent = transparentToggle.checked;
+            updateTransparency();
+        });
+
+        function updateTransparency() {
+            if (isTransparent) {
+                captureArea.style.background = 'transparent';
+                if (chartEl) {
+                    Plotly.relayout(chartEl, {
+                        'paper_bgcolor': 'rgba(0,0,0,0)',
+                        'plot_bgcolor': 'rgba(0,0,0,0)'
+                    });
+                }
+            } else {
+                const bgColor = isDark ? '#0f1114' : '#ffffff';
+                captureArea.style.background = bgColor;
+                if (chartEl) {
+                    Plotly.relayout(chartEl, {
+                        'paper_bgcolor': bgColor,
+                        'plot_bgcolor': bgColor
+                    });
+                }
+            }
+        }
 
         // Highlight year
         let customYearColors = {};
@@ -1240,7 +1275,8 @@
             const aspect = aspectSelect.value;
             const avg = avgToggle.checked ? '1' : '0';
             const palette = paletteSelect.value;
-            const chartUrl = `${GITHUB_PAGES_BASE}/volum/tilsalgs/tilsalgs.html?theme=${theme}&aspect=${aspect}&avg=${avg}&palette=${palette}`;
+            const transparent = isTransparent ? '1' : '0';
+            const chartUrl = `${GITHUB_PAGES_BASE}/volum/tilsalgs/tilsalgs.html?theme=${theme}&aspect=${aspect}&avg=${avg}&palette=${palette}&transparent=${transparent}`;
 
             return `<div class="grafer-embed" data-src="${chartUrl}"><script src="${GITHUB_PAGES_BASE}/embed.js"><\/script></div>`;
         }
