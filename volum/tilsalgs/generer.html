@@ -366,6 +366,12 @@
             <span id="themeText">Light mode</span>
         </button>
         <div class="size-selector">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="avgToggle" checked style="width: 16px; height: 16px; cursor: pointer;">
+                Gjennomsnitt
+            </label>
+        </div>
+        <div class="size-selector">
             <label for="aspectSelect">Aspect:</label>
             <select id="aspectSelect">
                 <option value="1.78">16:9 Standard web</option>
@@ -439,6 +445,16 @@
             }
         });
 
+        // Average line toggle
+        const avgToggle = document.getElementById('avgToggle');
+        avgToggle.addEventListener('change', () => {
+            if (chartEl && years.length > 0) {
+                const avgTraceIdx = years.length; // Average trace is last
+                Plotly.restyle(chartEl, { visible: avgToggle.checked }, [avgTraceIdx]);
+                updateLegend();
+            }
+        });
+
         // Chart data and rendering
         const months = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
         const colorPalette = ['rgba(9, 58, 96, 0.7)', 'rgba(24, 105, 184, 0.7)', 'rgba(33, 150, 245, 0.7)', 'rgba(75, 195, 254, 0.7)'];
@@ -505,11 +521,13 @@
                 legendEl.appendChild(item);
             });
 
-            // Add average to legend
-            const avgItem = document.createElement('div');
-            avgItem.className = 'legend-item';
-            avgItem.innerHTML = `<div style="width: 20px; height: 3px; border-top: 3px dashed ${avgLineColor};"></div><span>Gjennomsnitt</span>`;
-            legendEl.appendChild(avgItem);
+            // Add average to legend (only if toggle is checked)
+            if (avgToggle.checked) {
+                const avgItem = document.createElement('div');
+                avgItem.className = 'legend-item';
+                avgItem.innerHTML = `<div style="width: 20px; height: 3px; border-top: 3px dashed ${avgLineColor};"></div><span>Gjennomsnitt</span>`;
+                legendEl.appendChild(avgItem);
+            }
         }
 
         function loadChart() {
@@ -667,7 +685,8 @@
         function generateEmbedCode() {
             const theme = isDark ? 'dark' : 'light';
             const aspect = aspectSelect.value;
-            const chartUrl = `${GITHUB_PAGES_BASE}/volum/tilsalgs/tilsalgs.html?theme=${theme}&aspect=${aspect}`;
+            const avg = avgToggle.checked ? '1' : '0';
+            const chartUrl = `${GITHUB_PAGES_BASE}/volum/tilsalgs/tilsalgs.html?theme=${theme}&aspect=${aspect}&avg=${avg}`;
 
             const iframe = `<iframe
     src="${chartUrl}"

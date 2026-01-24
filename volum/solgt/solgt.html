@@ -264,9 +264,10 @@
         'sep': 'September', 'okt': 'Oktober', 'nov': 'November', 'des': 'Desember'
       };
 
-      // Check theme from URL
+      // Check theme and avg from URL
       const urlParams = new URLSearchParams(window.location.search);
       const isLightTheme = urlParams.get('theme') === 'light';
+      const showAvg = urlParams.get('avg') !== '0'; // Show by default unless explicitly set to 0
 
       const colorPalette = isLightTheme
         ? ['rgba(9, 58, 96, 0.85)', 'rgba(24, 105, 184, 0.85)', 'rgba(33, 150, 245, 0.85)', 'rgba(75, 195, 254, 0.85)']
@@ -357,6 +358,7 @@
             type: 'scatter',
             mode: 'lines',
             name: 'Gjennomsnitt',
+            visible: showAvg,
             line: {
               color: avgLineColor,
               width: 3,
