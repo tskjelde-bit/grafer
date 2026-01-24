@@ -152,7 +152,7 @@
 
     /* Header */
     .chart-header {
-      font-size: 1.6rem;
+      font-size: 1.25rem;
       font-weight: 600;
       margin: 0 0 10px 0;
       color: var(--text);
@@ -160,7 +160,7 @@
     }
 
     .chart-subheader {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       line-height: 1.2;
       font-weight: normal;
       color: var(--muted);
@@ -247,11 +247,12 @@
       document.querySelector('.wrap')?.style.setProperty('margin', '0');
     }
 
-    // Embed mode - no margins for iframes
+    // Embed mode - no margins for iframes, inherit fonts
     if (window.self !== window.top) {
       document.querySelector('.wrap')?.style.setProperty('margin', '0');
       document.querySelector('.wrap')?.style.setProperty('padding', '0');
       document.querySelector('.wrap')?.style.setProperty('max-width', 'none');
+      document.body.style.fontFamily = 'inherit';
     }
   </script>
 
