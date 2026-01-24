@@ -696,22 +696,42 @@
     // Send height to parent for embed auto-resize
     function sendHeight() {
       if (window.self !== window.top) {
-        const height = document.body.scrollHeight;
+        // Get the actual content height
+        const wrap = document.querySelector('.wrap');
+        const height = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          wrap ? wrap.offsetHeight : 0
+        );
         window.parent.postMessage({ type: 'grafer-resize', height: height }, '*');
       }
     }
 
     // Send height after load and on resize
     window.addEventListener('load', () => {
-      setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 200);
       setTimeout(sendHeight, 500);
       setTimeout(sendHeight, 1000);
+      setTimeout(sendHeight, 2000);
+    });
+
+    // Also send after DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(sendHeight, 100);
     });
 
     const resizeObserver = new ResizeObserver(() => {
       sendHeight();
     });
     resizeObserver.observe(document.body);
+
+    // Send periodically for first few seconds to catch Plotly render
+    let attempts = 0;
+    const interval = setInterval(() => {
+      sendHeight();
+      attempts++;
+      if (attempts > 10) clearInterval(interval);
+    }, 300);
   </script>
 </body>
 

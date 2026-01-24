@@ -15,13 +15,10 @@
         iframe.style.overflow = 'hidden';
         iframe.scrolling = 'no';
 
-        // Set initial height
-        iframe.style.height = '400px';
+        // Set initial height (generous to avoid cut-off)
+        iframe.style.height = '600px';
 
         container.appendChild(iframe);
-
-        // Store reference for resize messages
-        iframe._container = container;
     });
 
     // Listen for height messages from iframes
@@ -30,7 +27,8 @@
             const iframes = document.querySelectorAll('.grafer-embed iframe');
             iframes.forEach(iframe => {
                 if (iframe.contentWindow === e.source) {
-                    iframe.style.height = e.data.height + 'px';
+                    // Add small buffer to ensure nothing is cut off
+                    iframe.style.height = (e.data.height + 5) + 'px';
                 }
             });
         }
