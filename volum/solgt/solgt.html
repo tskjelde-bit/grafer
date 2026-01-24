@@ -221,6 +221,25 @@
   <div id="miTooltip" class="mi-tooltip"></div>
 
   <script>
+    // URL parameters handling
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = urlParams.get('theme');
+    const aspectParam = urlParams.get('aspect');
+
+    // Apply theme from URL parameter
+    if (themeParam === 'light') {
+      document.documentElement.style.setProperty('--bg', '#ffffff');
+      document.documentElement.style.setProperty('--text', '#1a1a2e');
+      document.documentElement.style.setProperty('--muted', '#6b7280');
+      document.body.style.background = '#ffffff';
+      document.body.style.color = '#1a1a2e';
+    }
+
+    // Apply aspect ratio from URL parameter
+    if (aspectParam) {
+      document.getElementById('chart').style.aspectRatio = aspectParam;
+    }
+
     // Preview mode - hide headers and legend when embedded
     if (window.location.search.includes('preview=true') || window.self !== window.top) {
       document.querySelector('.chart-header')?.style.setProperty('display', 'none');
@@ -245,7 +264,20 @@
         'sep': 'September', 'okt': 'Oktober', 'nov': 'November', 'des': 'Desember'
       };
 
-      const colorPalette = ['rgba(9, 58, 96, 0.7)', 'rgba(24, 105, 184, 0.7)', 'rgba(33, 150, 245, 0.7)', 'rgba(75, 195, 254, 0.7)'];
+      // Check theme from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const isLightTheme = urlParams.get('theme') === 'light';
+
+      const colorPalette = isLightTheme
+        ? ['rgba(9, 58, 96, 0.85)', 'rgba(24, 105, 184, 0.85)', 'rgba(33, 150, 245, 0.85)', 'rgba(75, 195, 254, 0.85)']
+        : ['rgba(9, 58, 96, 0.7)', 'rgba(24, 105, 184, 0.7)', 'rgba(33, 150, 245, 0.7)', 'rgba(75, 195, 254, 0.7)'];
+
+      const bgColor = isLightTheme ? '#ffffff' : '#0f1114';
+      const textColor = isLightTheme ? '#1a1a2e' : 'rgba(255,255,255,0.92)';
+      const mutedColor = isLightTheme ? '#6b7280' : 'rgba(255,255,255,0.40)';
+      const gridColor = isLightTheme ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';
+      const lineColor = isLightTheme ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.20)';
+      const avgLineColor = isLightTheme ? 'rgba(16, 185, 129, 1)' : 'rgba(160, 250, 178, 1)';
 
       function getMaxYearsToShow() {
         const width = window.innerWidth;
@@ -326,7 +358,7 @@
             mode: 'lines',
             name: 'Gjennomsnitt',
             line: {
-              color: 'rgba(160, 250, 178, 1)',
+              color: avgLineColor,
               width: 3,
               shape: 'spline',
               smoothing: 1.2,
@@ -340,35 +372,35 @@
             barmode: 'group',
             bargap: 0.15,
             bargroupgap: 0.02,
-            paper_bgcolor: '#0f1114',
-            plot_bgcolor: '#0f1114',
+            paper_bgcolor: bgColor,
+            plot_bgcolor: bgColor,
             font: {
               family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-              color: 'rgba(255,255,255,0.92)',
+              color: textColor,
               size: 14
             },
             margin: { l: 35, r: 20, t: 30, b: 160 },
             xaxis: {
               showgrid: false,
               showline: true,
-              linecolor: 'rgba(255,255,255,0.20)',
-              tickfont: { color: 'rgba(255,255,255,0.40)' },
+              linecolor: lineColor,
+              tickfont: { color: mutedColor },
               tickangle: 0,
               zeroline: false,
               ticks: '',
-              tickcolor: 'rgba(255,255,255,0.25)',
+              tickcolor: lineColor,
               range: [-0.6, 11.6],
               mirror: false
             },
             yaxis: {
               showgrid: true,
-              gridcolor: 'rgba(255,255,255,0.04)',
+              gridcolor: gridColor,
               showline: true,
-              linecolor: 'rgba(255,255,255,0.20)',
-              tickfont: { color: 'rgba(255,255,255,0.40)' },
+              linecolor: lineColor,
+              tickfont: { color: mutedColor },
               zeroline: false,
               ticks: '',
-              tickcolor: 'rgba(255,255,255,0.25)',
+              tickcolor: lineColor,
               dtick: 500,
               mirror: false
             },

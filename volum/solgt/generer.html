@@ -273,6 +273,61 @@
             display: flex;
         }
 
+        .embed-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .embed-modal.show {
+            display: flex;
+        }
+
+        .embed-content {
+            background: #1f2937;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+        }
+
+        .embed-content h3 {
+            margin: 0 0 0.5rem 0;
+            color: #60a5fa;
+        }
+
+        .embed-content p {
+            margin: 0 0 1rem 0;
+            color: #a1a1aa;
+            font-size: 0.9rem;
+        }
+
+        .embed-content textarea {
+            width: 100%;
+            height: 120px;
+            background: #0f1114;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e4e4e7;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            resize: none;
+        }
+
+        .embed-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
         @media (max-width: 768px) {
             .toolbar {
                 padding: 0.75rem 1rem;
@@ -331,6 +386,21 @@
         <button class="btn btn-success" id="downloadBtn">
             Last ned PNG
         </button>
+        <button class="btn btn-primary" id="embedBtn">
+            Vis embed-kode
+        </button>
+    </div>
+
+    <div class="embed-modal" id="embedModal">
+        <div class="embed-content">
+            <h3>Embed-kode</h3>
+            <p>Kopier denne koden for å embedde grafen:</p>
+            <textarea id="embedCode" readonly></textarea>
+            <div class="embed-actions">
+                <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
+                <button class="btn btn-toggle" id="closeEmbedBtn">Lukk</button>
+            </div>
+        </div>
     </div>
 
     <div class="chart-container">
@@ -592,6 +662,56 @@
                 alert('Kunne ikke generere bilde. Prøv igjen.');
             } finally {
                 loading.classList.remove('show');
+            }
+        });
+
+        // Embed code functionality
+        const embedBtn = document.getElementById('embedBtn');
+        const embedModal = document.getElementById('embedModal');
+        const embedCode = document.getElementById('embedCode');
+        const copyEmbedBtn = document.getElementById('copyEmbedBtn');
+        const closeEmbedBtn = document.getElementById('closeEmbedBtn');
+
+        // GitHub Pages base URL - update this to your actual GitHub Pages URL
+        const GITHUB_PAGES_BASE = 'https://tskjelde-bit.github.io/grafer';
+
+        function generateEmbedCode() {
+            const theme = isDark ? 'dark' : 'light';
+            const aspect = aspectSelect.value;
+            const chartUrl = `${GITHUB_PAGES_BASE}/volum/solgt/solgt.html?theme=${theme}&aspect=${aspect}`;
+
+            const iframe = `<iframe
+    src="${chartUrl}"
+    width="100%"
+    height="500"
+    frameborder="0"
+    style="border-radius: 12px; aspect-ratio: ${aspect};">
+</iframe>`;
+
+            return iframe;
+        }
+
+        embedBtn.addEventListener('click', () => {
+            embedCode.value = generateEmbedCode();
+            embedModal.classList.add('show');
+        });
+
+        closeEmbedBtn.addEventListener('click', () => {
+            embedModal.classList.remove('show');
+        });
+
+        copyEmbedBtn.addEventListener('click', () => {
+            embedCode.select();
+            document.execCommand('copy');
+            copyEmbedBtn.textContent = 'Kopiert!';
+            setTimeout(() => {
+                copyEmbedBtn.textContent = 'Kopier';
+            }, 2000);
+        });
+
+        embedModal.addEventListener('click', (e) => {
+            if (e.target === embedModal) {
+                embedModal.classList.remove('show');
             }
         });
 
