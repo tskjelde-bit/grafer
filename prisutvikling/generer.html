@@ -472,48 +472,193 @@
             color: #6b7280;
         }
 
-        .legend-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            user-select: none;
-            transition: opacity 0.2s;
-        }
-
-        body.dark .legend-item {
-            color: rgba(255, 255, 255, 0.60);
-        }
-
-        body.light .legend-item {
-            color: #6b7280;
-        }
-
-        .legend-item:hover {
-            opacity: 0.8;
-        }
-
-        .legend-item.disabled {
-            opacity: 0.4;
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
         #chart {
             width: 100%;
             aspect-ratio: 1.33;
+        }
+
+        /* Gradient fill for envelope trace */
+        .trace.scatter:first-of-type path.js-fill {
+            fill: url(#blueGradient) !important;
+            fill-opacity: 1 !important;
+        }
+
+        /* Dropdown Controls (like prisutvikling.html) */
+        .controls-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            width: 220px;
+            font-family: inherit;
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        body.dark .dropdown-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        body.light .dropdown-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        body.dark .dropdown-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.light .dropdown-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .dropdown-btn .chevron {
+            font-size: 10px;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown-btn.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 260px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 6px;
+            z-index: 1001;
+        }
+
+        body.dark .dropdown-content {
+            background: #16181d;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .dropdown-content {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+            font-size: 13px;
+            user-select: none;
+        }
+
+        body.dark .dropdown-item {
+            color: rgba(255, 255, 255, 0.60);
+        }
+
+        body.light .dropdown-item {
+            color: #6b7280;
+        }
+
+        body.dark .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        body.light .dropdown-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: #1a1a2e;
+        }
+
+        .dropdown-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        body.light .dropdown-item input[type="checkbox"] {
+            border-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-item input[type="checkbox"]:checked {
+            background: #1E88FF;
+            border-color: #1E88FF;
+        }
+
+        .dropdown-item input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dropdown-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dropdown-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* Loading overlay */
@@ -899,6 +1044,10 @@
             </div>
             <span class="toolbar-divider"></span>
             <div class="control">
+                <label>Fra år:</label>
+                <select id="startYearSelect"></select>
+            </div>
+            <div class="control">
                 <label>Aspect:</label>
                 <select id="aspectSelect">
                     <option value="1.33" selected>4:3</option>
@@ -1041,11 +1190,33 @@
         </div>
     </div>
 
+    <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+        <defs>
+            <linearGradient id="blueGradient" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#1E88FF" stop-opacity="0.25" />
+                <stop offset="80%" stop-color="#1E88FF" stop-opacity="0" />
+            </linearGradient>
+        </defs>
+    </svg>
+
     <div class="chart-container">
         <div id="captureArea">
             <h1 class="chart-header">Boligprisindeks - Oslo</h1>
             <div class="chart-subheader">Utforsk prisutviklingen i Oslos bydeler over tid</div>
-            <div class="legend-container" id="legendContainer"></div>
+
+            <!-- Area Dropdown -->
+            <div class="controls-header">
+                <div class="custom-dropdown" id="areaDropdown">
+                    <div class="dropdown-btn" id="areaDropdownBtn">
+                        <span id="areaDropdownText">Alle bydeler</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="dropdown-content" id="areaDropdownList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
             <div id="chart"></div>
         </div>
     </div>
@@ -1242,17 +1413,7 @@
 
         resetHighlightBtn.addEventListener('click', () => {
             customAreaColors = {};
-            if (chartEl) {
-                areaNames.forEach((area, idx) => {
-                    const isHero = area === heroArea;
-                    Plotly.restyle(chartEl, {
-                        'line.color': originalAreaColors[area],
-                        'line.width': isHero ? 3.5 : currentLineWidth,
-                        'opacity': isHero ? 1.0 : currentOpacity
-                    }, [idx]);
-                });
-                updateLegend();
-            }
+            rebuildChart();
         });
 
         // Chart data
@@ -1265,6 +1426,17 @@
         let heroArea = '';
         let areaValues = {};
         let dates = [];
+        let allDates = []; // Store all dates for filtering
+        let allAreaValues = {}; // Store all values for filtering
+        let startYear = null; // Selected start year
+
+        // Start year selector
+        const startYearSelect = document.getElementById('startYearSelect');
+        startYearSelect.addEventListener('change', () => {
+            startYear = startYearSelect.value ? parseInt(startYearSelect.value) : null;
+            filterDataByYear();
+            rebuildChart();
+        });
 
         // Dataset selector elements
         const datasetBtn = document.getElementById('datasetBtn');
@@ -1291,12 +1463,14 @@
         datasetSelectAll.addEventListener('click', () => {
             areaNames.forEach(a => visibleAreas.add(a));
             updateDatasetCheckboxes();
+            updateAreaDropdownCheckboxes();
             rebuildChart();
         });
 
         datasetSelectNone.addEventListener('click', () => {
             visibleAreas.clear();
             updateDatasetCheckboxes();
+            updateAreaDropdownCheckboxes();
             rebuildChart();
         });
 
@@ -1322,6 +1496,7 @@
                     } else {
                         visibleAreas.delete(area);
                     }
+                    updateAreaDropdownCheckboxes();
                     rebuildChart();
                 });
                 datasetList.appendChild(item);
@@ -1354,6 +1529,162 @@
             });
         }
 
+        // Area dropdown (in chart area - like prisutvikling.html)
+        const areaDropdownBtn = document.getElementById('areaDropdownBtn');
+        const areaDropdownList = document.getElementById('areaDropdownList');
+        const areaDropdownText = document.getElementById('areaDropdownText');
+        const areaDropdownWrapper = document.getElementById('areaDropdown');
+
+        // Toggle dropdown
+        areaDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            areaDropdownList.classList.toggle('show');
+            areaDropdownBtn.classList.toggle('open');
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!areaDropdownWrapper.contains(e.target)) {
+                areaDropdownList.classList.remove('show');
+                areaDropdownBtn.classList.remove('open');
+            }
+        });
+
+        function setupAreaDropdown() {
+            areaDropdownList.innerHTML = '';
+
+            // Add "Velg alle" option
+            const allItem = document.createElement('div');
+            allItem.className = 'dropdown-item';
+            allItem.innerHTML = `
+                <input type="checkbox" checked id="cb-all-area">
+                <span style="font-weight:600">Velg alle</span>
+            `;
+            areaDropdownList.appendChild(allItem);
+            const cbAll = allItem.querySelector('input');
+
+            // Area items
+            areaNames.forEach(area => {
+                const color = areaColors[area] || '#999';
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.innerHTML = `
+                    <input type="checkbox" checked value="${area}" class="area-cb-main">
+                    <div class="color-dot" style="background:${color}"></div>
+                    <span>${area}</span>
+                `;
+                areaDropdownList.appendChild(item);
+            });
+
+            const mainCheckboxes = areaDropdownList.querySelectorAll('.area-cb-main');
+
+            function updateAreaDropdownState() {
+                const checkedCount = Array.from(mainCheckboxes).filter(cb => cb.checked).length;
+                const allChecked = checkedCount === mainCheckboxes.length;
+                cbAll.checked = allChecked;
+                cbAll.indeterminate = checkedCount > 0 && !allChecked;
+
+                if (allChecked) {
+                    areaDropdownText.textContent = 'Alle bydeler';
+                } else if (checkedCount === 0) {
+                    areaDropdownText.textContent = 'Ingen valgt';
+                } else {
+                    areaDropdownText.textContent = `${checkedCount} valgt`;
+                }
+            }
+
+            // Event listeners for items
+            areaDropdownList.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const cb = item.querySelector('input');
+                    if (e.target !== cb) {
+                        cb.checked = !cb.checked;
+                    }
+
+                    if (cb === cbAll) {
+                        // Toggle all
+                        mainCheckboxes.forEach(c => c.checked = cb.checked);
+                    }
+
+                    // Update visibleAreas based on checkboxes
+                    visibleAreas.clear();
+                    mainCheckboxes.forEach(c => {
+                        if (c.checked) visibleAreas.add(c.value);
+                    });
+
+                    updateAreaDropdownState();
+                    updateDatasetCheckboxes(); // Sync toolbar dropdown
+                    rebuildChart();
+                });
+            });
+
+            updateAreaDropdownState();
+        }
+
+        function updateAreaDropdownCheckboxes() {
+            const mainCheckboxes = areaDropdownList.querySelectorAll('.area-cb-main');
+            mainCheckboxes.forEach(cb => {
+                cb.checked = visibleAreas.has(cb.value);
+            });
+
+            const checkedCount = Array.from(mainCheckboxes).filter(cb => cb.checked).length;
+            const cbAll = document.getElementById('cb-all-area');
+            if (cbAll) {
+                cbAll.checked = checkedCount === mainCheckboxes.length;
+                cbAll.indeterminate = checkedCount > 0 && checkedCount < mainCheckboxes.length;
+            }
+
+            if (checkedCount === areaNames.length) {
+                areaDropdownText.textContent = 'Alle bydeler';
+            } else if (checkedCount === 0) {
+                areaDropdownText.textContent = 'Ingen valgt';
+            } else {
+                areaDropdownText.textContent = `${checkedCount} valgt`;
+            }
+        }
+
+        function populateYearDropdown() {
+            // Extract unique years from dates (format: YYYY-MM-DD or similar)
+            const years = new Set();
+            allDates.forEach(d => {
+                const year = parseInt(d.substring(0, 4));
+                if (!isNaN(year)) years.add(year);
+            });
+
+            const sortedYears = Array.from(years).sort();
+            startYearSelect.innerHTML = '<option value="">Alle</option>';
+            sortedYears.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = year;
+                startYearSelect.appendChild(opt);
+            });
+        }
+
+        function filterDataByYear() {
+            if (!startYear) {
+                // No filter - use all data
+                dates = [...allDates];
+                areaNames.forEach(a => {
+                    areaValues[a] = [...allAreaValues[a]];
+                });
+            } else {
+                // Filter by start year
+                dates = [];
+                areaNames.forEach(a => areaValues[a] = []);
+
+                allDates.forEach((d, i) => {
+                    const year = parseInt(d.substring(0, 4));
+                    if (year >= startYear) {
+                        dates.push(d);
+                        areaNames.forEach(a => {
+                            areaValues[a].push(allAreaValues[a][i]);
+                        });
+                    }
+                });
+            }
+        }
+
         function rebuildChart() {
             if (!chartEl || areaNames.length === 0) return;
 
@@ -1366,7 +1697,7 @@
             });
 
             // Build traces for visible areas
-            const traces = areaNames.filter(name => visibleAreas.has(name)).map(name => {
+            const dataTraces = areaNames.filter(name => visibleAreas.has(name)).map(name => {
                 const isHero = name === heroArea;
                 const color = customAreaColors[name] || originalAreaColors[name] || '#999';
                 return {
@@ -1385,6 +1716,35 @@
                     hoverinfo: 'none'
                 };
             });
+
+            // Calculate max envelope for visible traces
+            const xLen = dates.length;
+            const maxY = new Array(xLen).fill(0);
+            dataTraces.forEach(t => {
+                if (t.y && t.y.length === xLen) {
+                    t.y.forEach((val, i) => {
+                        const v = val || 0;
+                        if (v > maxY[i]) maxY[i] = v;
+                    });
+                }
+            });
+
+            // Create envelope trace (must be first for CSS selector)
+            const envelopeTrace = {
+                x: dates,
+                y: maxY,
+                mode: 'lines',
+                line: { width: 0, shape: 'spline', smoothing: 1.2 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(0,0,0,0)', // CSS overrides this
+                hoverinfo: 'skip',
+                showlegend: false,
+                type: 'scatter',
+                name: 'GradientBackground'
+            };
+
+            // Prepend envelope trace
+            const traces = [envelopeTrace, ...dataTraces];
 
             const bgColor = isTransparent ? 'rgba(0,0,0,0)' : (isDark ? '#0f1114' : '#ffffff');
             const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
@@ -1416,13 +1776,26 @@
                     linecolor: lineColor,
                     tickfont: { color: mutedColor },
                     zeroline: false,
-                    automargin: true
+                    automargin: true,
+                    range: [50, null],
+                    autorange: false,
+                    rangemode: 'tozero'
                 },
                 hovermode: false
             };
 
+            // Calculate max Y for range
+            let maxYVal = 50;
+            dataTraces.forEach(t => {
+                if (t.y) {
+                    t.y.forEach(v => {
+                        if (v && v > maxYVal) maxYVal = v;
+                    });
+                }
+            });
+            layout.yaxis.range = [50, maxYVal * 1.05];
+
             Plotly.react(chartEl, traces, layout, { responsive: true, displaylogo: false, displayModeBar: false, staticPlot: true });
-            updateLegend();
         }
 
         function updateChartTheme() {
@@ -1448,8 +1821,6 @@
             if (!isTransparent) {
                 captureArea.style.background = bgColor;
             }
-
-            updateLegend();
         }
 
         function updateChartOpacity() {
@@ -1472,37 +1843,7 @@
             });
         }
 
-        function updateLegend() {
-            const legendEl = document.getElementById('legendContainer');
-            legendEl.innerHTML = '';
-
-            areaNames.forEach(area => {
-                const color = customAreaColors[area] || areaColors[area];
-                const item = document.createElement('div');
-                item.className = 'legend-item' + (visibleAreas.has(area) ? '' : ' disabled');
-                item.dataset.area = area;
-                item.innerHTML = `<div class="legend-dot" style="background:${color}"></div><span>${area}</span>`;
-                item.addEventListener('click', () => toggleArea(area, item));
-                legendEl.appendChild(item);
-            });
-        }
-
-        function toggleArea(area, item) {
-            if (visibleAreas.has(area)) {
-                visibleAreas.delete(area);
-                item.classList.add('disabled');
-            } else {
-                visibleAreas.add(area);
-                item.classList.remove('disabled');
-            }
-
-            // Find trace index and toggle visibility
-            const traceIdx = chartEl.data.findIndex(t => t.name === area);
-            if (traceIdx >= 0) {
-                Plotly.restyle(chartEl, { visible: visibleAreas.has(area) }, [traceIdx]);
-            }
-        }
-
+        
         function loadChart() {
             Promise.all([
                 fetch('data.csv').then(r => r.text()),
@@ -1521,31 +1862,42 @@
                 areaNames = headers.slice(1);
 
                 // Initialize data arrays
-                dates = [];
-                areaValues = {};
-                areaNames.forEach(a => areaValues[a] = []);
+                allDates = [];
+                allAreaValues = {};
+                areaNames.forEach(a => allAreaValues[a] = []);
 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
                     const cols = line.split(',');
-                    dates.push(cols[0]);
+                    allDates.push(cols[0]);
                     for (let j = 1; j < cols.length; j++) {
                         const val = cols[j] === '' ? null : parseFloat(cols[j]);
-                        areaValues[areaNames[j - 1]].push(val);
+                        allAreaValues[areaNames[j - 1]].push(val);
                     }
                 }
+
+                // Initialize filtered data (all data by default)
+                dates = [...allDates];
+                areaValues = {};
+                areaNames.forEach(a => areaValues[a] = [...allAreaValues[a]]);
+
+                // Populate year dropdown
+                populateYearDropdown();
 
                 // Initialize all areas as visible
                 areaNames.forEach(a => visibleAreas.add(a));
 
-                // Populate dataset selector
+                // Populate dataset selector (toolbar)
                 populateDatasetList();
                 updateDatasetCount();
                 updateHighlightAreaSelect();
 
-                // Build traces
-                const traces = areaNames.map(name => {
+                // Setup area dropdown (in chart area)
+                setupAreaDropdown();
+
+                // Build data traces
+                const dataTraces = areaNames.map(name => {
                     const isHero = name === heroArea;
                     return {
                         x: dates,
@@ -1564,8 +1916,34 @@
                     };
                 });
 
-                // Initialize all areas as visible
-                areaNames.forEach(a => visibleAreas.add(a));
+                // Calculate max envelope for gradient fill
+                const xLen = dates.length;
+                const maxY = new Array(xLen).fill(0);
+                dataTraces.forEach(t => {
+                    if (t.y && t.y.length === xLen) {
+                        t.y.forEach((val, i) => {
+                            const v = val || 0;
+                            if (v > maxY[i]) maxY[i] = v;
+                        });
+                    }
+                });
+
+                // Create envelope trace (must be first for CSS selector)
+                const envelopeTrace = {
+                    x: dates,
+                    y: maxY,
+                    mode: 'lines',
+                    line: { width: 0, shape: 'spline', smoothing: 1.2 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(0,0,0,0)', // CSS overrides this
+                    hoverinfo: 'skip',
+                    showlegend: false,
+                    type: 'scatter',
+                    name: 'GradientBackground'
+                };
+
+                // Prepend envelope trace
+                const traces = [envelopeTrace, ...dataTraces];
 
                 const bgColor = isDark ? '#0f1114' : '#ffffff';
                 const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
@@ -1595,6 +1973,18 @@
                     chartLayout.yaxis.gridcolor = gridColor;
                 }
 
+                // Calculate max Y for range (start at 50)
+                let maxYVal = 50;
+                dataTraces.forEach(t => {
+                    if (t.y) {
+                        t.y.forEach(v => {
+                            if (v && v > maxYVal) maxYVal = v;
+                        });
+                    }
+                });
+                chartLayout.yaxis.range = [50, maxYVal * 1.05];
+                chartLayout.yaxis.autorange = false;
+
                 const config = {
                     responsive: true,
                     displaylogo: false,
@@ -1604,7 +1994,6 @@
 
                 chartEl = document.getElementById('chart');
                 Plotly.newPlot(chartEl, traces, chartLayout, config);
-                updateLegend();
             });
         }
 

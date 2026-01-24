@@ -615,9 +615,12 @@
           try {
             const xr = gd._fullLayout.xaxis.range;
             const yr = gd._fullLayout.yaxis.range;
+            // Set y-axis to start at 50
+            const yMin = 50;
+            const yMax = yr[1];
             Plotly.relayout(gd, {
               'xaxis.range': [xr[0], xr[1]],
-              'yaxis.range': [yr[0], yr[1]],
+              'yaxis.range': [yMin, yMax],
               'xaxis.autorange': false,
               'yaxis.autorange': false
             });
