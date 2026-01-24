@@ -403,16 +403,25 @@
 
         // Parse CSV
         function parseCSV(text) {
-            const lines = text.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim());
+            // Remove BOM if present
+            if (text.charCodeAt(0) === 0xFEFF) {
+                text = text.slice(1);
+            }
+            // Also handle UTF-8 BOM as string
+            text = text.replace(/^\uFEFF/, '').replace(/^\xEF\xBB\xBF/, '');
+
+            const lines = text.trim().split(/\r?\n/);
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
             const data = [];
+
+            console.log('Raw headers:', headers);
 
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim()) {
                     const values = lines[i].split(',');
                     const row = {};
                     headers.forEach((header, index) => {
-                        row[header] = values[index] ? values[index].trim() : '';
+                        row[header] = values[index] ? values[index].trim().replace(/^["']|["']$/g, '') : '';
                     });
                     data.push(row);
                 }
@@ -482,9 +491,14 @@
                 uploadedHeaders = headers;
                 uploadedData = data;
 
-                showStatus(uploadStatus, `Lastet ${data.length} rader med ${headers.length} kolonner`, 'success');
+                showStatus(uploadStatus, `Lastet ${data.length} rader med ${headers.length} kolonner: ${headers.join(', ')}`, 'success');
 
                 await loadCurrentData();
+                clearLog();
+                log(`Fant ${headers.length} kolonner: ${headers.join(', ')}`, 'info');
+                if (data.length > 0) {
+                    log(`Eksempel rad 1: ${JSON.stringify(data[0])}`, 'info');
+                }
                 createColumnMapping(headers);
                 mappingPanel.classList.remove('hidden');
 
@@ -499,29 +513,46 @@
             const mapYear = document.getElementById('mapYear');
             const mapValue = document.getElementById('mapValue');
 
+            // Filter out empty or metadata columns
+            const validHeaders = sourceHeaders.filter(col => {
+                const c = col.trim().toLowerCase();
+                return c && !c.includes('filter') && !c.includes('brukte') && c.length > 0;
+            });
+
+            log(`Kolonner funnet: ${validHeaders.join(', ')}`, 'info');
+
             [mapMonth, mapYear, mapValue].forEach(select => {
                 select.innerHTML = '<option value="">-- Velg kolonne --</option>';
+
+                // Add all headers (including potentially invalid ones for debugging)
                 sourceHeaders.forEach(col => {
+                    if (!col.trim()) return;
+
                     const option = document.createElement('option');
                     option.value = col;
                     option.textContent = col;
 
-                    const colLower = col.toLowerCase();
+                    const colLower = col.toLowerCase().trim();
 
                     // Auto-select based on column name
-                    if (select === mapMonth && (colLower.includes('måned') || colLower.includes('maaned') || colLower.includes('month'))) {
+                    if (select === mapMonth && (colLower === 'måned' || colLower === 'maaned' || colLower === 'month' || colLower.includes('måned'))) {
                         option.selected = true;
                     }
-                    if (select === mapYear && (colLower.includes('år') || colLower.includes('aar') || colLower.includes('year'))) {
+                    if (select === mapYear && (colLower === 'år' || colLower === 'aar' || colLower === 'year' || colLower.includes('år'))) {
                         option.selected = true;
                     }
-                    if (select === mapValue && (colLower.includes('antall') || colLower.includes('totalt') || colLower.includes('value') || colLower.includes('count'))) {
+                    if (select === mapValue && (colLower.includes('antall') || colLower.includes('totalt') || colLower.includes('lagt ut') || colLower.includes('value'))) {
                         option.selected = true;
                     }
 
                     select.appendChild(option);
                 });
             });
+
+            // Show first few rows for debugging
+            if (uploadedData.length > 0) {
+                log(`Første rad: ${JSON.stringify(uploadedData[0])}`, 'info');
+            }
         }
 
         // Apply mapping and process data
