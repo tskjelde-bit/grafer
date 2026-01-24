@@ -145,6 +145,24 @@
             cursor: pointer;
         }
 
+        .control input[type="range"] {
+            width: 60px;
+            cursor: pointer;
+        }
+
+        .control-value {
+            min-width: 24px;
+            text-align: center;
+        }
+
+        body.dark .control-value {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .control-value {
+            color: #9ca3af;
+        }
+
         /* Buttons */
         .btn {
             padding: 0.5rem 1rem;
@@ -178,6 +196,15 @@
 
         .btn-success:hover {
             background: #059669;
+        }
+
+        .btn-highlight {
+            background: #2ECC9A;
+            color: #000;
+        }
+
+        .btn-highlight:hover {
+            background: #25b085;
         }
 
         .btn-outline {
@@ -740,6 +767,24 @@
         </div>
         <div class="toolbar-row">
             <div class="control">
+                <label>Opacity:</label>
+                <input type="range" id="opacityInput" min="0.3" max="1" step="0.1" value="0.85">
+                <span class="control-value" id="opacityValue">0.85</span>
+            </div>
+            <div class="control">
+                <label>Linjebredde:</label>
+                <input type="range" id="lineWidthInput" min="1" max="5" step="0.5" value="2.4">
+                <span class="control-value" id="lineWidthValue">2.4</span>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
+                <label>Highlight:</label>
+                <select id="highlightAreaSelect"></select>
+                <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
+                <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
                 <label>Aspect:</label>
                 <select id="aspectSelect">
                     <option value="1.33" selected>4:3</option>
@@ -1035,6 +1080,67 @@
             }
         }
 
+        // Opacity slider
+        let currentOpacity = 0.85;
+        const opacityInput = document.getElementById('opacityInput');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacityInput.addEventListener('input', () => {
+            currentOpacity = parseFloat(opacityInput.value);
+            opacityValue.textContent = currentOpacity;
+            updateChartOpacity();
+        });
+
+        // Line width slider
+        let currentLineWidth = 2.4;
+        const lineWidthInput = document.getElementById('lineWidthInput');
+        const lineWidthValue = document.getElementById('lineWidthValue');
+
+        lineWidthInput.addEventListener('input', () => {
+            currentLineWidth = parseFloat(lineWidthInput.value);
+            lineWidthValue.textContent = currentLineWidth;
+            updateChartLineWidth();
+        });
+
+        // Highlight area
+        let customAreaColors = {};
+        let originalAreaColors = {};
+        const highlightAreaSelect = document.getElementById('highlightAreaSelect');
+        const quickHighlightBtn = document.getElementById('quickHighlightBtn');
+        const resetHighlightBtn = document.getElementById('resetHighlightBtn');
+        const HIGHLIGHT_COLOR = '#2ECC9A';
+
+        quickHighlightBtn.addEventListener('click', () => {
+            const area = highlightAreaSelect.value;
+            if (area && chartEl) {
+                customAreaColors[area] = HIGHLIGHT_COLOR;
+                const traceIdx = areaNames.indexOf(area);
+                if (traceIdx >= 0) {
+                    Plotly.restyle(chartEl, {
+                        'line.color': HIGHLIGHT_COLOR,
+                        'line.width': 4,
+                        'opacity': 1
+                    }, [traceIdx]);
+                    updateLegend();
+                }
+            }
+        });
+
+        resetHighlightBtn.addEventListener('click', () => {
+            customAreaColors = {};
+            if (chartEl) {
+                areaNames.forEach((area, idx) => {
+                    const isHero = area === heroArea;
+                    Plotly.restyle(chartEl, {
+                        'line.color': originalAreaColors[area],
+                        'line.width': isHero ? 3.5 : currentLineWidth,
+                        'opacity': isHero ? 1.0 : currentOpacity
+                    }, [idx]);
+                });
+                updateLegend();
+            }
+        });
+
         // Chart data
         let chartEl;
         let areaNames = [];
@@ -1042,6 +1148,7 @@
         let visibleAreas = new Set();
         let chartData = [];
         let chartLayout = {};
+        let heroArea = '';
 
         function updateChartTheme() {
             if (!chartEl) return;
@@ -1070,15 +1177,36 @@
             updateLegend();
         }
 
+        function updateChartOpacity() {
+            if (!chartEl) return;
+            areaNames.forEach((area, idx) => {
+                if (!customAreaColors[area]) {
+                    const isHero = area === heroArea;
+                    Plotly.restyle(chartEl, { 'opacity': isHero ? 1.0 : currentOpacity }, [idx]);
+                }
+            });
+        }
+
+        function updateChartLineWidth() {
+            if (!chartEl) return;
+            areaNames.forEach((area, idx) => {
+                if (!customAreaColors[area]) {
+                    const isHero = area === heroArea;
+                    Plotly.restyle(chartEl, { 'line.width': isHero ? 3.5 : currentLineWidth }, [idx]);
+                }
+            });
+        }
+
         function updateLegend() {
             const legendEl = document.getElementById('legendContainer');
             legendEl.innerHTML = '';
 
             areaNames.forEach(area => {
+                const color = customAreaColors[area] || areaColors[area];
                 const item = document.createElement('div');
                 item.className = 'legend-item' + (visibleAreas.has(area) ? '' : ' disabled');
                 item.dataset.area = area;
-                item.innerHTML = `<div class="legend-dot" style="background:${areaColors[area]}"></div><span>${area}</span>`;
+                item.innerHTML = `<div class="legend-dot" style="background:${color}"></div><span>${area}</span>`;
                 item.addEventListener('click', () => toggleArea(area, item));
                 legendEl.appendChild(item);
             });
@@ -1107,12 +1235,24 @@
                 fetch('config.json').then(r => r.json())
             ]).then(([csvText, layoutJson, configJson]) => {
                 areaColors = configJson.colors;
-                const HERO = configJson.hero;
+                heroArea = configJson.hero;
+
+                // Store original colors for reset
+                originalAreaColors = { ...areaColors };
 
                 // Parse CSV
                 const lines = csvText.trim().split('\n');
                 const headers = lines[0].split(',');
                 areaNames = headers.slice(1);
+
+                // Populate highlight area select
+                highlightAreaSelect.innerHTML = '';
+                areaNames.forEach(area => {
+                    const opt = document.createElement('option');
+                    opt.value = area;
+                    opt.textContent = area;
+                    highlightAreaSelect.appendChild(opt);
+                });
 
                 const dates = [];
                 const areaValues = {};
@@ -1131,7 +1271,7 @@
 
                 // Build traces
                 const traces = areaNames.map(name => {
-                    const isHero = name === HERO;
+                    const isHero = name === heroArea;
                     return {
                         x: dates,
                         y: areaValues[name],
@@ -1142,9 +1282,9 @@
                             color: areaColors[name] || '#999',
                             shape: 'spline',
                             smoothing: 1.2,
-                            width: isHero ? 3.5 : 2.4
+                            width: isHero ? 3.5 : currentLineWidth
                         },
-                        opacity: isHero ? 1.0 : 0.85,
+                        opacity: isHero ? 1.0 : currentOpacity,
                         hoverinfo: 'none'
                     };
                 });
@@ -1285,7 +1425,10 @@
             return {
                 theme: isDark ? 'dark' : 'light',
                 aspect: aspectSelect.value,
-                transparent: isTransparent
+                transparent: isTransparent,
+                opacity: currentOpacity,
+                lineWidth: currentLineWidth,
+                highlightedAreas: Object.keys(customAreaColors)
             };
         }
 
