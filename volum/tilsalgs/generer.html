@@ -215,7 +215,7 @@
 
         #chart {
             width: 100%;
-            aspect-ratio: 4 / 3;
+            aspect-ratio: 1.33;
         }
 
         .size-selector {
@@ -311,7 +311,17 @@
             <span id="themeText">Light mode</span>
         </button>
         <div class="size-selector">
-            <label for="sizeSelect">Størrelse:</label>
+            <label for="aspectSelect">Aspect:</label>
+            <select id="aspectSelect">
+                <option value="1.78">16:9 Standard web</option>
+                <option value="2.0">2:1 Analyse</option>
+                <option value="1.33" selected>4:3 Dashboard</option>
+                <option value="1.25">5:4 Mobil</option>
+                <option value="0.75">3:4 Vertikal</option>
+            </select>
+        </div>
+        <div class="size-selector">
+            <label for="sizeSelect">Oppløsning:</label>
             <select id="sizeSelect">
                 <option value="1">1x (standard)</option>
                 <option value="2" selected>2x (høy oppløsning)</option>
@@ -347,6 +357,16 @@
             themeIcon.innerHTML = isDark ? '&#9728;' : '&#9790;';
             themeText.textContent = isDark ? 'Light mode' : 'Dark mode';
             updateChartTheme();
+        });
+
+        // Aspect ratio handling
+        const aspectSelect = document.getElementById('aspectSelect');
+        aspectSelect.addEventListener('change', () => {
+            const ratio = parseFloat(aspectSelect.value);
+            document.getElementById('chart').style.aspectRatio = ratio;
+            if (chartEl) {
+                Plotly.Plots.resize(chartEl);
+            }
         });
 
         // Chart data and rendering
