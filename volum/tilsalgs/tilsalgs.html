@@ -679,6 +679,26 @@
     }
 
     initChart();
+
+    // Send height to parent for embed auto-resize
+    function sendHeight() {
+      if (window.self !== window.top) {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ type: 'grafer-resize', height: height }, '*');
+      }
+    }
+
+    // Send height after load and on resize
+    window.addEventListener('load', () => {
+      setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 500);
+      setTimeout(sendHeight, 1000);
+    });
+
+    const resizeObserver = new ResizeObserver(() => {
+      sendHeight();
+    });
+    resizeObserver.observe(document.body);
   </script>
 </body>
 
