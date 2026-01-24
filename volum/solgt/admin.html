@@ -758,19 +758,33 @@
             showStatus(saveStatus, 'Fil lastet ned. Erstatt eksisterende data_solgt.csv med denne filen.', 'success');
         });
 
-        // Save button - download CSV file (GitHub Pages doesn't support server-side saves)
-        saveBtn.addEventListener('click', () => {
+        // Save directly
+        saveBtn.addEventListener('click', async () => {
             const csv = generateCSV();
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'data_solgt.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showStatus(saveStatus, 'data_solgt.csv lastet ned! Last opp filen til volum-mappen i GitHub-repoet for å oppdatere.', 'success');
+
+            try {
+                showStatus(saveStatus, 'Lagrer...', 'info');
+
+                const response = await fetch('/save-csv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ csv: csv, folder: 'volum', filename: 'data_solgt.csv' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(saveStatus, 'data_solgt.csv er oppdatert!', 'success');
+                    await loadCurrentData();
+                    showChartPreview();
+                } else {
+                    showStatus(saveStatus, `Feil: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(saveStatus, `Kunne ikke lagre: ${error.message}. Bruk "Last ned" knappen i stedet.`, 'error');
+            }
         });
 
         // Chart preview
