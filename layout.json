@@ -831,10 +831,10 @@
     "size": 14
   },
   "margin": {
-    "l": 80,
-    "r": 24,
-    "t": 60,
-    "b": 120
+    "l": 35,
+    "r": 20,
+    "t": 30,
+    "b": 100
   },
   "legend": {
     "font": {
@@ -860,11 +860,11 @@
     "showgrid": true,
     "gridcolor": "rgba(255,255,255,0.04)",
     "zeroline": false,
-    "tickformat": "%d.%m.%Y",
+    "tickformat": "%Y",
     "ticks": "",
     "tickcolor": "rgba(255,255,255,0.25)",
     "linecolor": "rgba(255,255,255,0.20)",
-    "mirror": true
+    "mirror": false
   },
   "yaxis": {
     "tickfont": {
@@ -877,7 +877,7 @@
     "ticksuffix": "  ",
     "tickcolor": "rgba(255,255,255,0.25)",
     "linecolor": "rgba(255,255,255,0.20)",
-    "mirror": true
+    "mirror": false
   },
   "paper_bgcolor": "#0f1114",
   "plot_bgcolor": "#0f1114",

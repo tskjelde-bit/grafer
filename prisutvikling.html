@@ -25,8 +25,8 @@
 
     .wrap {
       max-width: 1200px;
-      margin: 0 auto;
-      padding: 18px 16px 34px 16px;
+      margin: 20px auto;
+      padding: 6px;
     }
 
     #chart {
@@ -56,9 +56,18 @@
       position: absolute;
       top: 22px;
       right: -10px;
+      left: auto;
       border-top: 10px solid transparent;
       border-bottom: 10px solid transparent;
       border-left: 10px solid rgba(16, 18, 22, 0.94);
+      border-right: none;
+    }
+
+    .mi-tooltip.flipped::after {
+      right: auto;
+      left: -10px;
+      border-left: none;
+      border-right: 10px solid rgba(16, 18, 22, 0.94);
     }
 
     .mi-tooltip .date {
@@ -78,133 +87,11 @@
       font-weight: 900;
     }
 
-    /* Dual Range Sliders */
+    /* Dual Range Sliders Removed */
     .chart-wrapper {
       position: relative;
       width: 100%;
       aspect-ratio: 4 / 3;
-    }
-
-    .y-slider-container {
-      position: absolute;
-      left: 0px;
-      top: 60px;
-      bottom: 260px;
-      width: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
-
-    /* Slider Base Styles */
-    .y-range-slider,
-    .x-range-slider {
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 2px;
-    }
-
-    /* Track (Background) */
-    .y-range-slider .track,
-    .x-range-slider .track {
-      background: rgba(255, 255, 255, 0.12);
-      /* Dark grey active track */
-      border-radius: 0;
-      position: absolute;
-      /* Ensure positioning works with JS */
-    }
-
-    .y-range-slider .track {
-      width: 100%;
-    }
-
-    .x-range-slider .track {
-      height: 100%;
-    }
-
-    /* Thumbs (Handles) */
-    .y-range-slider input[type="range"]::-webkit-slider-thumb,
-    .x-range-slider input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      box-shadow: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      /* Transparent/Glassy */
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      /* Subtle border */
-      backdrop-filter: blur(2px);
-      pointer-events: all;
-    }
-
-    .y-range-slider input[type="range"]::-moz-range-thumb,
-    .x-range-slider input[type="range"]::-moz-range-thumb {
-      box-shadow: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(2px);
-      pointer-events: all;
-    }
-
-    .x-slider-container {
-      position: absolute;
-      left: 80px;
-      right: 24px;
-      bottom: 175px;
-      /* Positioned cleanly between X-axis labels and legend */
-      height: 30px;
-      display: flex;
-      align-items: center;
-      z-index: 100;
-    }
-
-    /* Container specific styling */
-    .y-range-slider {
-      width: 3px;
-      /* Thinner */
-      height: 100%;
-      position: relative;
-    }
-
-    .y-range-slider input[type="range"] {
-      position: absolute;
-      /* Width set dynamically by JS to match container height */
-      width: 100%;
-      height: 30px;
-      background: transparent;
-      pointer-events: none;
-      -webkit-appearance: none;
-      appearance: none;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%) rotate(-90deg);
-      margin: 0;
-    }
-
-    .x-range-slider {
-      width: 100%;
-      height: 3px;
-      /* Thinner */
-      position: relative;
-    }
-
-    .x-range-slider input[type="range"] {
-      position: absolute;
-      width: 100%;
-      height: 30px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      pointer-events: none;
-      -webkit-appearance: none;
-      appearance: none;
-      margin: 0;
     }
 
     @media (max-width: 640px) {
@@ -222,6 +109,163 @@
       fill: url(#blueGradient) !important;
       fill-opacity: 1 !important;
     }
+
+    /* Header */
+    .chart-header {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+      color: rgba(255, 255, 255, 0.92);
+      letter-spacing: -0.02em;
+    }
+
+    .chart-subheader {
+      font-size: 1.25rem;
+      line-height: 1.2;
+      font-weight: normal;
+      color: var(--muted);
+      margin: 0 0 20px 0;
+    }
+
+    /* Dropdown Controls */
+    .controls-header {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1000;
+    }
+
+    .custom-dropdown {
+      position: relative;
+      width: 220px;
+      font-family: inherit;
+    }
+
+    .dropdown-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .dropdown-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .dropdown-btn .chevron {
+      font-size: 10px;
+      opacity: 0.7;
+      transition: transform 0.2s;
+    }
+
+    .dropdown-btn.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 260px;
+      max-height: 400px;
+      overflow-y: auto;
+      background: #16181d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      padding: 6px;
+      z-index: 1001;
+    }
+
+    .dropdown-content.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 8px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+      font-size: 13px;
+      color: var(--muted);
+      user-select: none;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .dropdown-item input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .dropdown-item input[type="checkbox"]:checked {
+      background: #1E88FF;
+      border-color: #1E88FF;
+    }
+
+    .dropdown-item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Scrollbar */
+    .dropdown-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .dropdown-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .dropdown-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .dropdown-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   </style>
 
 </head>
@@ -236,26 +280,25 @@
     </defs>
   </svg>
   <div class="wrap">
+
+    <h1 class="chart-header">Boligprisindeks – Oslo</h1>
+    <div class="chart-subheader">Utforsk prisutviklingen i Oslos bydeler over tid</div>
+
+    <!-- Legend Dropdown -->
+    <div class="controls-header">
+      <div class="custom-dropdown" id="areaDropdown">
+        <div class="dropdown-btn" id="dropdownBtn">
+          <span>Velg bydeler</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="dropdown-content" id="dropdownList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
     <div class="chart-wrapper">
       <div id="chart"></div>
-
-      <!-- Y-axis dual range slider -->
-      <div class="y-slider-container">
-        <div class="y-range-slider">
-          <div class="track"></div>
-          <input type="range" min="50" max="300" value="110" id="yRangeMin" orient="vertical">
-          <input type="range" min="50" max="300" value="290" id="yRangeMax" orient="vertical">
-        </div>
-      </div>
-
-      <!-- X-axis dual range slider -->
-      <div class="x-slider-container">
-        <div class="x-range-slider">
-          <div class="track"></div>
-          <input type="range" min="0" max="91" value="36" id="xRangeMin">
-          <input type="range" min="0" max="91" value="91" id="xRangeMax">
-        </div>
-      </div>
     </div>
   </div>
   <div id="miTooltip" class="mi-tooltip"></div>
@@ -272,251 +315,295 @@
       console.log('Plotly loaded, initializing chart...');
 
 
-// --- CONFIG ---
-Promise.all([
-    fetch('data.csv').then(r => r.text()),
-    fetch('layout.json').then(r => r.json()),
-    fetch('config.json').then(r => r.json())
-]).then(([csvText, layoutJson, configJson]) => {
+      // --- CONFIG ---
+      Promise.all([
+        fetch('data.csv').then(r => r.text()),
+        fetch('layout.json').then(r => r.json()),
+        fetch('config.json').then(r => r.json())
+      ]).then(([csvText, layoutJson, configJson]) => {
 
-    const AREA_COLORS = configJson.colors;
-    const HERO = configJson.hero;
+        const AREA_COLORS = configJson.colors;
+        const HERO = configJson.hero;
 
-    // Parse CSV
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',');
-    const areaNames = headers.slice(1);
+        // Parse CSV
+        const lines = csvText.trim().split('\n');
+        const headers = lines[0].split(',');
+        const areaNames = headers.slice(1);
 
-    const dates = [];
-    const areaValues = {};
-    areaNames.forEach(a => areaValues[a] = []);
+        const dates = [];
+        const areaValues = {};
+        areaNames.forEach(a => areaValues[a] = []);
 
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        const cols = line.split(',');
-        dates.push(cols[0]);
-        for (let j = 1; j < cols.length; j++) {
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const cols = line.split(',');
+          dates.push(cols[0]);
+          for (let j = 1; j < cols.length; j++) {
             const val = cols[j] === '' ? null : parseFloat(cols[j]);
             areaValues[areaNames[j - 1]].push(val);
+          }
         }
-    }
 
-    // Build Traces
-    const traces = [];
-    areaNames.forEach(name => {
-        const isHero = name === HERO;
-        const trace = {
+        // Build Traces
+        const traces = [];
+        areaNames.forEach(name => {
+          const isHero = name === HERO;
+          const trace = {
             x: dates,
             y: areaValues[name],
             type: 'scatter',
             mode: 'lines',
             name: name,
             line: {
-                color: AREA_COLORS[name] || '#999',
-                shape: 'spline',
-                smoothing: 1.2,
-                width: isHero ? 3.5 : 2.4
+              color: AREA_COLORS[name] || '#999',
+              shape: 'spline',
+              smoothing: 1.2,
+              width: isHero ? 3.5 : 2.4
             },
             opacity: isHero ? 1.0 : 0.85,
             hoverinfo: 'none',
             hovertemplate: '<extra></extra>'
-        };
-        if (isHero) {
+          };
+          if (isHero) {
             trace.fill = 'tozeroy';
             trace.fillcolor = 'rgba(30,136,255,0.14)';
+          }
+          traces.push(trace);
+        });
+
+        // Re-assemble objects
+        const FIG = {
+          data: traces,
+          layout: layoutJson
+        };
+        FIG.layout.showlegend = false;
+        // Move title to HTML so we can place dropdown under it
+        if (FIG.layout.title) FIG.layout.title = undefined;
+
+        const LOOKUP = {
+          dates: dates,
+          areas: areaNames,
+          values: areaValues,
+          colors: AREA_COLORS,
+          hero: HERO
+        };
+
+        const chartEl = document.getElementById('chart');
+        const tipEl = document.getElementById('miTooltip');
+        // check if elements exist
+        if (!chartEl || !tipEl) return;
+
+        const config = {
+          responsive: true,
+          displaylogo: false,
+          displayModeBar: false,
+          modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+        };
+
+        // Add bottom margin to layout
+        FIG.layout.margin.b = 160;
+
+        function formatDateISOToNO(iso) {
+          const [y, m, d] = iso.split('-');
+          return `${d}.${m}.${y}`;
         }
-        traces.push(trace);
-    });
+        function formatNumberNO(x) {
+          if (x === null || x === undefined || Number.isNaN(x)) return '';
+          return x.toFixed(2).replace('.', ',');
+        }
 
-    // Re-assemble objects
-    const FIG = {
-        data: traces,
-        layout: layoutJson
-    };
+        const dateIndex = Object.create(null);
+        LOOKUP.dates.forEach((d, i) => dateIndex[d] = i);
 
-    const LOOKUP = {
-        dates: dates,
-        areas: areaNames,
-        values: areaValues,
-        colors: AREA_COLORS,
-        hero: HERO
-    };
-
-    const chartEl = document.getElementById('chart');
-    const tipEl = document.getElementById('miTooltip');
-    // check if elements exist
-    if (!chartEl || !tipEl) return;
-
-    const config = {
-        responsive: true,
-        displaylogo: false,
-        modeBarButtonsToRemove: ['select2d', 'lasso2d'],
-    };
-
-    // Add bottom margin to layout
-    FIG.layout.margin.b = 160;
-
-    function formatDateISOToNO(iso) {
-        const [y, m, d] = iso.split('-');
-        return `${d}.${m}.${y}`;
-    }
-    function formatNumberNO(x) {
-        if (x === null || x === undefined || Number.isNaN(x)) return '';
-        return x.toFixed(2).replace('.', ',');
-    }
-
-    const dateIndex = Object.create(null);
-    LOOKUP.dates.forEach((d, i) => dateIndex[d] = i);
-
-    function buildTooltipHTML(dateISO, orderAreas) {
-        const idx = dateIndex[dateISO];
-        let rows = '';
-        for (const area of orderAreas) {
+        function buildTooltipHTML(dateISO, orderAreas) {
+          const idx = dateIndex[dateISO];
+          let rows = '';
+          for (const area of orderAreas) {
             const v = idx !== undefined ? LOOKUP.values[area][idx] : null;
             rows += `
           <div class="dot" style="background:${LOOKUP.colors[area]}"></div>
           <div class="label ${area === LOOKUP.hero ? 'hero' : ''}">${area}</div>
           <div class="val">${formatNumberNO(v)}</div>
         `;
+          }
+          return `<div class="date">${formatDateISOToNO(dateISO)}</div><div class="rows">${rows}</div>`;
         }
-        return `<div class="date">${formatDateISOToNO(dateISO)}</div><div class="rows">${rows}</div>`;
-    }
 
-    function positionTooltip(evt) {
-        const r = tipEl.getBoundingClientRect();
-        let x = evt.clientX - r.width - 18;
-        let y = evt.clientY - 26;
-        const pad = 10;
-        if (x < pad) x = pad;
-        if (y < pad) y = pad;
-        if (y + r.height > window.innerHeight - pad) y = window.innerHeight - r.height - pad;
-        tipEl.style.left = x + 'px';
-        tipEl.style.top = y + 'px';
-    }
+        function positionTooltip(evt) {
+          const r = tipEl.getBoundingClientRect();
+          const pad = 10;
+          let x, y;
 
-    if (!FIG || !FIG.data) return;
+          // Check if cursor is on the left half of the screen
+          if (evt.clientX < window.innerWidth / 2) {
+            // Place tooltip to the RIGHT of cursor
+            x = evt.clientX + 18;
+            tipEl.classList.add('flipped');
+          } else {
+            // Place tooltip to the LEFT of cursor
+            x = evt.clientX - r.width - 18;
+            tipEl.classList.remove('flipped');
+          }
 
-    // 1. Calculate the 'Max Envelope' of all visible traces
-    const xLen = FIG.data[0].x.length;
-    const maxY = new Array(xLen).fill(0);
+          y = evt.clientY - 26;
 
-    FIG.data.forEach(t => {
-        // Remove existing fills from all real traces
-        delete t.fill;
-        delete t.fillcolor;
+          // Boundary checks
+          if (x < pad) x = pad;
+          if (x + r.width > window.innerWidth - pad) x = window.innerWidth - r.width - pad;
 
-        // Calculate max y
-        if (t.y && t.y.length === xLen) {
+          if (y < pad) y = pad;
+          if (y + r.height > window.innerHeight - pad) y = window.innerHeight - r.height - pad;
+
+          tipEl.style.left = x + 'px';
+          tipEl.style.top = y + 'px';
+        }
+
+        if (!FIG || !FIG.data) return;
+
+        // 1. Calculate the 'Max Envelope' of all visible traces
+        const xLen = FIG.data[0].x.length;
+        const maxY = new Array(xLen).fill(0);
+
+        FIG.data.forEach(t => {
+          // Remove existing fills from all real traces
+          delete t.fill;
+          delete t.fillcolor;
+
+          // Calculate max y
+          if (t.y && t.y.length === xLen) {
             t.y.forEach((val, i) => {
-                const v = val || 0;
-                if (v > maxY[i]) maxY[i] = v;
+              const v = val || 0;
+              if (v > maxY[i]) maxY[i] = v;
             });
-        }
-    });
+          }
+        });
 
-    // 2. Create the envelope trace
-    const envelopeTrace = {
-        x: FIG.data[0].x,
-        y: maxY,
-        mode: 'lines',
-        line: { width: 0, shape: 'spline', smoothing: 1.2 },
-        fill: 'tozeroy', // This triggers the CSS gradient
-        fillcolor: 'rgba(0,0,0,0)', // CSS overrides this
-        hoverinfo: 'skip',
-        showlegend: false,
-        type: 'scatter',
-        name: 'GradientBackground'
-    };
+        // 2. Create the envelope trace
+        const envelopeTrace = {
+          x: FIG.data[0].x,
+          y: maxY,
+          mode: 'lines',
+          line: { width: 0, shape: 'spline', smoothing: 1.2 },
+          fill: 'tozeroy', // This triggers the CSS gradient
+          fillcolor: 'rgba(0,0,0,0)', // CSS overrides this
+          hoverinfo: 'skip',
+          showlegend: false,
+          type: 'scatter',
+          name: 'GradientBackground'
+        };
 
-    // 3. Add to the START of the array so it's DOM-first (for CSS :first-of-type)
-    FIG.data.unshift(envelopeTrace);
+        // 3. Add to the START of the array so it's DOM-first (for CSS :first-of-type)
+        FIG.data.unshift(envelopeTrace);
 
-    // 4. Add auxiliary traces (SpikeLine and HoverDots) to the END
-    const spikeTrace = {
-        x: [],
-        y: [],
-        mode: 'lines',
-        line: { color: 'rgba(255, 255, 255, 0.7)', width: 1, dash: 'dash' },
-        hoverinfo: 'skip',
-        showlegend: false,
-        name: 'SpikeLine',
-        type: 'scatter'
-    };
+        // 4. Add auxiliary traces (HoverDots) to the END
+        // Note: SpikeLine removed in favor of layout shapes to prevent axis jitter
 
-    const dotTrace = {
-        x: [],
-        y: [],
-        mode: 'markers',
-        marker: { size: 6, line: { color: 'white', width: 1 } },
-        hoverinfo: 'skip',
-        showlegend: false,
-        name: 'HoverDots',
-        type: 'scatter'
-    };
+        const dotTrace = {
+          x: [],
+          y: [],
+          mode: 'markers',
+          marker: { size: 6, line: { color: 'white', width: 1 } },
+          hoverinfo: 'skip',
+          showlegend: false,
+          name: 'HoverDots',
+          type: 'scatter'
+        };
 
-    FIG.data.push(spikeTrace);
-    FIG.data.push(dotTrace);
+        FIG.data.push(dotTrace);
 
-    Plotly.newPlot(chartEl, FIG.data, FIG.layout, config).then(gd => {
-        // Hide default hover effects (points and labels) to prevent "double dots"
-        try {
+        // Ensure shapes array exists and add our SpikeLine shape
+        if (!FIG.layout.shapes) FIG.layout.shapes = [];
+        FIG.layout.shapes.push({
+          type: 'line',
+          xref: 'x',
+          yref: 'paper',
+          x0: 0,
+          y0: 0,
+          x1: 0,
+          y1: 1,
+          line: {
+            color: 'rgba(255, 255, 255, 0.7)',
+            width: 1,
+            dash: 'dash'
+          },
+          visible: false
+        });
+        // We need to know the index of our shape. Since we pushed it last:
+        const spikeShapeIdx = FIG.layout.shapes.length - 1;
+
+        Plotly.newPlot(chartEl, FIG.data, FIG.layout, config).then(gd => {
+          // Hide default hover effects (points and labels) to prevent "double dots"
+          try {
             const hoverlayer = gd.querySelector('.hoverlayer');
             if (hoverlayer) {
-                hoverlayer.style.display = 'none';
+              hoverlayer.style.display = 'none';
             }
-        } catch (e) { }
+          } catch (e) { }
 
-        // Dynamic Envelope Update Logic
-        const updateEnvelope = () => {
+          // Lock axis ranges to prevent "breathing" / shifting when hovering near edges or adding dots
+          try {
+            const xr = gd._fullLayout.xaxis.range;
+            const yr = gd._fullLayout.yaxis.range;
+            Plotly.relayout(gd, {
+              'xaxis.range': [xr[0], xr[1]],
+              'yaxis.range': [yr[0], yr[1]],
+              'xaxis.autorange': false,
+              'yaxis.autorange': false
+            });
+          } catch (e) { console.error('Error locking axes:', e); }
+
+          // Dynamic Envelope Update Logic
+          const updateEnvelope = () => {
             // Filter valid traces to consider for the envelope
             const visibleTraces = gd.data.filter(t =>
-                t.name !== 'GradientBackground' &&
-                t.name !== 'SpikeLine' &&
-                t.name !== 'HoverDots' &&
-                t.visible !== 'legendonly'
+              t.name !== 'GradientBackground' &&
+              t.name !== 'SpikeLine' &&
+              t.name !== 'HoverDots' &&
+              t.visible !== 'legendonly' &&
+              t.visible !== false
             );
 
             if (!visibleTraces.length || !gd.data[0].x) {
-                // No visible traces, zero out envelope
-                Plotly.restyle(gd, { y: [[]] }, [0]);
-                return;
+              // No visible traces, zero out envelope
+              Plotly.restyle(gd, { y: [[]] }, [0]);
+              return;
             }
 
             const xLen = gd.data[0].x.length;
             const maxY = new Array(xLen).fill(0);
 
             visibleTraces.forEach(t => {
-                if (t.y && t.y.length === xLen) {
-                    t.y.forEach((val, i) => {
-                        if (val !== null && val !== undefined && val > maxY[i]) {
-                            maxY[i] = val;
-                        }
-                    });
-                }
+              if (t.y && t.y.length === xLen) {
+                t.y.forEach((val, i) => {
+                  if (val !== null && val !== undefined && val > maxY[i]) {
+                    maxY[i] = val;
+                  }
+                });
+              }
             });
 
             // Update the envelope trace (index 0)
             Plotly.restyle(gd, { y: [maxY] }, [0]);
-        };
+          };
 
-        gd.on('plotly_restyle', (data) => {
+          gd.on('plotly_restyle', (data) => {
             // data is [update, indices]
             const indices = data[1];
             if (indices && indices.includes(0)) return;
             updateEnvelope();
-        });
+          });
 
-        gd.on('plotly_hover', e => {
+          gd.on('plotly_hover', e => {
             const pt = e.points && e.points[0];
             if (!pt) return;
             const dateISO = (pt.x instanceof Date) ? pt.x.toISOString().slice(0, 10) : String(pt.x).slice(0, 10);
 
             const visibleAreas = [];
             gd.data.forEach(t => {
-                if ((t.visible === undefined || t.visible === true) && t.name !== 'GradientBackground' && t.name !== 'HoverDots' && t.name !== 'SpikeLine') {
-                    visibleAreas.push(t.name);
-                }
+              if ((t.visible === undefined || t.visible === true) && t.name !== 'GradientBackground' && t.name !== 'HoverDots' && t.name !== 'SpikeLine') {
+                visibleAreas.push(t.name);
+              }
             });
 
             const hovered = pt.data.name;
@@ -533,133 +620,179 @@ Promise.all([
             const idx = pt.pointIndex;
             const xVal = pt.x;
 
-            // Update SpikeLine (2nd to last trace)
-            const spikeTraceIdx = gd.data.length - 2;
-            // Use a large Y range to cover the viewport dynamically
-            Plotly.restyle(gd, {
-                x: [[xVal, xVal]],
-                y: [[-1000, 5000]]
-            }, [spikeTraceIdx]);
+            // Update SpikeLine (Shape)
+            // Using relayout on a shape with yref='paper' prevents any axis auto-scaling issues
+            const update = {};
+            update[`shapes[${spikeShapeIdx}].x0`] = xVal;
+            update[`shapes[${spikeShapeIdx}].x1`] = xVal;
+            update[`shapes[${spikeShapeIdx}].visible`] = true;
+            Plotly.relayout(gd, update);
 
             // Update HoverDots on top
             const yVals = [];
             const colors = [];
             gd.data.forEach(t => {
-                if ((t.visible === undefined || t.visible === true) && t.name !== 'GradientBackground' && t.name !== 'HoverDots' && t.name !== 'SpikeLine' && t.y[idx] !== undefined) {
-                    yVals.push(t.y[idx]);
-                    colors.push(t.line.color);
-                }
+              if ((t.visible === undefined || t.visible === true) && t.name !== 'GradientBackground' && t.name !== 'HoverDots' && t.name !== 'SpikeLine' && t.y[idx] !== undefined) {
+                yVals.push(t.y[idx]);
+                colors.push(t.line.color);
+              }
             });
             const xVals = new Array(yVals.length).fill(xVal);
             const dotTraceIdx = gd.data.length - 1;
             Plotly.restyle(gd, {
-                x: [xVals],
-                y: [yVals],
-                'marker.color': [colors]
+              x: [xVals],
+              y: [yVals],
+              'marker.color': [colors]
             }, [dotTraceIdx]);
-        });
+          });
 
-        gd.on('plotly_unhover', () => {
+          gd.on('plotly_unhover', () => {
             tipEl.style.display = 'none';
-            const spikeTraceIdx = gd.data.length - 2;
+            // Hide spike line shape
+            const update = {};
+            update[`shapes[${spikeShapeIdx}].visible`] = false;
+            Plotly.relayout(gd, update);
+
+            // Clear dots
             const dotTraceIdx = gd.data.length - 1;
-            Plotly.restyle(gd, { x: [[], []], y: [[], []] }, [spikeTraceIdx, dotTraceIdx]);
-        });
-        gd.addEventListener('mousemove', evt => { if (tipEl.style.display === 'block') positionTooltip(evt); });
+            Plotly.restyle(gd, { x: [[]], y: [[]] }, [dotTraceIdx]);
+          });
+          gd.addEventListener('mousemove', evt => { if (tipEl.style.display === 'block') positionTooltip(evt); });
 
-        // Dual Range Slider Logic
-        const yRangeMin = document.getElementById('yRangeMin');
-        const yRangeMax = document.getElementById('yRangeMax');
-        const xRangeMin = document.getElementById('xRangeMin');
-        const xRangeMax = document.getElementById('xRangeMax');
-        const yTrack = document.querySelector('.y-range-slider .track');
-        const xTrack = document.querySelector('.x-range-slider .track');
-
-        const ySliderContainer = document.querySelector('.y-slider-container');
-        const updateYSliderWidth = () => {
-            if (ySliderContainer) {
-                const height = ySliderContainer.getBoundingClientRect().height;
-                if (yRangeMin) yRangeMin.style.width = height + 'px';
-                if (yRangeMax) yRangeMax.style.width = height + 'px';
-            }
-        };
-
-        const ro = new ResizeObserver(() => {
+          const ro = new ResizeObserver(() => {
             Plotly.Plots.resize(gd);
-            updateYSliderWidth();
-        });
-        ro.observe(chartEl.parentElement);
-        updateYSliderWidth();
+          });
+          ro.observe(chartEl.parentElement);
 
-        function updateYTrack() {
-            let min = parseFloat(yRangeMin.value);
-            let max = parseFloat(yRangeMax.value);
+          // --- Dropdown Logic ---
+          const dropdownBtn = document.getElementById('dropdownBtn');
+          const dropdownList = document.getElementById('dropdownList');
+          const dropdownWrapper = document.getElementById('areaDropdown');
 
-            if (min > max - 5) {
-                yRangeMin.value = max - 5;
-                min = max - 5;
+          // Toggle dropdown
+          dropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownList.classList.toggle('show');
+            dropdownBtn.classList.toggle('open');
+          });
+
+          // Close when clicking outside
+          document.addEventListener('click', (e) => {
+            if (!dropdownWrapper.contains(e.target)) {
+              dropdownList.classList.remove('show');
+              dropdownBtn.classList.remove('open');
             }
-            if (max < min + 5) {
-                yRangeMax.value = min + 5;
-                max = min + 5;
-            }
+          });
 
-            const percentMin = ((min - 50) / (300 - 50)) * 100;
-            const percentMax = ((max - 50) / (300 - 50)) * 100;
+          // Populate Dropdown
+          // Add "Velg alle" option
+          const allItem = document.createElement('div');
+          allItem.className = 'dropdown-item';
+          allItem.innerHTML = `
+            <input type="checkbox" checked id="cb-all">
+            <span style="font-weight:600">Velg alle</span>
+        `;
+          dropdownList.appendChild(allItem);
+          const cbAll = allItem.querySelector('input');
 
-            yTrack.style.bottom = percentMin + '%';
-            yTrack.style.height = (percentMax - percentMin) + '%';
+          // Area items
+          areaNames.forEach(area => {
+            const color = AREA_COLORS[area] || '#999';
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            // Prevent label click from double-triggering checkbox if we nested, 
+            // but here we just catch item click
+            item.innerHTML = `
+                <input type="checkbox" checked value="${area}" class="area-cb">
+                <div class="color-dot" style="background:${color}"></div>
+                <span>${area}</span>
+            `;
+            dropdownList.appendChild(item);
+          });
 
-            Plotly.relayout(gd, {
-                'yaxis.range': [min, max]
+          // Handle Checkbox Changes
+          const checkboxes = dropdownList.querySelectorAll('.area-cb');
+
+          function updatePlot() {
+            const checkedAreas = [];
+            checkboxes.forEach(cb => {
+              if (cb.checked) checkedAreas.push(cb.value);
             });
-        }
 
-        function updateXTrack() {
-            let min = parseInt(xRangeMin.value);
-            let max = parseInt(xRangeMax.value);
+            // Update Plotly visibility
+            // We need to map traces to visibility. 
+            // Note: trace names match areaNames.
+            // Also need to handle auxiliary traces (keep them hidden/skip).
 
-            if (min > max - 1) {
-                xRangeMin.value = max - 1;
-                min = max - 1;
+            const updateVisibility = [];
+            const updateIndices = [];
+
+            gd.data.forEach((t, i) => {
+              const name = t.name;
+              // Skip aux traces
+              if (name === 'GradientBackground' || name === 'SpikeLine' || name === 'HoverDots') return;
+
+              const shouldBeVisible = checkedAreas.includes(name);
+              // "visible" property: true, false, or "legendonly".
+              // We use true/false here effectively.
+              const currentState = (t.visible === undefined || t.visible === true);
+
+              if (currentState !== shouldBeVisible) {
+                updateVisibility.push(shouldBeVisible ? true : false);
+                updateIndices.push(i);
+              }
+            });
+
+            if (updateIndices.length > 0) {
+              Plotly.restyle(gd, { visible: updateVisibility }, updateIndices);
             }
-            if (max < min + 1) {
-                xRangeMax.value = min + 1;
-                max = min + 1;
+
+            // Update "All" checkbox state
+            const allChecked = checkedAreas.length === checkboxes.length;
+            cbAll.checked = allChecked;
+            cbAll.indeterminate = checkedAreas.length > 0 && !allChecked;
+
+            // Update button text
+            if (allChecked) {
+              dropdownBtn.querySelector('span').textContent = 'Alle bydeler';
+            } else if (checkedAreas.length === 0) {
+              dropdownBtn.querySelector('span').textContent = 'Ingen valgt';
+            } else {
+              dropdownBtn.querySelector('span').textContent = `${checkedAreas.length} valgt`;
             }
+          }
 
-            const percentMin = (min / 91) * 100;
-            const percentMax = (max / 91) * 100;
+          // Event Listeners for Items
+          dropdownList.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+              // If clicked on input, let it toggle naturaly, just update plot
+              // If clicked on div, toggle input then update plot
+              const cb = item.querySelector('input');
+              if (e.target !== cb) {
+                cb.checked = !cb.checked;
+              }
 
-            xTrack.style.left = percentMin + '%';
-            xTrack.style.width = (percentMax - percentMin) + '%';
+              if (cb === cbAll) {
+                // Toggle all
+                const state = cb.checked;
+                checkboxes.forEach(c => c.checked = state);
+              } else {
+                // Check if all are now checked
+                const all = Array.from(checkboxes).every(c => c.checked);
+                cbAll.checked = all;
+                cbAll.indeterminate = !all && Array.from(checkboxes).some(c => c.checked);
+              }
 
-            // Update slider attributes manually just in case
-            if (xRangeMin.getAttribute('max') != String(dates.length - 1)) {
-                xRangeMin.setAttribute('max', dates.length - 1);
-                xRangeMax.setAttribute('max', dates.length - 1);
-            }
+              updatePlot();
+            });
+          });
 
-            const startDate = LOOKUP.dates[min];
-            const endDate = LOOKUP.dates[max];
+          // Initialize button text
+          dropdownBtn.querySelector('span').textContent = 'Alle bydeler';
 
-            if (startDate && endDate) {
-                Plotly.relayout(gd, {
-                    'xaxis.range': [startDate, endDate]
-                });
-            }
-        }
-
-        yRangeMin.addEventListener('input', updateYTrack);
-        yRangeMax.addEventListener('input', updateYTrack);
-        xRangeMin.addEventListener('input', updateXTrack);
-        xRangeMax.addEventListener('input', updateXTrack);
-
-        updateYTrack();
-        updateXTrack();
-    });
-})
-    .catch(err => console.error("Error loading resources:", err));
+        });
+      })
+        .catch(err => console.error("Error loading resources:", err));
     }
 
     // Start initialization
