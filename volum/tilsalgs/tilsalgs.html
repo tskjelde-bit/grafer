@@ -155,7 +155,7 @@
       font-size: 1.6rem;
       font-weight: 600;
       margin: 0 0 10px 0;
-      color: rgba(255, 255, 255, 0.92);
+      color: var(--text);
       letter-spacing: -0.02em;
     }
 
@@ -301,8 +301,10 @@
 
       // Apply transparent background if requested
       if (isTransparent) {
+        document.documentElement.style.background = 'transparent';
         document.body.style.background = 'transparent';
         document.querySelector('.wrap').style.background = 'transparent';
+        document.querySelector('.chart-wrapper').style.background = 'transparent';
       }
       const textColor = isLightTheme ? '#1a1a2e' : 'rgba(255,255,255,0.92)';
       const mutedColor = isLightTheme ? '#6b7280' : 'rgba(255,255,255,0.40)';
