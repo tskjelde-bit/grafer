@@ -760,6 +760,97 @@
                 margin-top: 280px;
             }
         }
+
+        /* Dataset selector dropdown */
+        .dataset-dropdown {
+            position: relative;
+        }
+
+        .dataset-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .dataset-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 200px;
+            max-height: 350px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 8px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .dataset-panel.show {
+            display: block;
+        }
+
+        body.dark .dataset-panel {
+            background: #1a1d21;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light .dataset-panel {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .dataset-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        .dataset-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.light .dataset-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dataset-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .dataset-color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dataset-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .dataset-actions {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dataset-actions .btn {
+            flex: 1;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.75rem;
+            height: auto;
+        }
     </style>
 </head>
 <body class="dark">
@@ -774,6 +865,21 @@
             </button>
         </div>
         <div class="toolbar-row">
+            <div class="control dataset-dropdown">
+                <label>Bydeler:</label>
+                <button class="btn btn-outline dataset-btn" id="datasetBtn">
+                    <span id="datasetCount">Alle</span>
+                    <span style="font-size: 10px;">▼</span>
+                </button>
+                <div class="dataset-panel" id="datasetPanel">
+                    <div id="datasetList"></div>
+                    <div class="dataset-actions">
+                        <button class="btn btn-outline" id="datasetSelectAll">Alle</button>
+                        <button class="btn btn-outline" id="datasetSelectNone">Ingen</button>
+                    </div>
+                </div>
+            </div>
+            <span class="toolbar-divider"></span>
             <div class="control">
                 <label>Opacity:</label>
                 <input type="range" id="opacityInput" min="0.3" max="1" step="0.1" value="0.85">
@@ -1157,6 +1263,167 @@
         let chartData = [];
         let chartLayout = {};
         let heroArea = '';
+        let areaValues = {};
+        let dates = [];
+
+        // Dataset selector elements
+        const datasetBtn = document.getElementById('datasetBtn');
+        const datasetPanel = document.getElementById('datasetPanel');
+        const datasetList = document.getElementById('datasetList');
+        const datasetCount = document.getElementById('datasetCount');
+        const datasetSelectAll = document.getElementById('datasetSelectAll');
+        const datasetSelectNone = document.getElementById('datasetSelectNone');
+
+        // Toggle dataset panel
+        datasetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            datasetPanel.classList.toggle('show');
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!datasetPanel.contains(e.target) && e.target !== datasetBtn) {
+                datasetPanel.classList.remove('show');
+            }
+        });
+
+        // Select all/none
+        datasetSelectAll.addEventListener('click', () => {
+            areaNames.forEach(a => visibleAreas.add(a));
+            updateDatasetCheckboxes();
+            rebuildChart();
+        });
+
+        datasetSelectNone.addEventListener('click', () => {
+            visibleAreas.clear();
+            updateDatasetCheckboxes();
+            rebuildChart();
+        });
+
+        function populateDatasetList() {
+            datasetList.innerHTML = '';
+            areaNames.forEach(area => {
+                const item = document.createElement('div');
+                item.className = 'dataset-item';
+                const color = areaColors[area] || '#999';
+                item.innerHTML = `
+                    <input type="checkbox" id="ds-${area.replace(/[:\s]/g, '-')}" ${visibleAreas.has(area) ? 'checked' : ''}>
+                    <div class="dataset-color-dot" style="background:${color}"></div>
+                    <label for="ds-${area.replace(/[:\s]/g, '-')}">${area}</label>
+                `;
+                item.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const cb = item.querySelector('input');
+                        cb.checked = !cb.checked;
+                    }
+                    const cb = item.querySelector('input');
+                    if (cb.checked) {
+                        visibleAreas.add(area);
+                    } else {
+                        visibleAreas.delete(area);
+                    }
+                    rebuildChart();
+                });
+                datasetList.appendChild(item);
+            });
+        }
+
+        function updateDatasetCheckboxes() {
+            areaNames.forEach(area => {
+                const cb = document.getElementById(`ds-${area.replace(/[:\s]/g, '-')}`);
+                if (cb) cb.checked = visibleAreas.has(area);
+            });
+        }
+
+        function updateDatasetCount() {
+            const count = visibleAreas.size;
+            if (count === areaNames.length) {
+                datasetCount.textContent = 'Alle';
+            } else {
+                datasetCount.textContent = `${count} valgt`;
+            }
+        }
+
+        function updateHighlightAreaSelect() {
+            highlightAreaSelect.innerHTML = '';
+            Array.from(visibleAreas).forEach(area => {
+                const opt = document.createElement('option');
+                opt.value = area;
+                opt.textContent = area;
+                highlightAreaSelect.appendChild(opt);
+            });
+        }
+
+        function rebuildChart() {
+            if (!chartEl || areaNames.length === 0) return;
+
+            updateDatasetCount();
+            updateHighlightAreaSelect();
+
+            // Reset custom colors for removed areas
+            Object.keys(customAreaColors).forEach(a => {
+                if (!visibleAreas.has(a)) delete customAreaColors[a];
+            });
+
+            // Build traces for visible areas
+            const traces = areaNames.filter(name => visibleAreas.has(name)).map(name => {
+                const isHero = name === heroArea;
+                const color = customAreaColors[name] || originalAreaColors[name] || '#999';
+                return {
+                    x: dates,
+                    y: areaValues[name],
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: name,
+                    line: {
+                        color: color,
+                        shape: 'spline',
+                        smoothing: 1.2,
+                        width: customAreaColors[name] ? 4 : (isHero ? 3.5 : currentLineWidth)
+                    },
+                    opacity: customAreaColors[name] ? 1 : (isHero ? 1.0 : currentOpacity),
+                    hoverinfo: 'none'
+                };
+            });
+
+            const bgColor = isTransparent ? 'rgba(0,0,0,0)' : (isDark ? '#0f1114' : '#ffffff');
+            const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
+            const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
+            const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+            const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+
+            const layout = {
+                showlegend: false,
+                paper_bgcolor: bgColor,
+                plot_bgcolor: bgColor,
+                font: {
+                    family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+                    color: textColor,
+                    size: 14
+                },
+                margin: { l: 50, r: 20, t: 30, b: 50 },
+                xaxis: {
+                    showgrid: false,
+                    showline: true,
+                    linecolor: lineColor,
+                    tickfont: { color: mutedColor },
+                    zeroline: false
+                },
+                yaxis: {
+                    showgrid: true,
+                    gridcolor: gridColor,
+                    showline: true,
+                    linecolor: lineColor,
+                    tickfont: { color: mutedColor },
+                    zeroline: false,
+                    automargin: true
+                },
+                hovermode: false
+            };
+
+            Plotly.react(chartEl, traces, layout, { responsive: true, displaylogo: false, displayModeBar: false, staticPlot: true });
+            updateLegend();
+        }
 
         function updateChartTheme() {
             if (!chartEl) return;
@@ -1253,17 +1520,9 @@
                 const headers = lines[0].split(',');
                 areaNames = headers.slice(1);
 
-                // Populate highlight area select
-                highlightAreaSelect.innerHTML = '';
-                areaNames.forEach(area => {
-                    const opt = document.createElement('option');
-                    opt.value = area;
-                    opt.textContent = area;
-                    highlightAreaSelect.appendChild(opt);
-                });
-
-                const dates = [];
-                const areaValues = {};
+                // Initialize data arrays
+                dates = [];
+                areaValues = {};
                 areaNames.forEach(a => areaValues[a] = []);
 
                 for (let i = 1; i < lines.length; i++) {
@@ -1276,6 +1535,14 @@
                         areaValues[areaNames[j - 1]].push(val);
                     }
                 }
+
+                // Initialize all areas as visible
+                areaNames.forEach(a => visibleAreas.add(a));
+
+                // Populate dataset selector
+                populateDatasetList();
+                updateDatasetCount();
+                updateHighlightAreaSelect();
 
                 // Build traces
                 const traces = areaNames.map(name => {
