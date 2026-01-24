@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boliger solgt - Kontrollpanel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e4e4e7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #60a5fa;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel h2 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: #a5b4fc;
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(96, 165, 250, 0.5);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .upload-zone p {
+            color: #a1a1aa;
+            margin-top: 0.5rem;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            margin-right: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+        }
+
+        .status.info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+        }
+
+        .data-preview {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(96, 165, 250, 0.1);
+            color: #60a5fa;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        tr.new-row {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        tr.updated-row {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            color: #a1a1aa;
+            margin-top: 0.5rem;
+        }
+
+        .log {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry.success { color: #10b981; }
+        .log-entry.warning { color: #f59e0b; }
+        .log-entry.error { color: #ef4444; }
+        .log-entry.info { color: #60a5fa; }
+
+        .hidden {
+            display: none;
+        }
+
+        .column-mapping {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .mapping-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+        }
+
+        .mapping-item select {
+            flex: 1;
+            background: #1f2937;
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .mapping-item label {
+            min-width: 140px;
+            font-size: 0.875rem;
+        }
+
+        .arrow {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <a href="../../index.html" style="position: absolute; top: 1.5rem; left: 1.5rem; color: #a1a1aa; text-decoration: none; font-size: 0.875rem;">← Tilbake til oversikt</a>
+
+    <div class="container">
+        <h1>Boliger solgt - Kontrollpanel</h1>
+
+        <!-- Upload Section -->
+        <div class="panel">
+            <h2>1. Last opp rådata</h2>
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📁</div>
+                <strong>Dra og slipp fil her, eller klikk for å velge</strong>
+                <p>Støtter CSV-filer med kolonner: Måned, År, Antall solgt</p>
+                <input type="file" id="fileInput" accept=".csv,.txt">
+            </div>
+            <div class="status" id="uploadStatus"></div>
+        </div>
+
+        <!-- Column Mapping Section -->
+        <div class="panel hidden" id="mappingPanel">
+            <h2>2. Kolonnemapping</h2>
+            <p>Velg hvilke kolonner i filen som inneholder måned, år og antall:</p>
+            <div class="column-mapping" id="columnMapping">
+                <div class="mapping-item">
+                    <label>Måned-kolonne</label>
+                    <span class="arrow">←</span>
+                    <select id="mapMonth"></select>
+                </div>
+                <div class="mapping-item">
+                    <label>År-kolonne</label>
+                    <span class="arrow">←</span>
+                    <select id="mapYear"></select>
+                </div>
+                <div class="mapping-item">
+                    <label>Antall-kolonne</label>
+                    <span class="arrow">←</span>
+                    <select id="mapValue"></select>
+                </div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <button class="btn" id="applyMappingBtn">Prosesser data</button>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="panel hidden" id="previewPanel">
+            <h2>3. Forhåndsvisning av endringer</h2>
+            <div class="stats" id="stats"></div>
+            <div class="log" id="processingLog"></div>
+            <div class="data-preview" id="dataPreview"></div>
+            <div style="margin-top: 1.5rem;">
+                <button class="btn btn-success" id="downloadBtn">Last ned oppdatert CSV</button>
+                <button class="btn btn-warning" id="saveBtn">Lagre direkte</button>
+                <button class="btn" id="githubBtn" style="background: #238636;">Push til GitHub</button>
+            </div>
+            <div class="status" id="saveStatus"></div>
+        </div>
+
+        <!-- Chart Preview Section -->
+        <div class="panel hidden" id="chartPreviewPanel">
+            <h2>4. Forhåndsvisning av graf</h2>
+            <p>Slik vil grafen se ut med de nye dataene:</p>
+            <div style="margin-bottom: 1rem;">
+                <button class="btn" id="refreshPreviewBtn">Oppdater forhåndsvisning</button>
+                <button class="btn" id="openFullBtn" style="background: #6366f1;">Åpne i ny fane</button>
+            </div>
+            <div class="chart-preview-container">
+                <iframe id="chartPreview" src="" style="width: 100%; height: 600px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: #0f1114;"></iframe>
+            </div>
+        </div>
+
+        <!-- Current Data Section -->
+        <div class="panel">
+            <h2>Eksisterende data</h2>
+            <button class="btn" id="loadCurrentBtn">Last inn gjeldende data</button>
+            <div class="data-preview" id="currentDataPreview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Expected CSV format: MonthNameShort,TotaltAntallSolgt,Year
+        const TARGET_COLUMNS = ['MonthNameShort', 'TotaltAntallSolgt', 'Year'];
+
+        const MONTH_MAP = {
+            'jan': 'jan', 'januar': 'jan',
+            'feb': 'feb', 'februar': 'feb',
+            'mar': 'mar', 'mars': 'mar',
+            'apr': 'apr', 'april': 'apr',
+            'mai': 'mai',
+            'jun': 'jun', 'juni': 'jun',
+            'jul': 'jul', 'juli': 'jul',
+            'aug': 'aug', 'august': 'aug',
+            'sep': 'sep', 'september': 'sep',
+            'okt': 'okt', 'oktober': 'okt',
+            'nov': 'nov', 'november': 'nov',
+            'des': 'des', 'desember': 'des'
+        };
+
+        // State
+        let currentData = [];
+        let uploadedData = [];
+        let uploadedHeaders = [];
+        let mergedData = [];
+
+        // DOM Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const mappingPanel = document.getElementById('mappingPanel');
+        const applyMappingBtn = document.getElementById('applyMappingBtn');
+        const previewPanel = document.getElementById('previewPanel');
+        const statsDiv = document.getElementById('stats');
+        const processingLog = document.getElementById('processingLog');
+        const dataPreview = document.getElementById('dataPreview');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const saveStatus = document.getElementById('saveStatus');
+        const loadCurrentBtn = document.getElementById('loadCurrentBtn');
+        const currentDataPreview = document.getElementById('currentDataPreview');
+        const chartPreviewPanel = document.getElementById('chartPreviewPanel');
+        const chartPreview = document.getElementById('chartPreview');
+        const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
+        const openFullBtn = document.getElementById('openFullBtn');
+
+        // Utility functions
+        function showStatus(element, message, type) {
+            element.textContent = message;
+            element.className = `status show ${type}`;
+        }
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            processingLog.appendChild(entry);
+            processingLog.scrollTop = processingLog.scrollHeight;
+        }
+
+        function clearLog() {
+            processingLog.innerHTML = '';
+        }
+
+        // Parse CSV
+        function parseCSV(text) {
+            // Remove BOM if present
+            if (text.charCodeAt(0) === 0xFEFF) {
+                text = text.slice(1);
+            }
+            // Also handle UTF-8 BOM as string
+            text = text.replace(/^\uFEFF/, '').replace(/^\xEF\xBB\xBF/, '');
+
+            const lines = text.trim().split(/\r?\n/);
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+            const data = [];
+
+            console.log('Raw headers:', headers);
+
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',');
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] ? values[index].trim().replace(/^["']|["']$/g, '') : '';
+                    });
+                    data.push(row);
+                }
+            }
+
+            return { headers, data };
+        }
+
+        // Load current data
+        async function loadCurrentData() {
+            try {
+                const response = await fetch('../data_solgt.csv?t=' + Date.now());
+                const text = await response.text();
+                const { headers, data } = parseCSV(text);
+                currentData = data;
+
+                renderTable(currentDataPreview, headers, data.slice(-20), 'Siste 20 rader:');
+                showStatus(uploadStatus, `Lastet ${data.length} rader fra data_solgt.csv`, 'success');
+                return true;
+            } catch (error) {
+                showStatus(uploadStatus, `Feil ved lasting: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        loadCurrentBtn.addEventListener('click', loadCurrentData);
+
+        // File upload handling
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        async function handleFile(file) {
+            showStatus(uploadStatus, `Leser fil: ${file.name}...`, 'info');
+
+            try {
+                let text = await file.text();
+
+                // Try to detect delimiter
+                const firstLine = text.split('\n')[0];
+                if (firstLine.includes(';') && !firstLine.includes(',')) {
+                    text = text.replace(/;/g, ',');
+                } else if (firstLine.includes('\t') && !firstLine.includes(',')) {
+                    text = text.replace(/\t/g, ',');
+                }
+
+                const { headers, data } = parseCSV(text);
+                uploadedHeaders = headers;
+                uploadedData = data;
+
+                showStatus(uploadStatus, `Lastet ${data.length} rader med ${headers.length} kolonner: ${headers.join(', ')}`, 'success');
+
+                await loadCurrentData();
+                clearLog();
+                log(`Fant ${headers.length} kolonner: ${headers.join(', ')}`, 'info');
+                if (data.length > 0) {
+                    log(`Eksempel rad 1: ${JSON.stringify(data[0])}`, 'info');
+                }
+                createColumnMapping(headers);
+                mappingPanel.classList.remove('hidden');
+
+            } catch (error) {
+                showStatus(uploadStatus, `Feil: ${error.message}`, 'error');
+            }
+        }
+
+        // Column mapping
+        function createColumnMapping(sourceHeaders) {
+            const mapMonth = document.getElementById('mapMonth');
+            const mapYear = document.getElementById('mapYear');
+            const mapValue = document.getElementById('mapValue');
+
+            // Filter out empty or metadata columns
+            const validHeaders = sourceHeaders.filter(col => {
+                const c = col.trim().toLowerCase();
+                return c && !c.includes('filter') && !c.includes('brukte') && c.length > 0;
+            });
+
+            log(`Kolonner funnet: ${validHeaders.join(', ')}`, 'info');
+
+            [mapMonth, mapYear, mapValue].forEach(select => {
+                select.innerHTML = '<option value="">-- Velg kolonne --</option>';
+
+                // Add all headers (including potentially invalid ones for debugging)
+                sourceHeaders.forEach(col => {
+                    if (!col.trim()) return;
+
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+
+                    const colLower = col.toLowerCase().trim();
+
+                    // Auto-select based on column name
+                    if (select === mapMonth && (colLower === 'måned' || colLower === 'maaned' || colLower === 'month' || colLower.includes('month') || colLower.includes('måned'))) {
+                        option.selected = true;
+                    }
+                    if (select === mapYear && (colLower === 'år' || colLower === 'aar' || colLower === 'year' || colLower.includes('year') || colLower.includes('år'))) {
+                        option.selected = true;
+                    }
+                    if (select === mapValue && (colLower.includes('solgt') || colLower.includes('antall') || colLower.includes('value'))) {
+                        option.selected = true;
+                    }
+
+                    select.appendChild(option);
+                });
+            });
+
+            // Show first few rows for debugging
+            if (uploadedData.length > 0) {
+                log(`Første rad: ${JSON.stringify(uploadedData[0])}`, 'info');
+            }
+        }
+
+        // Apply mapping and process data
+        applyMappingBtn.addEventListener('click', () => {
+            clearLog();
+            log('Starter dataprosessering...', 'info');
+
+            const monthCol = document.getElementById('mapMonth').value;
+            const yearCol = document.getElementById('mapYear').value;
+            const valueCol = document.getElementById('mapValue').value;
+
+            if (!monthCol || !yearCol || !valueCol) {
+                log('FEIL: Alle tre kolonner må være valgt!', 'error');
+                return;
+            }
+
+            log(`Måned-kolonne: "${monthCol}"`, 'info');
+            log(`År-kolonne: "${yearCol}"`, 'info');
+            log(`Antall-kolonne: "${valueCol}"`, 'info');
+
+            processData(monthCol, yearCol, valueCol);
+        });
+
+        function normalizeMonth(rawMonth) {
+            if (!rawMonth) return null;
+            const m = String(rawMonth).trim().toLowerCase();
+            return MONTH_MAP[m] || null;
+        }
+
+        function processData(monthCol, yearCol, valueCol) {
+            const newRows = [];
+            const updatedRows = [];
+
+            // Create a map of existing data for quick lookup
+            const existingMap = {};
+            currentData.forEach(row => {
+                const key = `${row.MonthNameShort}-${row.Year}`;
+                existingMap[key] = row;
+            });
+
+            uploadedData.forEach((row, index) => {
+                const rawMonth = row[monthCol];
+                const rawYear = row[yearCol];
+                const rawValue = row[valueCol];
+
+                const month = normalizeMonth(rawMonth);
+                const year = String(rawYear).trim();
+                const value = String(rawValue).trim().replace(/\s/g, '').replace(',', '.');
+
+                if (!month) {
+                    if (index < 5) log(`Rad ${index + 1}: Ugyldig måned "${rawMonth}"`, 'warning');
+                    return;
+                }
+
+                if (!year || !/^\d{4}$/.test(year)) {
+                    if (index < 5) log(`Rad ${index + 1}: Ugyldig år "${rawYear}"`, 'warning');
+                    return;
+                }
+
+                if (!value || isNaN(parseInt(value))) {
+                    if (index < 5) log(`Rad ${index + 1}: Ugyldig verdi "${rawValue}"`, 'warning');
+                    return;
+                }
+
+                const key = `${month}-${year}`;
+                const cleanedRow = {
+                    MonthNameShort: month,
+                    TotaltAntallSolgt: parseInt(value),
+                    Year: year
+                };
+
+                if (existingMap[key]) {
+                    if (existingMap[key].TotaltAntallSolgt !== cleanedRow.TotaltAntallSolgt) {
+                        updatedRows.push(cleanedRow);
+                        log(`Oppdaterer: ${month} ${year}`, 'warning');
+                    }
+                } else {
+                    newRows.push(cleanedRow);
+                    log(`Ny: ${month} ${year} = ${value}`, 'success');
+                }
+            });
+
+            log(`Resultat: ${newRows.length} nye, ${updatedRows.length} oppdaterte`, 'info');
+
+            // Merge data
+            mergedData = [...currentData];
+
+            // Apply updates
+            updatedRows.forEach(row => {
+                const key = `${row.MonthNameShort}-${row.Year}`;
+                const index = mergedData.findIndex(r => `${r.MonthNameShort}-${r.Year}` === key);
+                if (index >= 0) {
+                    mergedData[index] = row;
+                }
+            });
+
+            // Add new rows
+            newRows.forEach(row => {
+                mergedData.push(row);
+            });
+
+            // Sort by year and month
+            const monthOrder = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+            mergedData.sort((a, b) => {
+                const yearDiff = parseInt(a.Year) - parseInt(b.Year);
+                if (yearDiff !== 0) return yearDiff;
+                return monthOrder.indexOf(a.MonthNameShort) - monthOrder.indexOf(b.MonthNameShort);
+            });
+
+            showPreview(newRows, updatedRows);
+        }
+
+        function showPreview(newRows, updatedRows) {
+            previewPanel.classList.remove('hidden');
+
+            // Stats
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${currentData.length}</div>
+                    <div class="stat-label">Eksisterende rader</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #10b981;">${newRows.length}</div>
+                    <div class="stat-label">Nye rader</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;">${updatedRows.length}</div>
+                    <div class="stat-label">Oppdaterte rader</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${mergedData.length}</div>
+                    <div class="stat-label">Totalt etter merge</div>
+                </div>
+            `;
+
+            // Show last rows
+            const newKeys = new Set(newRows.map(r => `${r.MonthNameShort}-${r.Year}`));
+            const updatedKeys = new Set(updatedRows.map(r => `${r.MonthNameShort}-${r.Year}`));
+
+            let tableHTML = '<p>Siste 20 rader (grønn = ny, gul = oppdatert):</p><table><thead><tr>';
+            TARGET_COLUMNS.forEach(col => {
+                tableHTML += `<th>${col}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            mergedData.slice(-20).forEach(row => {
+                const key = `${row.MonthNameShort}-${row.Year}`;
+                let rowClass = '';
+                if (newKeys.has(key)) rowClass = 'new-row';
+                else if (updatedKeys.has(key)) rowClass = 'updated-row';
+
+                tableHTML += `<tr class="${rowClass}">`;
+                TARGET_COLUMNS.forEach(col => {
+                    tableHTML += `<td>${row[col] || ''}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            dataPreview.innerHTML = tableHTML;
+        }
+
+        function renderTable(container, headers, data, title = '') {
+            let html = title ? `<p>${title}</p>` : '';
+            html += '<table><thead><tr>';
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(h => {
+                    html += `<td>${row[h] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Generate CSV
+        function generateCSV() {
+            let csv = TARGET_COLUMNS.join(',') + '\n';
+            mergedData.forEach(row => {
+                const values = TARGET_COLUMNS.map(col => row[col] || '');
+                csv += values.join(',') + '\n';
+            });
+            return csv;
+        }
+
+        // Download CSV
+        downloadBtn.addEventListener('click', () => {
+            const csv = generateCSV();
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'data_solgt.csv';
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showStatus(saveStatus, 'Fil lastet ned. Erstatt eksisterende data_solgt.csv med denne filen.', 'success');
+        });
+
+        // Save directly
+        saveBtn.addEventListener('click', async () => {
+            const csv = generateCSV();
+
+            try {
+                showStatus(saveStatus, 'Lagrer...', 'info');
+
+                const response = await fetch('/save-csv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ csv: csv, folder: 'volum', filename: 'data_solgt.csv' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(saveStatus, 'data_solgt.csv er oppdatert!', 'success');
+                    await loadCurrentData();
+                    showChartPreview();
+                } else {
+                    showStatus(saveStatus, `Feil: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(saveStatus, `Kunne ikke lagre: ${error.message}. Bruk "Last ned" knappen i stedet.`, 'error');
+            }
+        });
+
+        // Chart preview
+        function showChartPreview() {
+            chartPreviewPanel.classList.remove('hidden');
+            chartPreview.src = 'solgt.html?t=' + Date.now();
+        }
+
+        refreshPreviewBtn.addEventListener('click', () => {
+            chartPreview.src = 'solgt.html?t=' + Date.now();
+        });
+
+        openFullBtn.addEventListener('click', () => {
+            window.open('solgt.html', '_blank');
+        });
+
+        // GitHub push
+        const githubBtn = document.getElementById('githubBtn');
+        githubBtn.addEventListener('click', async () => {
+            const today = new Date().toISOString().split('T')[0];
+            const message = `Oppdatert boliger solgt data ${today}`;
+
+            try {
+                showStatus(saveStatus, 'Pusher til GitHub...', 'info');
+
+                const response = await fetch('/git-push', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message, folder: 'volum' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(saveStatus, result.message, 'success');
+                } else {
+                    showStatus(saveStatus, `Git feil: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(saveStatus, `Kunne ikke pushe: ${error.message}`, 'error');
+            }
+        });
+
+        // Initial load
+        loadCurrentData();
+    </script>
+</body>
+</html>

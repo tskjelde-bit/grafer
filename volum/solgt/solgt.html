@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="no">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boliger solgt – Oslo</title>
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1114;
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.60);
+      --grid: rgba(255, 255, 255, 0.07);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 6px;
+    }
+
+    #chart {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+
+    /* Tooltip */
+    .mi-tooltip {
+      position: fixed;
+      display: none;
+      z-index: 9999;
+      background: rgba(16, 18, 22, 0.94);
+      color: rgba(255, 255, 255, 0.94);
+      border-radius: 12px;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
+      padding: 14px;
+      width: 200px;
+      max-width: calc(100vw - 24px);
+      max-height: min(560px, calc(100vh - 24px));
+      overflow: auto;
+      pointer-events: none;
+    }
+
+    .mi-tooltip::after {
+      content: "";
+      position: absolute;
+      top: 22px;
+      right: -10px;
+      left: auto;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 10px solid rgba(16, 18, 22, 0.94);
+      border-right: none;
+    }
+
+    .mi-tooltip.flipped::after {
+      right: auto;
+      left: -10px;
+      border-left: none;
+      border-right: 10px solid rgba(16, 18, 22, 0.94);
+    }
+
+    .mi-tooltip .date {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .mi-tooltip .rows {
+      display: grid;
+      grid-template-columns: 12px 1fr auto;
+      gap: 8px 10px;
+      font-size: 14px;
+    }
+
+    .mi-tooltip .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 3px;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+
+    @media (max-width: 768px) {
+      .chart-header {
+        font-size: 1.3rem;
+      }
+
+      .chart-subheader {
+        font-size: 1rem;
+      }
+
+      .legend-container {
+        gap: 10px;
+      }
+
+      .legend-item {
+        font-size: 12px;
+        gap: 6px;
+      }
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #chart {
+        aspect-ratio: 1 / 1;
+      }
+
+      .mi-tooltip {
+        width: 160px;
+        padding: 10px;
+      }
+
+      .mi-tooltip .date {
+        font-size: 14px;
+      }
+
+      .mi-tooltip .rows {
+        font-size: 12px;
+      }
+
+      .chart-header {
+        font-size: 1.1rem;
+      }
+
+      .chart-subheader {
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+
+      .legend-item {
+        font-size: 11px;
+      }
+    }
+
+    /* Header */
+    .chart-header {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+      color: rgba(255, 255, 255, 0.92);
+      letter-spacing: -0.02em;
+    }
+
+    .chart-subheader {
+      font-size: 1.25rem;
+      line-height: 1.2;
+      font-weight: normal;
+      color: var(--muted);
+      margin: 0 0 20px 0;
+    }
+
+    .legend-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+
+    .legend-item:hover {
+      color: var(--text);
+    }
+
+    .legend-item.disabled {
+      opacity: 0.4;
+    }
+
+    .legend-item.disabled .legend-dot {
+      background: rgba(255,255,255,0.3) !important;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1 class="chart-header">Boliger solgt</h1>
+    <div class="chart-subheader">Månedlig antall boliger solgt i Oslo</div>
+
+    <div class="legend-container" id="legendContainer"></div>
+
+    <div class="chart-wrapper">
+      <div id="chart"></div>
+    </div>
+  </div>
+  <div id="miTooltip" class="mi-tooltip"></div>
+
+  <script>
+    // Preview mode - hide headers and legend when embedded
+    if (window.location.search.includes('preview=true') || window.self !== window.top) {
+      document.querySelector('.chart-header')?.style.setProperty('display', 'none');
+      document.querySelector('.chart-subheader')?.style.setProperty('display', 'none');
+      document.querySelector('.legend-container')?.style.setProperty('display', 'none');
+      document.querySelector('.wrap')?.style.setProperty('padding', '0');
+      document.querySelector('.wrap')?.style.setProperty('margin', '0');
+    }
+  </script>
+
+  <script>
+    function initChart() {
+      if (typeof Plotly === 'undefined') {
+        setTimeout(initChart, 50);
+        return;
+      }
+
+      const months = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+      const monthNames = {
+        'jan': 'Januar', 'feb': 'Februar', 'mar': 'Mars', 'apr': 'April',
+        'mai': 'Mai', 'jun': 'Juni', 'jul': 'Juli', 'aug': 'August',
+        'sep': 'September', 'okt': 'Oktober', 'nov': 'November', 'des': 'Desember'
+      };
+
+      const colorPalette = ['rgba(9, 58, 96, 0.7)', 'rgba(24, 105, 184, 0.7)', 'rgba(33, 150, 245, 0.7)', 'rgba(75, 195, 254, 0.7)'];
+
+      function getMaxYearsToShow() {
+        const width = window.innerWidth;
+        if (width <= 480) return 3;
+        if (width <= 768) return 4;
+        if (width <= 1024) return 5;
+        return 6;
+      }
+
+      fetch('../data_solgt.csv?t=' + Date.now())
+        .then(r => r.text())
+        .then(csvText => {
+          const lines = csvText.trim().split('\n');
+          const dataByYear = {};
+
+          // Parse header to find column indices
+          let headerLine = lines[0];
+          // Remove BOM if present
+          if (headerLine.charCodeAt(0) === 0xFEFF) {
+            headerLine = headerLine.slice(1);
+          }
+          const headers = headerLine.split(',').map(h => h.trim().toLowerCase());
+
+          // Find column indices (flexible column names)
+          const monthIdx = headers.findIndex(h => h.includes('month') || h === 'måned');
+          const yearIdx = headers.findIndex(h => h.includes('year') || h === 'år');
+          const valueIdx = headers.findIndex(h => h.includes('solgt') || h.includes('antall') || h.includes('value'));
+
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const cols = line.split(',');
+            const month = cols[monthIdx].toLowerCase();
+            const year = cols[yearIdx];
+            const value = parseInt(cols[valueIdx], 10);
+
+            if (!dataByYear[year]) {
+              dataByYear[year] = {};
+            }
+            dataByYear[year][month] = value;
+          }
+
+          const allYears = Object.keys(dataByYear).sort();
+          let maxYearsToShow = getMaxYearsToShow();
+          let years = allYears.slice(-maxYearsToShow);
+
+          // Assign colors dynamically to the years being shown
+          const yearColors = {};
+          years.forEach((year, i) => {
+            yearColors[year] = colorPalette[i % colorPalette.length];
+          });
+
+          const traces = years.map(year => {
+            const values = months.map(m => dataByYear[year][m] || null);
+            return {
+              x: months,
+              y: values,
+              type: 'bar',
+              name: year,
+              marker: {
+                color: yearColors[year] || '#999'
+              },
+              hoverinfo: 'none'
+            };
+          });
+
+          // Calculate average per month across all years
+          const avgValues = months.map(m => {
+            const vals = years.map(y => dataByYear[y][m]).filter(v => v != null);
+            return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+          });
+
+          // Add smoothed average line
+          const avgTrace = {
+            x: months,
+            y: avgValues,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Gjennomsnitt',
+            line: {
+              color: 'rgba(160, 250, 178, 1)',
+              width: 3,
+              shape: 'spline',
+              smoothing: 1.2,
+              dash: 'dash'
+            },
+            hoverinfo: 'none'
+          };
+          traces.push(avgTrace);
+
+          const layout = {
+            barmode: 'group',
+            bargap: 0.15,
+            bargroupgap: 0.02,
+            paper_bgcolor: '#0f1114',
+            plot_bgcolor: '#0f1114',
+            font: {
+              family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+              color: 'rgba(255,255,255,0.92)',
+              size: 14
+            },
+            margin: { l: 35, r: 20, t: 30, b: 160 },
+            xaxis: {
+              showgrid: false,
+              showline: true,
+              linecolor: 'rgba(255,255,255,0.20)',
+              tickfont: { color: 'rgba(255,255,255,0.40)' },
+              tickangle: 0,
+              zeroline: false,
+              ticks: '',
+              tickcolor: 'rgba(255,255,255,0.25)',
+              range: [-0.6, 11.6],
+              mirror: false
+            },
+            yaxis: {
+              showgrid: true,
+              gridcolor: 'rgba(255,255,255,0.04)',
+              showline: true,
+              linecolor: 'rgba(255,255,255,0.20)',
+              tickfont: { color: 'rgba(255,255,255,0.40)' },
+              zeroline: false,
+              ticks: '',
+              tickcolor: 'rgba(255,255,255,0.25)',
+              dtick: 500,
+              mirror: false
+            },
+            legend: {
+              orientation: 'h',
+              x: 0,
+              y: 1.08,
+              xanchor: 'left',
+              yanchor: 'bottom',
+              bgcolor: 'rgba(0,0,0,0)',
+              font: { color: 'rgba(255,255,255,0.60)', size: 12 }
+            },
+            showlegend: false,
+            hovermode: 'x'
+          };
+
+          const config = {
+            responsive: true,
+            displaylogo: false,
+            displayModeBar: false
+          };
+
+          const chartEl = document.getElementById('chart');
+          const tipEl = document.getElementById('miTooltip');
+          const legendEl = document.getElementById('legendContainer');
+
+          // Track visible years
+          const visibleYears = new Set(years);
+
+          function updateAverage(gd) {
+            const activeYears = years.filter(y => visibleYears.has(y));
+            const newAvgValues = months.map(m => {
+              const vals = activeYears.map(y => dataByYear[y][m]).filter(v => v != null);
+              return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+            });
+            const avgTraceIdx = gd.data.length - 1;
+            Plotly.restyle(gd, { y: [newAvgValues] }, [avgTraceIdx]);
+          }
+
+          // Build HTML legend
+          years.forEach((year, idx) => {
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.dataset.year = year;
+            item.dataset.traceIdx = idx;
+            item.innerHTML = `
+              <div class="legend-dot" style="background:${yearColors[year]}"></div>
+              <span>${year}</span>
+            `;
+            legendEl.appendChild(item);
+          });
+
+          // Add average to legend
+          const avgItem = document.createElement('div');
+          avgItem.className = 'legend-item';
+          avgItem.innerHTML = `
+            <div style="width: 20px; height: 3px; border-top: 3px dashed rgba(160, 250, 178, 1);"></div>
+            <span>Gjennomsnitt</span>
+          `;
+          legendEl.appendChild(avgItem);
+
+
+          function formatNumberNO(x) {
+            if (x === null || x === undefined || Number.isNaN(x)) return '';
+            return x.toLocaleString('nb-NO');
+          }
+
+          function buildTooltipHTML(month, visibleYears, dataByYear) {
+            let rows = '';
+            for (const year of visibleYears) {
+              const v = dataByYear[year] ? dataByYear[year][month] : null;
+              rows += `
+                <div class="dot" style="background:${yearColors[year]}"></div>
+                <div class="label">${year}</div>
+                <div class="val">${formatNumberNO(v)}</div>
+              `;
+            }
+            return `<div class="date">${monthNames[month]}</div><div class="rows">${rows}</div>`;
+          }
+
+          function positionTooltip(evt) {
+            const r = tipEl.getBoundingClientRect();
+            const pad = 10;
+            let x, y;
+
+            if (evt.clientX < window.innerWidth / 2) {
+              x = evt.clientX + 18;
+              tipEl.classList.add('flipped');
+            } else {
+              x = evt.clientX - r.width - 18;
+              tipEl.classList.remove('flipped');
+            }
+
+            y = evt.clientY - 26;
+
+            if (x < pad) x = pad;
+            if (x + r.width > window.innerWidth - pad) x = window.innerWidth - r.width - pad;
+            if (y < pad) y = pad;
+            if (y + r.height > window.innerHeight - pad) y = window.innerHeight - r.height - pad;
+
+            tipEl.style.left = x + 'px';
+            tipEl.style.top = y + 'px';
+          }
+
+          function rebuildChart() {
+            maxYearsToShow = getMaxYearsToShow();
+            years = allYears.slice(-maxYearsToShow);
+
+            // Rebuild yearColors
+            Object.keys(yearColors).forEach(k => delete yearColors[k]);
+            years.forEach((year, i) => {
+              yearColors[year] = colorPalette[i % colorPalette.length];
+            });
+
+            // Rebuild traces
+            const newTraces = years.map(year => {
+              const values = months.map(m => dataByYear[year][m] || null);
+              return {
+                x: months,
+                y: values,
+                type: 'bar',
+                name: year,
+                marker: { color: yearColors[year] || '#999' },
+                hoverinfo: 'none'
+              };
+            });
+
+            // Recalculate average
+            const newAvgValues = months.map(m => {
+              const vals = years.map(y => dataByYear[y][m]).filter(v => v != null);
+              return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+            });
+
+            const newAvgTrace = {
+              x: months,
+              y: newAvgValues,
+              type: 'scatter',
+              mode: 'lines',
+              name: 'Gjennomsnitt',
+              line: { color: 'rgba(160, 250, 178, 1)', width: 3, shape: 'spline', smoothing: 1.2, dash: 'dash' },
+              hoverinfo: 'none'
+            };
+            newTraces.push(newAvgTrace);
+
+            // Reset visible years and rebuild legend
+            visibleYears.clear();
+            years.forEach(y => visibleYears.add(y));
+
+            legendEl.innerHTML = '';
+            years.forEach((year, idx) => {
+              const item = document.createElement('div');
+              item.className = 'legend-item';
+              item.dataset.year = year;
+              item.dataset.traceIdx = idx;
+              item.innerHTML = `<div class="legend-dot" style="background:${yearColors[year]}"></div><span>${year}</span>`;
+              legendEl.appendChild(item);
+            });
+            const avgItem = document.createElement('div');
+            avgItem.className = 'legend-item';
+            avgItem.innerHTML = `<div style="width: 20px; height: 3px; border-top: 3px dashed rgba(160, 250, 178, 1);"></div><span>Gjennomsnitt</span>`;
+            legendEl.appendChild(avgItem);
+
+            return newTraces;
+          }
+
+          function attachLegendHandlers(gd) {
+            legendEl.querySelectorAll('.legend-item[data-year]').forEach(item => {
+              item.addEventListener('click', () => {
+                const year = item.dataset.year;
+                const traceIdx = parseInt(item.dataset.traceIdx);
+
+                if (visibleYears.has(year)) {
+                  visibleYears.delete(year);
+                  item.classList.add('disabled');
+                  Plotly.restyle(gd, { visible: false }, [traceIdx]);
+                } else {
+                  visibleYears.add(year);
+                  item.classList.remove('disabled');
+                  Plotly.restyle(gd, { visible: true }, [traceIdx]);
+                }
+
+                updateAverage(gd);
+              });
+            });
+          }
+
+          Plotly.newPlot(chartEl, traces, layout, config).then(gd => {
+            // Hide default hover
+            try {
+              const hoverlayer = gd.querySelector('.hoverlayer');
+              if (hoverlayer) hoverlayer.style.display = 'none';
+            } catch (e) { }
+
+            // Attach legend click handlers
+            attachLegendHandlers(gd);
+
+            // Store original colors for reset
+            const originalColors = years.map(year => yearColors[year] || '#999');
+
+            // Create highlighted versions of colors (full opacity)
+            const highlightColors = {};
+            years.forEach(year => {
+              highlightColors[year] = yearColors[year].replace(', 0.7)', ', 1)');
+            });
+
+            let lastHoveredMonth = null;
+
+            gd.on('plotly_hover', e => {
+              const pt = e.points && e.points[0];
+              if (!pt) return;
+              const month = pt.x;
+              const monthIdx = months.indexOf(month);
+
+              const activeYears = years.filter(y => visibleYears.has(y));
+              tipEl.innerHTML = buildTooltipHTML(month, activeYears, dataByYear);
+              tipEl.style.display = 'block';
+              positionTooltip(e.event || window.event);
+
+              // Only update if month changed
+              if (lastHoveredMonth === month) return;
+              lastHoveredMonth = month;
+
+              // Highlight all bars in the hovered month
+              const colorArrays = years.map(year => {
+                return months.map((m, i) => {
+                  return i === monthIdx ? highlightColors[year] : yearColors[year];
+                });
+              });
+
+              Plotly.restyle(gd, { 'marker.color': colorArrays }, years.map((_, i) => i));
+            });
+
+            gd.on('plotly_unhover', () => {
+              tipEl.style.display = 'none';
+              lastHoveredMonth = null;
+              // Reset colors
+              Plotly.restyle(gd, { 'marker.color': originalColors }, years.map((_, i) => i));
+            });
+
+            gd.addEventListener('mousemove', evt => {
+              if (tipEl.style.display === 'block') positionTooltip(evt);
+            });
+
+            let lastWidth = window.innerWidth;
+            const ro = new ResizeObserver(() => {
+              const newWidth = window.innerWidth;
+              const newMaxYears = getMaxYearsToShow();
+              if (newMaxYears !== maxYearsToShow) {
+                const newTraces = rebuildChart();
+                Plotly.react(gd, newTraces, layout, config).then(() => {
+                  attachLegendHandlers(gd);
+                });
+              } else {
+                Plotly.Plots.resize(gd);
+              }
+              lastWidth = newWidth;
+            });
+            ro.observe(chartEl.parentElement);
+          });
+
+        }).catch(err => console.error("Error loading data:", err));
+    }
+
+    initChart();
+  </script>
+</body>
+
+</html>
