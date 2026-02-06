@@ -901,6 +901,11 @@
                     Snitt
                 </label>
             </div>
+            <div class="control">
+                <label>Linjetykkelse:</label>
+                <input type="range" id="avgWidthInput" min="1" max="8" step="0.5" value="3">
+                <span class="control-value" id="avgWidthValue">3</span>
+            </div>
             <span class="toolbar-divider"></span>
             <div class="control">
                 <label>Highlight:</label>
@@ -1182,6 +1187,21 @@
             if (chartEl && years.length > 0) {
                 const avgTraceIdx = years.length;
                 Plotly.restyle(chartEl, { visible: avgToggle.checked }, [avgTraceIdx]);
+                updateLegend();
+            }
+        });
+
+        // Average line width slider
+        let avgLineWidth = 3;
+        const avgWidthInput = document.getElementById('avgWidthInput');
+        const avgWidthValue = document.getElementById('avgWidthValue');
+
+        avgWidthInput.addEventListener('input', () => {
+            avgLineWidth = parseFloat(avgWidthInput.value);
+            avgWidthValue.textContent = avgLineWidth;
+            if (chartEl && years.length > 0) {
+                const avgTraceIdx = years.length;
+                Plotly.restyle(chartEl, { 'line.width': avgLineWidth }, [avgTraceIdx]);
                 updateLegend();
             }
         });
@@ -1500,7 +1520,7 @@
                 mode: 'lines',
                 name: 'Gjennomsnitt',
                 visible: avgToggle.checked,
-                line: { color: avgLineColor, width: 3, shape: 'spline', smoothing: 1.2, dash: 'dash' },
+                line: { color: avgLineColor, width: avgLineWidth, shape: 'spline', smoothing: 1.2, dash: 'dash' },
                 hoverinfo: 'none'
             });
 
@@ -1631,7 +1651,7 @@
             if (avgToggle.checked) {
                 const avgItem = document.createElement('div');
                 avgItem.className = 'legend-item';
-                avgItem.innerHTML = `<div style="width: 20px; height: 3px; border-top: 3px dashed ${avgLineColor};"></div><span>Gjennomsnitt</span>`;
+                avgItem.innerHTML = `<div style="width: 20px; height: ${avgLineWidth}px; border-top: ${avgLineWidth}px dashed ${avgLineColor};"></div><span>Gjennomsnitt</span>`;
                 legendEl.appendChild(avgItem);
             }
         }
@@ -1713,7 +1733,7 @@
                         type: 'scatter',
                         mode: 'lines',
                         name: 'Gjennomsnitt',
-                        line: { color: avgLineColor, width: 3, shape: 'spline', smoothing: 1.2, dash: 'dash' },
+                        line: { color: avgLineColor, width: avgLineWidth, shape: 'spline', smoothing: 1.2, dash: 'dash' },
                         hoverinfo: 'none'
                     });
 
