@@ -1152,5 +1152,18 @@
         // Initial load
         loadCurrentData();
     </script>
+    <script src="../github-save.js"></script>
+    <script>
+        if (typeof initGitHubSave === 'function') {
+            initGitHubSave({
+                owner: 'tskjelde-bit',
+                repo: 'grafer',
+                filePath: 'volum/data.csv',
+                getCSVContent: generateCSV,
+                commitMessagePrefix: 'Oppdatert volum data',
+                statusElement: document.getElementById('saveStatus')
+            });
+        }
+    </script>
 </body>
 </html>

@@ -839,5 +839,18 @@
         // Initial load
         loadCurrentData();
     </script>
+    <script src="../../github-save.js"></script>
+    <script>
+        if (typeof initGitHubSave === 'function') {
+            initGitHubSave({
+                owner: 'tskjelde-bit',
+                repo: 'grafer',
+                filePath: 'volum/data_lagt_ut.csv',
+                getCSVContent: generateCSV,
+                commitMessagePrefix: 'Oppdatert boliger til salgs data',
+                statusElement: document.getElementById('saveStatus')
+            });
+        }
+    </script>
 </body>
 </html>

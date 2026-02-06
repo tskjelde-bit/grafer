@@ -1152,5 +1152,18 @@
         // Initial load
         loadCurrentData();
     </script>
+    <script src="../github-save.js"></script>
+    <script>
+        if (typeof initGitHubSave === 'function') {
+            initGitHubSave({
+                owner: 'tskjelde-bit',
+                repo: 'grafer',
+                filePath: 'prisutvikling/data.csv',
+                getCSVContent: generateCSV,
+                commitMessagePrefix: 'Oppdatert prisindeks data',
+                statusElement: document.getElementById('saveStatus')
+            });
+        }
+    </script>
 </body>
 </html>

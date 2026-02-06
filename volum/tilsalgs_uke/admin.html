@@ -804,5 +804,18 @@
         // Initial load
         loadCurrentData();
     </script>
+    <script src="../../github-save.js"></script>
+    <script>
+        if (typeof initGitHubSave === 'function') {
+            initGitHubSave({
+                owner: 'tskjelde-bit',
+                repo: 'grafer',
+                filePath: 'volum/data_lagt_ut_uke.csv',
+                getCSVContent: generateCSV,
+                commitMessagePrefix: 'Oppdatert boliger til salgs per uke data',
+                statusElement: document.getElementById('saveStatus')
+            });
+        }
+    </script>
 </body>
 </html>
