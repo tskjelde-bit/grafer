@@ -893,6 +893,7 @@
                     <option value="solgt">Solgt</option>
                     <option value="lagtut">Lagt ut</option>
                 </select>
+                <input type="text" id="highlightColorInput" value="#A0FAB2" maxlength="7" style="width:70px;font-size:0.75rem;text-transform:uppercase;">
                 <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
                 <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
             </div>
@@ -1065,7 +1066,7 @@
         let currentOpacity = 1;
         let currentLineWidth = 3;
         let highlightedLine = null;
-        const HIGHLIGHT_COLOR = '#2ECC9A';
+        let HIGHLIGHT_COLOR = '#A0FAB2';
 
         // Theme handling
         let isDark = true;
@@ -1224,6 +1225,17 @@
         const highlightSelect = document.getElementById('highlightSelect');
         const quickHighlightBtn = document.getElementById('quickHighlightBtn');
         const resetHighlightBtn = document.getElementById('resetHighlightBtn');
+        const highlightColorInput = document.getElementById('highlightColorInput');
+
+        highlightColorInput.addEventListener('change', () => {
+            let val = highlightColorInput.value.trim();
+            if (!val.startsWith('#')) val = '#' + val;
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                HIGHLIGHT_COLOR = val.toUpperCase();
+                highlightColorInput.value = HIGHLIGHT_COLOR;
+                if (highlightedLine) updateLineColors();
+            }
+        });
 
         quickHighlightBtn.addEventListener('click', () => {
             const selected = highlightSelect.value;

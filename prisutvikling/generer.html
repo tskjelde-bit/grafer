@@ -1043,6 +1043,7 @@
             <div class="control">
                 <label>Highlight:</label>
                 <select id="highlightAreaSelect"></select>
+                <input type="text" id="highlightColorInput" value="#A0FAB2" maxlength="7" style="width:70px;font-size:0.75rem;text-transform:uppercase;">
                 <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
                 <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
             </div>
@@ -1411,16 +1412,19 @@
         const highlightAreaSelect = document.getElementById('highlightAreaSelect');
         const quickHighlightBtn = document.getElementById('quickHighlightBtn');
         const resetHighlightBtn = document.getElementById('resetHighlightBtn');
-        const HIGHLIGHT_COLOR = '#2ECC9A';
+        const highlightColorInput = document.getElementById('highlightColorInput');
 
         quickHighlightBtn.addEventListener('click', () => {
             const area = highlightAreaSelect.value;
             if (area && chartEl) {
-                customAreaColors[area] = HIGHLIGHT_COLOR;
+                let hlColor = highlightColorInput.value.trim();
+                if (!hlColor.startsWith('#')) hlColor = '#' + hlColor;
+                if (!/^#[0-9A-Fa-f]{6}$/.test(hlColor)) hlColor = '#A0FAB2';
+                customAreaColors[area] = hlColor;
                 const traceIdx = areaNames.indexOf(area);
                 if (traceIdx >= 0) {
                     Plotly.restyle(chartEl, {
-                        'line.color': HIGHLIGHT_COLOR,
+                        'line.color': hlColor,
                         'line.width': 4,
                         'opacity': 1
                     }, [traceIdx]);
