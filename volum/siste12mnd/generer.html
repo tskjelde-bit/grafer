@@ -920,6 +920,28 @@
                 </label>
             </div>
             <button class="btn btn-outline" id="settingsBtn">Margin & Border</button>
+        </div>
+        <div class="toolbar-row">
+            <div class="control">
+                <label>Tittel:</label>
+                <input type="text" id="headerInput" value="Boligmarked siste 12 måneder" style="width:220px;font-size:0.8rem;">
+                <label>Str:</label>
+                <input type="number" id="headerSizeInput" value="22" min="10" max="48" style="width:50px;font-size:0.8rem;">
+            </div>
+            <div class="control">
+                <label>Undertittel:</label>
+                <input type="text" id="subheaderInput" value="Antall boliger solgt og lagt ut for salg i Oslo" style="width:280px;font-size:0.8rem;">
+                <label>Str:</label>
+                <input type="number" id="subheaderSizeInput" value="14" min="8" max="32" style="width:50px;font-size:0.8rem;">
+            </div>
+            <div class="control">
+                <label>
+                    <input type="checkbox" id="fontInheritToggle" checked>
+                    Inherit font
+                </label>
+            </div>
+        </div>
+        <div class="toolbar-row">
             <span class="toolbar-spacer"></span>
             <div class="control">
                 <label>Oppløsning:</label>
@@ -1223,6 +1245,33 @@
                 // Only update line traces (indices 2 and 3)
                 Plotly.restyle(chartEl, { mode: mode }, [2, 3]);
             }
+        });
+
+        // Heading controls
+        const chartHeader = document.querySelector('.chart-header');
+        const chartSubheader = document.querySelector('.chart-subheader');
+        const headerInput = document.getElementById('headerInput');
+        const subheaderInput = document.getElementById('subheaderInput');
+        const headerSizeInput = document.getElementById('headerSizeInput');
+        const subheaderSizeInput = document.getElementById('subheaderSizeInput');
+        const fontInheritToggle = document.getElementById('fontInheritToggle');
+
+        headerInput.addEventListener('input', () => {
+            chartHeader.textContent = headerInput.value;
+        });
+        subheaderInput.addEventListener('input', () => {
+            chartSubheader.textContent = subheaderInput.value;
+        });
+        headerSizeInput.addEventListener('input', () => {
+            chartHeader.style.fontSize = headerSizeInput.value + 'px';
+        });
+        subheaderSizeInput.addEventListener('input', () => {
+            chartSubheader.style.fontSize = subheaderSizeInput.value + 'px';
+        });
+        fontInheritToggle.addEventListener('change', () => {
+            const font = fontInheritToggle.checked ? 'inherit' : 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+            chartHeader.style.fontFamily = font;
+            chartSubheader.style.fontFamily = font;
         });
 
         // Highlight controls
