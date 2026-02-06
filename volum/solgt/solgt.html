@@ -219,26 +219,124 @@
   <div id="miTooltip" class="mi-tooltip"></div>
 
   <script>
-    // URL parameters handling
+    // Version and URL parameters handling
     const urlParams = new URLSearchParams(window.location.search);
-    const themeParam = urlParams.get('theme');
-    const aspectParam = urlParams.get('aspect');
+    const versionId = urlParams.get('v');
+    let _versionConfig = null;
 
-    // Apply theme from URL parameter
-    if (themeParam === 'light') {
-      document.documentElement.style.setProperty('--bg', '#ffffff');
-      document.documentElement.style.setProperty('--text', '#1a1a2e');
-      document.documentElement.style.setProperty('--muted', '#6b7280');
-      document.body.style.background = '#ffffff';
-      document.body.style.color = '#1a1a2e';
+    function applyBasicSettings(cfg) {
+      // Theme
+      if (cfg.theme === 'light') {
+        document.documentElement.style.setProperty('--bg', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#1a1a2e');
+        document.documentElement.style.setProperty('--muted', '#6b7280');
+        document.body.style.background = '#ffffff';
+        document.body.style.color = '#1a1a2e';
+      }
+
+      // Aspect ratio
+      const aspectValue = cfg.aspect || '1.78';
+      document.getElementById('chart').style.aspectRatio = aspectValue;
+      document.querySelector('.chart-wrapper').style.aspectRatio = aspectValue;
+
+      // Headers
+      if (cfg.header) {
+        const h = document.querySelector('.chart-header');
+        if (h) {
+          h.textContent = cfg.header.text || h.textContent;
+          if (cfg.header.fontSize) h.style.fontSize = cfg.header.fontSize + 'px';
+        }
+      }
+      if (cfg.subheader) {
+        const s = document.querySelector('.chart-subheader');
+        if (s) {
+          s.textContent = cfg.subheader.text || s.textContent;
+          if (cfg.subheader.fontSize) s.style.fontSize = cfg.subheader.fontSize + 'px';
+        }
+      }
+
+      // Font inherit
+      if (cfg.fontInherit) {
+        document.querySelector('.chart-header')?.style.setProperty('font-family', 'inherit');
+        document.querySelector('.chart-subheader')?.style.setProperty('font-family', 'inherit');
+      }
+
+      // Margins on wrap
+      if (cfg.margins) {
+        const wrap = document.querySelector('.wrap');
+        if (wrap) {
+          if (cfg.margins.top) wrap.style.paddingTop = cfg.margins.top + 'px';
+          if (cfg.margins.right) wrap.style.paddingRight = cfg.margins.right + 'px';
+          if (cfg.margins.bottom) wrap.style.paddingBottom = cfg.margins.bottom + 'px';
+          if (cfg.margins.left) wrap.style.paddingLeft = cfg.margins.left + 'px';
+        }
+      }
+
+      // Borders on wrap
+      if (cfg.border && cfg.border.enabled) {
+        const wrap = document.querySelector('.wrap');
+        if (wrap) {
+          ['top', 'right', 'bottom', 'left'].forEach(side => {
+            if (cfg.border[side]) {
+              wrap.style[`border${side.charAt(0).toUpperCase() + side.slice(1)}`] =
+                `${cfg.border[side].width || 1}px ${cfg.border[side].style || 'solid'} ${cfg.border[side].color || '#cccccc'}`;
+            }
+          });
+        }
+      }
+
+      // Transparent background
+      if (cfg.transparent) {
+        document.documentElement.style.background = 'transparent';
+        document.body.style.background = 'transparent';
+        document.querySelector('.wrap').style.background = 'transparent';
+        document.querySelector('.chart-wrapper').style.background = 'transparent';
+      }
     }
 
-    // Apply aspect ratio from URL parameter (default 16:9)
-    const aspectValue = aspectParam || '1.78';
-    document.getElementById('chart').style.aspectRatio = aspectValue;
-    document.querySelector('.chart-wrapper').style.aspectRatio = aspectValue;
+    // Load version config if ?v= is present
+    if (versionId) {
+      fetch('versions.json?t=' + Date.now())
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data && data.versions && data.versions[versionId]) {
+            _versionConfig = data.versions[versionId].config;
+            applyBasicSettings(_versionConfig);
+          } else {
+            // Fallback to URL params
+            applyBasicSettings({
+              theme: urlParams.get('theme'),
+              aspect: urlParams.get('aspect')
+            });
+          }
+          initChart();
+        })
+        .catch(() => {
+          applyBasicSettings({
+            theme: urlParams.get('theme'),
+            aspect: urlParams.get('aspect')
+          });
+          initChart();
+        });
+    } else {
+      // Legacy URL params mode
+      const themeParam = urlParams.get('theme');
+      const aspectParam = urlParams.get('aspect');
 
-    // Preview mode - only hide headers and legend if explicitly requested via URL
+      if (themeParam === 'light') {
+        document.documentElement.style.setProperty('--bg', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#1a1a2e');
+        document.documentElement.style.setProperty('--muted', '#6b7280');
+        document.body.style.background = '#ffffff';
+        document.body.style.color = '#1a1a2e';
+      }
+
+      const aspectValue = aspectParam || '1.78';
+      document.getElementById('chart').style.aspectRatio = aspectValue;
+      document.querySelector('.chart-wrapper').style.aspectRatio = aspectValue;
+    }
+
+    // Preview mode
     if (window.location.search.includes('minimal=true')) {
       document.querySelector('.chart-header')?.style.setProperty('display', 'none');
       document.querySelector('.chart-subheader')?.style.setProperty('display', 'none');
@@ -270,12 +368,17 @@
         'sep': 'September', 'okt': 'Oktober', 'nov': 'November', 'des': 'Desember'
       };
 
-      // Check theme, avg, palette and transparent from URL
+      // Get settings from version config or URL params
+      const vc = _versionConfig;
       const urlParams = new URLSearchParams(window.location.search);
-      const isLightTheme = urlParams.get('theme') === 'light';
-      const showAvg = urlParams.get('avg') !== '0'; // Show by default unless explicitly set to 0
-      const paletteParam = urlParams.get('palette') || 'default';
-      const isTransparent = urlParams.get('transparent') === '1';
+      const isLightTheme = vc ? (vc.theme === 'light') : (urlParams.get('theme') === 'light');
+      const showAvg = vc ? (vc.avg ? vc.avg.enabled !== false : true) : (urlParams.get('avg') !== '0');
+      const paletteParam = vc ? (vc.palette || 'default') : (urlParams.get('palette') || 'default');
+      const isTransparent = vc ? (vc.transparent || false) : (urlParams.get('transparent') === '1');
+      const vcAvgColor = vc && vc.avg ? vc.avg.color : null;
+      const vcAvgWidth = vc && vc.avg ? (vc.avg.lineWidth || 3) : 3;
+      const vcAvgDashed = vc && vc.avg ? (vc.avg.dashed !== false) : true;
+      const vcOpacity = vc ? (vc.opacity || 0.7) : 0.7;
 
       // Color palettes
       const palettes = {
@@ -297,11 +400,11 @@
           });
       }
 
-      const colorPalette = getColorPalette(paletteParam, isLightTheme ? 0.85 : 0.7);
+      const colorPalette = getColorPalette(paletteParam, isLightTheme ? 0.85 : vcOpacity);
 
       const bgColor = isTransparent ? 'rgba(0,0,0,0)' : (isLightTheme ? '#ffffff' : '#0f1114');
 
-      // Apply transparent background if requested
+      // Apply transparent background if requested (in case not already set by version)
       if (isTransparent) {
         document.documentElement.style.background = 'transparent';
         document.body.style.background = 'transparent';
@@ -312,7 +415,8 @@
       const mutedColor = isLightTheme ? '#6b7280' : 'rgba(255,255,255,0.40)';
       const gridColor = isLightTheme ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';
       const lineColor = isLightTheme ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.20)';
-      const avgLineColor = isLightTheme ? 'rgba(16, 185, 129, 1)' : 'rgba(160, 250, 178, 1)';
+      // Average line color - use version config color or default
+      const avgLineColor = vcAvgColor || (isLightTheme ? 'rgba(16, 185, 129, 1)' : 'rgba(160, 250, 178, 1)');
 
       function getMaxYearsToShow() {
         const width = window.innerWidth;
@@ -385,6 +489,21 @@
             return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
           });
 
+          // Apply custom year colors from version config
+          if (vc && vc.customYearColors) {
+            Object.keys(vc.customYearColors).forEach(year => {
+              if (yearColors[year] !== undefined) {
+                yearColors[year] = vc.customYearColors[year];
+              }
+            });
+            // Reapply colors to traces
+            traces.forEach(t => {
+              if (t.name && yearColors[t.name]) {
+                t.marker.color = yearColors[t.name];
+              }
+            });
+          }
+
           // Add smoothed average line
           const avgTrace = {
             x: months,
@@ -395,10 +514,10 @@
             visible: showAvg,
             line: {
               color: avgLineColor,
-              width: 3,
+              width: vcAvgWidth,
               shape: 'spline',
               smoothing: 1.2,
-              dash: 'dash'
+              dash: vcAvgDashed ? 'dash' : 'solid'
             },
             hoverinfo: 'none'
           };
@@ -492,13 +611,16 @@
           });
 
           // Add average to legend
-          const avgItem = document.createElement('div');
-          avgItem.className = 'legend-item';
-          avgItem.innerHTML = `
-            <div style="width: 20px; height: 3px; border-top: 3px dashed rgba(160, 250, 178, 1);"></div>
-            <span>Gjennomsnitt</span>
-          `;
-          legendEl.appendChild(avgItem);
+          if (showAvg) {
+            const avgItem = document.createElement('div');
+            avgItem.className = 'legend-item';
+            const avgDashStyle = vcAvgDashed ? 'dashed' : 'solid';
+            avgItem.innerHTML = `
+              <div style="width: 20px; height: ${vcAvgWidth}px; border-top: ${vcAvgWidth}px ${avgDashStyle} ${avgLineColor};"></div>
+              <span>Gjennomsnitt</span>
+            `;
+            legendEl.appendChild(avgItem);
+          }
 
 
           function formatNumberNO(x) {
@@ -702,7 +824,10 @@
         }).catch(err => console.error("Error loading data:", err));
     }
 
-    initChart();
+    // initChart is called by version loader above, or here for legacy mode
+    if (!versionId) {
+      initChart();
+    }
 
     // Send height to parent for embed auto-resize
     function sendHeight() {

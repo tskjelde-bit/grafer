@@ -265,48 +265,161 @@
         }
         .loading.show { display: flex; }
 
-        .modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+        /* Version panel styles */
+        .versions-panel-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
             display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
         }
-        .modal.show { display: flex; }
 
-        .modal-content {
+        .versions-panel-container.show {
+            display: block;
+        }
+
+        .versions-panel-inner {
             border-radius: 12px;
-            padding: 1.5rem;
-            max-width: 600px;
-            width: 90%;
-        }
-        body.dark .modal-content { background: #1f2937; }
-        body.light .modal-content { background: #ffffff; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
-
-        .modal-content h3 { margin-bottom: 0.5rem; }
-        .modal-content p { margin-bottom: 1rem; font-size: 0.9rem; }
-        body.dark .modal-content p { color: #a1a1aa; }
-        body.light .modal-content p { color: #6b7280; }
-
-        .modal-content textarea {
-            width: 100%;
-            height: 100px;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            resize: none;
+            padding: 1.25rem;
             margin-bottom: 1rem;
         }
-        body.dark .modal-content textarea { background: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: #e4e4e7; }
-        body.light .modal-content textarea { background: #f9fafb; border: 1px solid rgba(0, 0, 0, 0.1); color: #1a1a2e; }
 
-        .modal-actions {
+        body.dark .versions-panel-inner {
+            background: #1a1d23;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .versions-panel-inner {
+            background: #f9fafb;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .versions-save-row {
             display: flex;
             gap: 0.5rem;
-            justify-content: flex-end;
+            margin-bottom: 0.75rem;
+        }
+
+        .version-name-input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        body.dark .version-name-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e4e4e7;
+        }
+
+        body.light .version-name-input {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            color: #1a1a2e;
+        }
+
+        .version-status {
+            font-size: 0.8rem;
+            min-height: 1.2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-status.success { color: #10b981; }
+        .version-status.error { color: #ef4444; }
+
+        .versions-list-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .version-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark .version-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        body.light .version-item {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .version-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .version-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .version-date {
+            font-size: 0.7rem;
+        }
+
+        body.dark .version-date {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .version-date {
+            color: #9ca3af;
+        }
+
+        .version-url {
+            font-family: monospace;
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+            word-break: break-all;
+        }
+
+        body.dark .version-url {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .version-url {
+            color: #9ca3af;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 0.3rem 0.6rem !important;
+            font-size: 0.7rem !important;
+            height: auto !important;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .no-versions {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        body.dark .no-versions {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light .no-versions {
+            color: #9ca3af;
         }
 
         @media (max-width: 900px) {
@@ -471,17 +584,7 @@
         </div>
     </div>
 
-    <div class="modal" id="embedModal">
-        <div class="modal-content">
-            <h3>Embed-kode</h3>
-            <p>Kopier denne koden for å embedde grafen:</p>
-            <textarea id="embedCode" readonly></textarea>
-            <div class="modal-actions">
-                <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
-                <button class="btn btn-outline" id="closeEmbedBtn">Lukk</button>
-            </div>
-        </div>
-    </div>
+    <!-- Version panel is injected by version-manager.js -->
 
     <div class="chart-container">
         <div id="captureArea">
@@ -1226,42 +1329,127 @@
             }
         });
 
-        // Embed code
-        const embedBtn = document.getElementById('embedBtn');
-        const embedModal = document.getElementById('embedModal');
-        const embedCode = document.getElementById('embedCode');
-        const copyEmbedBtn = document.getElementById('copyEmbedBtn');
-        const closeEmbedBtn = document.getElementById('closeEmbedBtn');
-
-        const GITHUB_PAGES_BASE = 'https://tskjelde-bit.github.io/grafer';
-
-        function generateEmbedCode() {
-            const theme = isDark ? 'dark' : 'light';
-            const aspect = aspectSelect.value;
-            const avg = avgToggle.checked ? '1' : '0';
-            const palette = paletteSelect.value;
-            const transparent = isTransparent ? '1' : '0';
-            const chartUrl = `${GITHUB_PAGES_BASE}/volum/tilsalgs_uke/tilsalgs_uke.html?theme=${theme}&aspect=${aspect}&avg=${avg}&palette=${palette}&transparent=${transparent}`;
-            return `<div class="grafer-embed" data-src="${chartUrl}"><script src="${GITHUB_PAGES_BASE}/embed.js"><\/script></div>`;
+        // Version management - getCurrentConfig captures ALL settings
+        function getCurrentConfig() {
+            return {
+                theme: isDark ? 'dark' : 'light',
+                aspect: aspectSelect.value,
+                transparent: isTransparent,
+                opacity: currentOpacity,
+                palette: paletteSelect.value,
+                avg: {
+                    enabled: avgToggle.checked,
+                    color: avgColor,
+                    lineWidth: avgLineWidth,
+                    dashed: avgDashed
+                },
+                customYearColors: { ...customYearColors },
+                selectedYears: Array.from(selectedYears),
+                selectedWeeks: Array.from(selectedWeeks),
+                header: {
+                    text: headerInput.value,
+                    fontSize: parseInt(headerSizeInput.value)
+                },
+                subheader: {
+                    text: subheaderInput.value,
+                    fontSize: parseInt(subheaderSizeInput.value)
+                },
+                fontInherit: fontInheritToggle.checked
+            };
         }
 
-        embedBtn.addEventListener('click', () => {
-            embedCode.value = generateEmbedCode();
-            embedModal.classList.add('show');
-        });
+        // applyConfig restores ALL settings from a version
+        function applyConfig(config) {
+            // Theme
+            isDark = config.theme === 'dark';
+            document.body.className = isDark ? 'dark' : 'light';
+            themeIcon.innerHTML = isDark ? '&#9728;' : '&#9790;';
+            themeText.textContent = isDark ? 'Light' : 'Dark';
 
-        copyEmbedBtn.addEventListener('click', () => {
-            embedCode.select();
-            document.execCommand('copy');
-            copyEmbedBtn.textContent = 'Kopiert!';
-            setTimeout(() => { copyEmbedBtn.textContent = 'Kopier'; }, 2000);
-        });
+            // Aspect
+            aspectSelect.value = config.aspect || '2.0';
+            document.getElementById('chart').style.aspectRatio = aspectSelect.value;
 
-        closeEmbedBtn.addEventListener('click', () => { embedModal.classList.remove('show'); });
-        embedModal.addEventListener('click', (e) => { if (e.target === embedModal) embedModal.classList.remove('show'); });
+            // Transparent
+            isTransparent = config.transparent || false;
+            transparentToggle.checked = isTransparent;
+
+            // Opacity
+            currentOpacity = config.opacity || 0.7;
+            opacityInput.value = currentOpacity;
+            opacityValue.textContent = currentOpacity;
+
+            // Palette
+            currentPalette = config.palette || 'default';
+            paletteSelect.value = currentPalette;
+            colorPalette = getColorPalette(currentPalette, 0.7);
+            colorPaletteLight = getColorPalette(currentPalette, 0.85);
+
+            // Average line
+            if (config.avg) {
+                avgToggle.checked = config.avg.enabled !== false;
+                avgColor = config.avg.color || '#A0FAB2';
+                avgColorInput.value = avgColor;
+                avgLineWidth = config.avg.lineWidth || 3;
+                avgWidthInput.value = avgLineWidth;
+                avgWidthValue.textContent = avgLineWidth;
+                avgDashed = config.avg.dashed !== false;
+                avgDashToggle.checked = avgDashed;
+            }
+
+            // Custom year colors
+            customYearColors = { ...(config.customYearColors || {}) };
+
+            // Selected years
+            if (config.selectedYears && config.selectedYears.length > 0) {
+                selectedYears.clear();
+                config.selectedYears.forEach(y => selectedYears.add(y));
+                updateDatasetCheckboxes();
+            }
+
+            // Selected weeks
+            if (config.selectedWeeks && config.selectedWeeks.length > 0) {
+                selectedWeeks.clear();
+                config.selectedWeeks.forEach(w => selectedWeeks.add(w));
+                updateXAxisCheckboxes();
+                updateXAxisCount();
+            }
+
+            // Headers
+            if (config.header) {
+                headerInput.value = config.header.text || '';
+                chartHeader.textContent = config.header.text || '';
+                headerSizeInput.value = config.header.fontSize || 22;
+                chartHeader.style.fontSize = (config.header.fontSize || 22) + 'px';
+            }
+            if (config.subheader) {
+                subheaderInput.value = config.subheader.text || '';
+                chartSubheader.textContent = config.subheader.text || '';
+                subheaderSizeInput.value = config.subheader.fontSize || 14;
+                chartSubheader.style.fontSize = (config.subheader.fontSize || 14) + 'px';
+            }
+            fontInheritToggle.checked = config.fontInherit || false;
+            const font = config.fontInherit ? 'inherit' : 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+            chartHeader.style.fontFamily = font;
+            chartSubheader.style.fontFamily = font;
+
+            // Rebuild chart with new settings
+            rebuildChart();
+            updateTransparency();
+        }
 
         // Initialize
         loadChart();
+    </script>
+    <script src="../../version-manager.js"></script>
+    <script>
+        VersionManager.init({
+            chartType: 'tilsalgs_uke',
+            versionsPath: 'volum/tilsalgs_uke/versions.json',
+            publicUrl: 'volum/tilsalgs_uke/tilsalgs_uke.html',
+            getCurrentConfig: getCurrentConfig,
+            applyConfig: applyConfig
+        });
     </script>
 </body>
 </html>

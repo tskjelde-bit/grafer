@@ -540,214 +540,38 @@
             display: flex;
         }
 
-        /* Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            border-radius: 12px;
-            padding: 1.5rem;
-            max-width: 600px;
-            width: 90%;
-        }
-
-        body.dark .modal-content {
-            background: #1f2937;
-        }
-
-        body.light .modal-content {
-            background: #ffffff;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-content h3 {
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-content p {
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-
-        body.dark .modal-content p {
-            color: #a1a1aa;
-        }
-
-        body.light .modal-content p {
-            color: #6b7280;
-        }
-
-        .modal-content textarea {
-            width: 100%;
-            height: 100px;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            resize: none;
-            margin-bottom: 1rem;
-        }
-
-        body.dark .modal-content textarea {
-            background: #111827;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e4e4e7;
-        }
-
-        body.light .modal-content textarea {
-            background: #f9fafb;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: #1a1a2e;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
-        }
-
-        .modal-wide {
-            max-width: 800px;
-        }
-
-        .save-version-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .save-version-row input[type="text"] {
-            flex: 1;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-
-        body.dark .save-version-row input[type="text"] {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #e4e4e7;
-        }
-
-        body.light .save-version-row input[type="text"] {
-            background: #f3f4f6;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: #1a1a2e;
-        }
-
-        .versions-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 1rem;
-        }
-
-        .version-item {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-        }
-
-        body.dark .version-item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        body.light .version-item {
-            background: #f9fafb;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .version-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .version-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .version-date {
-            font-size: 0.75rem;
-        }
-
-        body.dark .version-date {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        body.light .version-date {
-            color: #9ca3af;
-        }
-
-        .version-embed {
-            font-family: monospace;
-            font-size: 0.7rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-            word-break: break-all;
-            max-height: 60px;
-            overflow: hidden;
-        }
-
-        body.dark .version-embed {
-            background: rgba(0, 0, 0, 0.3);
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        body.light .version-embed {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .version-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .version-actions .btn {
-            padding: 0.35rem 0.75rem;
-            font-size: 0.75rem;
-            height: auto;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .no-versions {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        body.dark .no-versions {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        body.light .no-versions {
-            color: #9ca3af;
-        }
+        /* Version panel styles */
+        .versions-panel-container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; display: none; }
+        .versions-panel-container.show { display: block; }
+        .versions-panel-inner { border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+        body.dark .versions-panel-inner { background: #1a1d23; border: 1px solid rgba(255, 255, 255, 0.1); }
+        body.light .versions-panel-inner { background: #f9fafb; border: 1px solid rgba(0, 0, 0, 0.1); }
+        .versions-save-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .version-name-input { flex: 1; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.85rem; }
+        body.dark .version-name-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #e4e4e7; }
+        body.light .version-name-input { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.15); color: #1a1a2e; }
+        .version-status { font-size: 0.8rem; min-height: 1.2em; margin-bottom: 0.5rem; }
+        .version-status.success { color: #10b981; }
+        .version-status.error { color: #ef4444; }
+        .versions-list-container { max-height: 500px; overflow-y: auto; }
+        .version-item { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; }
+        body.dark .version-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); }
+        body.light .version-item { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); }
+        .version-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+        .version-name { font-weight: 600; font-size: 0.9rem; }
+        .version-date { font-size: 0.7rem; }
+        body.dark .version-date { color: rgba(255, 255, 255, 0.5); }
+        body.light .version-date { color: #9ca3af; }
+        .version-url { font-family: monospace; font-size: 0.7rem; margin-bottom: 0.5rem; word-break: break-all; }
+        body.dark .version-url { color: rgba(255, 255, 255, 0.5); }
+        body.light .version-url { color: #9ca3af; }
+        .version-actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+        .btn-sm { padding: 0.3rem 0.6rem !important; font-size: 0.7rem !important; height: auto !important; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .no-versions { text-align: center; padding: 1.5rem; font-size: 0.85rem; }
+        body.dark .no-versions { color: rgba(255, 255, 255, 0.5); }
+        body.light .no-versions { color: #9ca3af; }
 
         @media (max-width: 900px) {
             .toolbar {
@@ -1039,32 +863,7 @@
         </div>
     </div>
 
-    <div class="modal" id="embedModal">
-        <div class="modal-content">
-            <h3>Embed-kode</h3>
-            <p>Kopier denne koden for å embedde grafen:</p>
-            <textarea id="embedCode" readonly></textarea>
-            <div class="save-version-row">
-                <input type="text" id="versionName" placeholder="Versjonsnavn (f.eks. 'Mørk 16:9')">
-                <button class="btn btn-primary" id="saveVersionBtn">Lagre versjon</button>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
-                <button class="btn btn-outline" id="showVersionsBtn">Se versjoner</button>
-                <button class="btn btn-outline" id="closeEmbedBtn">Lukk</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="versionsModal">
-        <div class="modal-content modal-wide">
-            <h3>Lagrede versjoner</h3>
-            <div id="versionsList" class="versions-list"></div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" id="closeVersionsBtn">Lukk</button>
-            </div>
-        </div>
-    </div>
+    <!-- Version panel is injected by version-manager.js -->
 
     <div class="chart-container">
         <div id="captureArea">
@@ -1807,178 +1606,137 @@
             }
         });
 
-        // Embed code functionality
-        const embedBtn = document.getElementById('embedBtn');
-        const embedModal = document.getElementById('embedModal');
-        const embedCode = document.getElementById('embedCode');
-        const copyEmbedBtn = document.getElementById('copyEmbedBtn');
-        const closeEmbedBtn = document.getElementById('closeEmbedBtn');
-
-        const GITHUB_PAGES_BASE = 'https://tskjelde-bit.github.io/grafer';
-
-        function generateEmbedCode() {
-            const theme = isDark ? 'dark' : 'light';
-            const aspect = aspectSelect.value;
-            const transparent = isTransparent ? '1' : '0';
-            const chartUrl = `${GITHUB_PAGES_BASE}/volum/siste12mnd/siste12mnd.html?theme=${theme}&aspect=${aspect}&transparent=${transparent}`;
-
-            return `<div class="grafer-embed" data-src="${chartUrl}"><script src="${GITHUB_PAGES_BASE}/embed.js"><\/script></div>`;
-        }
-
-        embedBtn.addEventListener('click', () => {
-            embedCode.value = generateEmbedCode();
-            embedModal.classList.add('show');
-        });
-
-        copyEmbedBtn.addEventListener('click', () => {
-            embedCode.select();
-            document.execCommand('copy');
-            copyEmbedBtn.textContent = 'Kopiert!';
-            setTimeout(() => {
-                copyEmbedBtn.textContent = 'Kopier';
-            }, 2000);
-        });
-
-        closeEmbedBtn.addEventListener('click', () => {
-            embedModal.classList.remove('show');
-        });
-
-        embedModal.addEventListener('click', (e) => {
-            if (e.target === embedModal) {
-                embedModal.classList.remove('show');
-            }
-        });
-
-        // Version management
-        const VERSIONS_KEY = 'grafer-siste12mnd-versions';
-        const versionNameInput = document.getElementById('versionName');
-        const saveVersionBtn = document.getElementById('saveVersionBtn');
-        const showVersionsBtn = document.getElementById('showVersionsBtn');
-        const versionsModal = document.getElementById('versionsModal');
-        const versionsList = document.getElementById('versionsList');
-        const closeVersionsBtn = document.getElementById('closeVersionsBtn');
-
-        function getVersions() {
-            const stored = localStorage.getItem(VERSIONS_KEY);
-            return stored ? JSON.parse(stored) : [];
-        }
-
-        function saveVersions(versions) {
-            localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
-        }
-
+        // Version management - getCurrentConfig captures ALL settings
         function getCurrentConfig() {
             return {
                 theme: isDark ? 'dark' : 'light',
                 aspect: aspectSelect.value,
                 transparent: isTransparent,
+                opacity: currentOpacity,
+                palette: currentPalette,
                 lineWidth: currentLineWidth,
                 showMarkers: markersToggle.checked,
-                palette: currentPalette,
-                opacity: currentOpacity,
-                highlight: highlightedLine
+                highlightedLine: highlightedLine,
+                highlightColor: HIGHLIGHT_COLOR,
+                selectedXIndices: Array.from(selectedXIndices),
+                header: {
+                    text: headerInput.value,
+                    fontSize: parseInt(headerSizeInput.value)
+                },
+                subheader: {
+                    text: subheaderInput.value,
+                    fontSize: parseInt(subheaderSizeInput.value)
+                },
+                fontInherit: fontInheritToggle.checked,
+                margins: {
+                    top: parseInt(marginTop.value) || 0,
+                    right: parseInt(marginRight.value) || 0,
+                    bottom: parseInt(marginBottom.value) || 0,
+                    left: parseInt(marginLeft.value) || 0
+                },
+                border: {
+                    enabled: borderToggle.checked,
+                    top: { width: parseInt(borderInputs.top.width.value), style: borderInputs.top.style.value, color: borderInputs.top.color.value },
+                    right: { width: parseInt(borderInputs.right.width.value), style: borderInputs.right.style.value, color: borderInputs.right.color.value },
+                    bottom: { width: parseInt(borderInputs.bottom.width.value), style: borderInputs.bottom.style.value, color: borderInputs.bottom.color.value },
+                    left: { width: parseInt(borderInputs.left.width.value), style: borderInputs.left.style.value, color: borderInputs.left.color.value }
+                }
             };
         }
 
-        saveVersionBtn.addEventListener('click', () => {
-            const name = versionNameInput.value.trim();
-            if (!name) {
-                alert('Vennligst skriv inn et versjonsnavn');
-                return;
+        // applyConfig restores ALL settings from a version
+        function applyConfig(config) {
+            isDark = config.theme === 'dark';
+            document.body.className = isDark ? 'dark' : 'light';
+            themeIcon.innerHTML = isDark ? '&#9728;' : '&#9790;';
+            themeText.textContent = isDark ? 'Light' : 'Dark';
+
+            aspectSelect.value = config.aspect || '1.78';
+            document.getElementById('chart').style.aspectRatio = aspectSelect.value;
+
+            isTransparent = config.transparent || false;
+            transparentToggle.checked = isTransparent;
+
+            currentOpacity = config.opacity || 0.7;
+            opacityInput.value = currentOpacity;
+            opacityValue.textContent = currentOpacity;
+
+            currentPalette = config.palette || 'default';
+            paletteSelect.value = currentPalette;
+
+            currentLineWidth = config.lineWidth || 3;
+            lineWidthInput.value = currentLineWidth;
+            lineWidthValue.textContent = currentLineWidth;
+
+            markersToggle.checked = config.showMarkers !== false;
+
+            highlightedLine = config.highlightedLine || null;
+            if (config.highlightColor) {
+                HIGHLIGHT_COLOR = config.highlightColor;
+                highlightColorInput.value = HIGHLIGHT_COLOR;
             }
 
-            const versions = getVersions();
-            const newVersion = {
-                id: Date.now(),
-                name: name,
-                embedCode: generateEmbedCode(),
-                config: getCurrentConfig(),
-                createdAt: new Date().toISOString()
-            };
-
-            versions.unshift(newVersion);
-            saveVersions(versions);
-
-            versionNameInput.value = '';
-            alert('Versjon lagret!');
-        });
-
-        showVersionsBtn.addEventListener('click', () => {
-            renderVersionsList();
-            versionsModal.classList.add('show');
-        });
-
-        closeVersionsBtn.addEventListener('click', () => {
-            versionsModal.classList.remove('show');
-        });
-
-        versionsModal.addEventListener('click', (e) => {
-            if (e.target === versionsModal) {
-                versionsModal.classList.remove('show');
-            }
-        });
-
-        function renderVersionsList() {
-            const versions = getVersions();
-
-            if (versions.length === 0) {
-                versionsList.innerHTML = '<div class="no-versions">Ingen lagrede versjoner ennå</div>';
-                return;
+            if (config.selectedXIndices && config.selectedXIndices.length > 0) {
+                selectedXIndices.clear();
+                config.selectedXIndices.forEach(i => selectedXIndices.add(i));
+                updateXAxisCheckboxes();
+                updateXAxisCount();
             }
 
-            versionsList.innerHTML = versions.map(v => {
-                const date = new Date(v.createdAt).toLocaleDateString('nb-NO', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+            if (config.header) {
+                headerInput.value = config.header.text || '';
+                chartHeader.textContent = config.header.text || '';
+                headerSizeInput.value = config.header.fontSize || 22;
+                chartHeader.style.fontSize = (config.header.fontSize || 22) + 'px';
+            }
+            if (config.subheader) {
+                subheaderInput.value = config.subheader.text || '';
+                chartSubheader.textContent = config.subheader.text || '';
+                subheaderSizeInput.value = config.subheader.fontSize || 14;
+                chartSubheader.style.fontSize = (config.subheader.fontSize || 14) + 'px';
+            }
+            fontInheritToggle.checked = config.fontInherit || false;
+            const font = config.fontInherit ? 'inherit' : 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+            chartHeader.style.fontFamily = font;
+            chartSubheader.style.fontFamily = font;
 
-                return `
-                    <div class="version-item" data-id="${v.id}">
-                        <div class="version-header">
-                            <span class="version-name">${v.name}</span>
-                            <span class="version-date">${date}</span>
-                        </div>
-                        <div class="version-embed">${v.embedCode}</div>
-                        <div class="version-actions">
-                            <button class="btn btn-success copy-version-btn">Kopier embed</button>
-                            <button class="btn btn-danger delete-version-btn">Slett</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            if (config.margins) {
+                marginTop.value = config.margins.top || 0;
+                marginRight.value = config.margins.right || 0;
+                marginBottom.value = config.margins.bottom || 0;
+                marginLeft.value = config.margins.left || 0;
+                updateMargins();
+            }
 
-            // Add event listeners
-            versionsList.querySelectorAll('.copy-version-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const item = e.target.closest('.version-item');
-                    const id = parseInt(item.dataset.id);
-                    const version = versions.find(v => v.id === id);
-                    if (version) {
-                        navigator.clipboard.writeText(version.embedCode).then(() => {
-                            btn.textContent = 'Kopiert!';
-                            setTimeout(() => btn.textContent = 'Kopier embed', 2000);
-                        });
+            if (config.border) {
+                borderToggle.checked = config.border.enabled || false;
+                borderControls.style.display = config.border.enabled ? 'block' : 'none';
+                ['top', 'right', 'bottom', 'left'].forEach(side => {
+                    if (config.border[side]) {
+                        borderInputs[side].width.value = config.border[side].width || 1;
+                        borderInputs[side].style.value = config.border[side].style || 'solid';
+                        borderInputs[side].color.value = config.border[side].color || '#cccccc';
                     }
                 });
-            });
+                updateBorders();
+            }
 
-            versionsList.querySelectorAll('.delete-version-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if (!confirm('Er du sikker på at du vil slette denne versjonen?')) return;
-                    const item = e.target.closest('.version-item');
-                    const id = parseInt(item.dataset.id);
-                    const updatedVersions = versions.filter(v => v.id !== id);
-                    saveVersions(updatedVersions);
-                    renderVersionsList();
-                });
-            });
+            rebuildChart();
+            updateTransparency();
         }
 
         // Initialize
         loadChart();
+    </script>
+    <script src="../version-manager.js"></script>
+    <script>
+        VersionManager.init({
+            chartType: 'siste12mnd',
+            versionsPath: 'volum/siste12mnd/versions.json',
+            publicUrl: 'volum/siste12mnd/generer.html',
+            getCurrentConfig: getCurrentConfig,
+            applyConfig: applyConfig
+        });
     </script>
 </body>
 </html>
