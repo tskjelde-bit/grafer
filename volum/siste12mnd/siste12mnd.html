@@ -161,13 +161,37 @@
       height: 3px;
       border-radius: 2px;
     }
+
+    /* Gradient fills for area under lines */
+    .trace.scatter:nth-of-type(1) path.js-fill {
+      fill: url(#orangeGradient) !important;
+      fill-opacity: 1 !important;
+    }
+    .trace.scatter:nth-of-type(2) path.js-fill {
+      fill: url(#blueGradient) !important;
+      fill-opacity: 1 !important;
+    }
   </style>
 </head>
 
 <body>
+  <!-- SVG Gradient Definitions -->
+  <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+    <defs>
+      <linearGradient id="blueGradient" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#4FAEF6" stop-opacity="0.35" />
+        <stop offset="80%" stop-color="#4FAEF6" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="orangeGradient" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#F2A541" stop-opacity="0.25" />
+        <stop offset="80%" stop-color="#F2A541" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+  </svg>
+
   <div class="wrap">
     <h1 class="chart-header">Boligmarked siste 12 måneder</h1>
-    <div class="chart-subheader">Antall boliger solgt og lagt ut for salg i Oslo</div>
+    <div class="chart-subheader" id="chartSubheader">Antall boliger solgt og lagt ut for salg i Oslo</div>
 
     <div class="legend-container" id="legendContainer"></div>
 
@@ -330,26 +354,44 @@
           lagtUt: lagtUtValues
         };
 
-        // Build traces
-        const traceSolgt = {
+        // Calculate totals and update subheader
+        const totalSolgt = solgtValues.reduce((sum, val) => sum + (val || 0), 0);
+        const totalLagtUt = lagtUtValues.reduce((sum, val) => sum + (val || 0), 0);
+        const diff = totalLagtUt - totalSolgt;
+        const subheaderEl = document.getElementById('chartSubheader');
+        if (subheaderEl) {
+          subheaderEl.textContent = `De siste 12 månedene er det solgt ${totalSolgt.toLocaleString('nb-NO')} og lagt ut for salg ${totalLagtUt.toLocaleString('nb-NO')} – Det er lagt ut ${diff.toLocaleString('nb-NO')} flere enn det er solgt`;
+        }
+
+        // Build envelope traces for gradient fills (rendered first, behind the lines)
+        // Order: lagtUt envelope (back), solgt envelope (middle), lagtUt line, solgt line (front)
+        const envelopeLagtUt = {
+          x: dates,
+          y: lagtUtValues,
+          type: 'scatter',
+          mode: 'none',
+          name: 'Lagt ut fill',
+          fill: 'tozeroy',
+          fillcolor: 'rgba(242, 165, 65, 0.25)',
+          line: { shape: 'spline', smoothing: 1.2 },
+          hoverinfo: 'skip',
+          showlegend: false
+        };
+
+        const envelopeSolgt = {
           x: dates,
           y: solgtValues,
           type: 'scatter',
-          mode: 'lines+markers',
-          name: 'Solgt',
-          line: {
-            color: colors.solgt,
-            width: 3,
-            shape: 'spline',
-            smoothing: 1.2
-          },
-          marker: {
-            size: 8,
-            color: colors.solgt
-          },
-          hoverinfo: 'none'
+          mode: 'none',
+          name: 'Solgt fill',
+          fill: 'tozeroy',
+          fillcolor: 'rgba(79, 174, 246, 0.35)',
+          line: { shape: 'spline', smoothing: 1.2 },
+          hoverinfo: 'skip',
+          showlegend: false
         };
 
+        // Build line traces
         const traceLagtUt = {
           x: dates,
           y: lagtUtValues,
@@ -369,7 +411,27 @@
           hoverinfo: 'none'
         };
 
-        const traces = [traceSolgt, traceLagtUt];
+        const traceSolgt = {
+          x: dates,
+          y: solgtValues,
+          type: 'scatter',
+          mode: 'lines+markers',
+          name: 'Solgt',
+          line: {
+            color: colors.solgt,
+            width: 3,
+            shape: 'spline',
+            smoothing: 1.2
+          },
+          marker: {
+            size: 8,
+            color: colors.solgt
+          },
+          hoverinfo: 'none'
+        };
+
+        // Order: envelopes first (back to front), then lines (back to front)
+        const traces = [envelopeLagtUt, envelopeSolgt, traceLagtUt, traceSolgt];
 
         const layout = {
           paper_bgcolor: bgColor,
@@ -419,17 +481,19 @@
         const legendEl = document.getElementById('legendContainer');
 
         // Build legend
+        // Trace order: [0: envelopeLagtUt, 1: envelopeSolgt, 2: traceLagtUt, 3: traceSolgt]
         const legendItems = [
-          { name: 'Solgt', color: colors.solgt, traceIdx: 0 },
-          { name: 'Lagt ut for salg', color: colors.lagtUt, traceIdx: 1 }
+          { name: 'Solgt', color: colors.solgt, lineIdx: 3, envIdx: 1 },
+          { name: 'Lagt ut for salg', color: colors.lagtUt, lineIdx: 2, envIdx: 0 }
         ];
 
-        const visibleTraces = new Set([0, 1]);
+        const visibleTraces = new Set([0, 1, 2, 3]);
 
         legendItems.forEach(item => {
           const div = document.createElement('div');
           div.className = 'legend-item';
-          div.dataset.traceIdx = item.traceIdx;
+          div.dataset.lineIdx = item.lineIdx;
+          div.dataset.envIdx = item.envIdx;
           div.innerHTML = `
             <div class="legend-line" style="background:${item.color}"></div>
             <span>${item.name}</span>
@@ -446,14 +510,16 @@
           const date = LOOKUP.dates[idx];
           let rows = '';
 
-          if (visibleTraces.has(0)) {
+          // Solgt line is trace index 3
+          if (visibleTraces.has(3)) {
             rows += `
               <div class="dot" style="background:${colors.solgt}"></div>
               <div class="label">Solgt</div>
               <div class="val">${formatNumberNO(LOOKUP.solgt[idx])}</div>
             `;
           }
-          if (visibleTraces.has(1)) {
+          // Lagt ut line is trace index 2
+          if (visibleTraces.has(2)) {
             rows += `
               <div class="dot" style="background:${colors.lagtUt}"></div>
               <div class="label">Lagt ut</div>
@@ -497,15 +563,18 @@
           // Legend click handlers
           legendEl.querySelectorAll('.legend-item').forEach(item => {
             item.addEventListener('click', () => {
-              const traceIdx = parseInt(item.dataset.traceIdx);
-              if (visibleTraces.has(traceIdx)) {
-                visibleTraces.delete(traceIdx);
+              const lineIdx = parseInt(item.dataset.lineIdx);
+              const envIdx = parseInt(item.dataset.envIdx);
+              if (visibleTraces.has(lineIdx)) {
+                visibleTraces.delete(lineIdx);
+                visibleTraces.delete(envIdx);
                 item.classList.add('disabled');
-                Plotly.restyle(gd, { visible: false }, [traceIdx]);
+                Plotly.restyle(gd, { visible: false }, [lineIdx, envIdx]);
               } else {
-                visibleTraces.add(traceIdx);
+                visibleTraces.add(lineIdx);
+                visibleTraces.add(envIdx);
                 item.classList.remove('disabled');
-                Plotly.restyle(gd, { visible: true }, [traceIdx]);
+                Plotly.restyle(gd, { visible: true }, [lineIdx, envIdx]);
               }
             });
           });

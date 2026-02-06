@@ -28,6 +28,8 @@ class AdminHandler(http.server.SimpleHTTPRequestHandler):
                 csv_content = data.get('csv', '')
                 folder = data.get('folder', '')  # subfolder like 'prisutvikling'
 
+                filename = data.get('filename', 'data.csv')
+
                 # Determine target directory
                 if folder:
                     target_dir = os.path.join(DIRECTORY, folder)
@@ -35,9 +37,10 @@ class AdminHandler(http.server.SimpleHTTPRequestHandler):
                     target_dir = DIRECTORY
 
                 # Backup existing file
-                data_file = os.path.join(target_dir, 'data.csv')
+                data_file = os.path.join(target_dir, filename)
                 if os.path.exists(data_file):
-                    backup_file = os.path.join(target_dir, 'data_backup.csv')
+                    name, ext = os.path.splitext(filename)
+                    backup_file = os.path.join(target_dir, f'{name}_backup{ext}')
                     with open(data_file, 'r', encoding='utf-8') as f:
                         with open(backup_file, 'w', encoding='utf-8') as bf:
                             bf.write(f.read())
@@ -70,11 +73,13 @@ class AdminHandler(http.server.SimpleHTTPRequestHandler):
                 commit_message = data.get('message', 'Oppdatert data.csv')
                 folder = data.get('folder', '')  # subfolder like 'prisutvikling'
 
+                filename = data.get('filename', 'data.csv')
+
                 # Determine file path for git add
                 if folder:
-                    data_file_path = os.path.join(folder, 'data.csv')
+                    data_file_path = os.path.join(folder, filename)
                 else:
-                    data_file_path = 'data.csv'
+                    data_file_path = filename
 
                 # Run git commands
                 os.chdir(DIRECTORY)

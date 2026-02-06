@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boliger til salgs - Kontrollpanel</title>
+    <title>Boliger til salgs per uke - Kontrollpanel</title>
     <style>
         * {
             margin: 0;
@@ -263,7 +263,7 @@
     <a href="../../index.html" style="position: absolute; top: 1.5rem; left: 1.5rem; color: #a1a1aa; text-decoration: none; font-size: 0.875rem;">← Tilbake til oversikt</a>
 
     <div class="container">
-        <h1>Boliger til salgs - Kontrollpanel</h1>
+        <h1>Boliger til salgs per uke - Kontrollpanel</h1>
 
         <!-- Upload Section -->
         <div class="panel">
@@ -271,7 +271,7 @@
             <div class="upload-zone" id="uploadZone">
                 <div class="upload-icon">📁</div>
                 <strong>Dra og slipp fil her, eller klikk for å velge</strong>
-                <p>Støtter CSV-filer med kolonner: Måned, År, Antall</p>
+                <p>Støtter CSV-filer med kolonner: Uke, År, Antall</p>
                 <input type="file" id="fileInput" accept=".csv,.txt">
             </div>
             <div class="status" id="uploadStatus"></div>
@@ -280,12 +280,12 @@
         <!-- Column Mapping Section -->
         <div class="panel hidden" id="mappingPanel">
             <h2>2. Kolonnemapping</h2>
-            <p>Velg hvilke kolonner i filen som inneholder måned, år og antall:</p>
+            <p>Velg hvilke kolonner i filen som inneholder uke, år og antall:</p>
             <div class="column-mapping" id="columnMapping">
                 <div class="mapping-item">
-                    <label>Måned-kolonne</label>
+                    <label>Uke-kolonne</label>
                     <span class="arrow">←</span>
-                    <select id="mapMonth"></select>
+                    <select id="mapWeek"></select>
                 </div>
                 <div class="mapping-item">
                     <label>År-kolonne</label>
@@ -340,23 +340,8 @@
     </div>
 
     <script>
-        // Expected CSV format: Måned,År,TotaltAntallLagtUt
-        const TARGET_COLUMNS = ['Måned', 'År', 'TotaltAntallLagtUt'];
-
-        const MONTH_MAP = {
-            'jan': 'jan', 'januar': 'jan',
-            'feb': 'feb', 'februar': 'feb',
-            'mar': 'mar', 'mars': 'mar',
-            'apr': 'apr', 'april': 'apr',
-            'mai': 'mai',
-            'jun': 'jun', 'juni': 'jun',
-            'jul': 'jul', 'juli': 'jul',
-            'aug': 'aug', 'august': 'aug',
-            'sep': 'sep', 'september': 'sep',
-            'okt': 'okt', 'oktober': 'okt',
-            'nov': 'nov', 'november': 'nov',
-            'des': 'des', 'desember': 'des'
-        };
+        // Expected CSV format: Uke,År,AntallLagtUt
+        const TARGET_COLUMNS = ['Uke', 'År', 'AntallLagtUt'];
 
         // State
         let currentData = [];
@@ -408,14 +393,11 @@
             if (text.charCodeAt(0) === 0xFEFF) {
                 text = text.slice(1);
             }
-            // Also handle UTF-8 BOM as string
             text = text.replace(/^\uFEFF/, '').replace(/^\xEF\xBB\xBF/, '');
 
             const lines = text.trim().split(/\r?\n/);
             const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
             const data = [];
-
-            console.log('Raw headers:', headers);
 
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim()) {
@@ -434,13 +416,13 @@
         // Load current data
         async function loadCurrentData() {
             try {
-                const response = await fetch('../data_lagt_ut.csv?t=' + Date.now());
+                const response = await fetch('../data_lagt_ut_uke.csv?t=' + Date.now());
                 const text = await response.text();
                 const { headers, data } = parseCSV(text);
                 currentData = data;
 
                 renderTable(currentDataPreview, headers, data.slice(-20), 'Siste 20 rader:');
-                showStatus(uploadStatus, `Lastet ${data.length} rader fra data_lagt_ut.csv`, 'success');
+                showStatus(uploadStatus, `Lastet ${data.length} rader fra data_lagt_ut_uke.csv`, 'success');
                 return true;
             } catch (error) {
                 showStatus(uploadStatus, `Feil ved lasting: ${error.message}`, 'error');
@@ -510,22 +492,13 @@
 
         // Column mapping
         function createColumnMapping(sourceHeaders) {
-            const mapMonth = document.getElementById('mapMonth');
+            const mapWeek = document.getElementById('mapWeek');
             const mapYear = document.getElementById('mapYear');
             const mapValue = document.getElementById('mapValue');
 
-            // Filter out empty or metadata columns
-            const validHeaders = sourceHeaders.filter(col => {
-                const c = col.trim().toLowerCase();
-                return c && !c.includes('filter') && !c.includes('brukte') && c.length > 0;
-            });
-
-            log(`Kolonner funnet: ${validHeaders.join(', ')}`, 'info');
-
-            [mapMonth, mapYear, mapValue].forEach(select => {
+            [mapWeek, mapYear, mapValue].forEach(select => {
                 select.innerHTML = '<option value="">-- Velg kolonne --</option>';
 
-                // Add all headers (including potentially invalid ones for debugging)
                 sourceHeaders.forEach(col => {
                     if (!col.trim()) return;
 
@@ -536,7 +509,7 @@
                     const colLower = col.toLowerCase().trim();
 
                     // Auto-select based on column name
-                    if (select === mapMonth && (colLower === 'måned' || colLower === 'maaned' || colLower === 'month' || colLower.includes('måned'))) {
+                    if (select === mapWeek && (colLower === 'uke' || colLower === 'week' || colLower.includes('uke'))) {
                         option.selected = true;
                     }
                     if (select === mapYear && (colLower === 'år' || colLower === 'aar' || colLower === 'year' || colLower.includes('år'))) {
@@ -550,7 +523,6 @@
                 });
             });
 
-            // Show first few rows for debugging
             if (uploadedData.length > 0) {
                 log(`Første rad: ${JSON.stringify(uploadedData[0])}`, 'info');
             }
@@ -561,50 +533,44 @@
             clearLog();
             log('Starter dataprosessering...', 'info');
 
-            const monthCol = document.getElementById('mapMonth').value;
+            const weekCol = document.getElementById('mapWeek').value;
             const yearCol = document.getElementById('mapYear').value;
             const valueCol = document.getElementById('mapValue').value;
 
-            if (!monthCol || !yearCol || !valueCol) {
+            if (!weekCol || !yearCol || !valueCol) {
                 log('FEIL: Alle tre kolonner må være valgt!', 'error');
                 return;
             }
 
-            log(`Måned-kolonne: "${monthCol}"`, 'info');
+            log(`Uke-kolonne: "${weekCol}"`, 'info');
             log(`År-kolonne: "${yearCol}"`, 'info');
             log(`Antall-kolonne: "${valueCol}"`, 'info');
 
-            processData(monthCol, yearCol, valueCol);
+            processData(weekCol, yearCol, valueCol);
         });
 
-        function normalizeMonth(rawMonth) {
-            if (!rawMonth) return null;
-            const m = String(rawMonth).trim().toLowerCase();
-            return MONTH_MAP[m] || null;
-        }
-
-        function processData(monthCol, yearCol, valueCol) {
+        function processData(weekCol, yearCol, valueCol) {
             const newRows = [];
             const updatedRows = [];
 
             // Create a map of existing data for quick lookup
             const existingMap = {};
             currentData.forEach(row => {
-                const key = `${row.Måned}-${row.År}`;
+                const key = `${row.Uke}-${row.År}`;
                 existingMap[key] = row;
             });
 
             uploadedData.forEach((row, index) => {
-                const rawMonth = row[monthCol];
+                const rawWeek = row[weekCol];
                 const rawYear = row[yearCol];
                 const rawValue = row[valueCol];
 
-                const month = normalizeMonth(rawMonth);
+                const week = parseInt(String(rawWeek).trim(), 10);
                 const year = String(rawYear).trim();
                 const value = String(rawValue).trim().replace(/\s/g, '').replace(',', '.');
 
-                if (!month) {
-                    if (index < 5) log(`Rad ${index + 1}: Ugyldig måned "${rawMonth}"`, 'warning');
+                if (isNaN(week) || week < 1 || week > 53) {
+                    if (index < 5) log(`Rad ${index + 1}: Ugyldig uke "${rawWeek}"`, 'warning');
                     return;
                 }
 
@@ -618,21 +584,21 @@
                     return;
                 }
 
-                const key = `${month}-${year}`;
+                const key = `${week}-${year}`;
                 const cleanedRow = {
-                    Måned: month,
+                    Uke: week,
                     År: year,
-                    TotaltAntallLagtUt: parseInt(value)
+                    AntallLagtUt: parseInt(value)
                 };
 
                 if (existingMap[key]) {
-                    if (existingMap[key].TotaltAntallLagtUt !== cleanedRow.TotaltAntallLagtUt) {
+                    if (parseInt(existingMap[key].AntallLagtUt) !== cleanedRow.AntallLagtUt) {
                         updatedRows.push(cleanedRow);
-                        log(`Oppdaterer: ${month} ${year}`, 'warning');
+                        log(`Oppdaterer: uke ${week} ${year}`, 'warning');
                     }
                 } else {
                     newRows.push(cleanedRow);
-                    log(`Ny: ${month} ${year} = ${value}`, 'success');
+                    log(`Ny: uke ${week} ${year} = ${value}`, 'success');
                 }
             });
 
@@ -643,8 +609,8 @@
 
             // Apply updates
             updatedRows.forEach(row => {
-                const key = `${row.Måned}-${row.År}`;
-                const index = mergedData.findIndex(r => `${r.Måned}-${r.År}` === key);
+                const key = `${row.Uke}-${row.År}`;
+                const index = mergedData.findIndex(r => `${r.Uke}-${r.År}` === key);
                 if (index >= 0) {
                     mergedData[index] = row;
                 }
@@ -655,12 +621,11 @@
                 mergedData.push(row);
             });
 
-            // Sort by year and month
-            const monthOrder = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+            // Sort by year and week
             mergedData.sort((a, b) => {
                 const yearDiff = parseInt(a.År) - parseInt(b.År);
                 if (yearDiff !== 0) return yearDiff;
-                return monthOrder.indexOf(a.Måned) - monthOrder.indexOf(b.Måned);
+                return parseInt(a.Uke) - parseInt(b.Uke);
             });
 
             showPreview(newRows, updatedRows);
@@ -690,8 +655,8 @@
             `;
 
             // Show last rows
-            const newKeys = new Set(newRows.map(r => `${r.Måned}-${r.År}`));
-            const updatedKeys = new Set(updatedRows.map(r => `${r.Måned}-${r.År}`));
+            const newKeys = new Set(newRows.map(r => `${r.Uke}-${r.År}`));
+            const updatedKeys = new Set(updatedRows.map(r => `${r.Uke}-${r.År}`));
 
             let tableHTML = '<p>Siste 20 rader (grønn = ny, gul = oppdatert):</p><table><thead><tr>';
             TARGET_COLUMNS.forEach(col => {
@@ -700,7 +665,7 @@
             tableHTML += '</tr></thead><tbody>';
 
             mergedData.slice(-20).forEach(row => {
-                const key = `${row.Måned}-${row.År}`;
+                const key = `${row.Uke}-${row.År}`;
                 let rowClass = '';
                 if (newKeys.has(key)) rowClass = 'new-row';
                 else if (updatedKeys.has(key)) rowClass = 'updated-row';
@@ -751,11 +716,11 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'data_lagt_ut.csv';
+            link.download = 'data_lagt_ut_uke.csv';
             link.click();
             URL.revokeObjectURL(url);
 
-            showStatus(saveStatus, 'Fil lastet ned. Erstatt eksisterende data_lagt_ut.csv med denne filen.', 'success');
+            showStatus(saveStatus, 'Fil lastet ned. Erstatt eksisterende data_lagt_ut_uke.csv med denne filen.', 'success');
         });
 
         // Save directly
@@ -770,13 +735,13 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ csv: csv, folder: 'volum', filename: 'data_lagt_ut.csv' })
+                    body: JSON.stringify({ csv: csv, folder: 'volum', filename: 'data_lagt_ut_uke.csv' })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    showStatus(saveStatus, 'data_lagt_ut.csv er oppdatert!', 'success');
+                    showStatus(saveStatus, 'data_lagt_ut_uke.csv er oppdatert!', 'success');
                     await loadCurrentData();
                     showChartPreview();
                 } else {
@@ -790,15 +755,15 @@
         // Chart preview
         function showChartPreview() {
             chartPreviewPanel.classList.remove('hidden');
-            chartPreview.src = 'tilsalgs.html?t=' + Date.now();
+            chartPreview.src = 'tilsalgs_uke.html?t=' + Date.now();
         }
 
         refreshPreviewBtn.addEventListener('click', () => {
-            chartPreview.src = 'tilsalgs.html?t=' + Date.now();
+            chartPreview.src = 'tilsalgs_uke.html?t=' + Date.now();
         });
 
         openFullBtn.addEventListener('click', () => {
-            window.open('tilsalgs.html', '_blank');
+            window.open('tilsalgs_uke.html', '_blank');
         });
 
         // Generate PNG page
@@ -811,7 +776,7 @@
         const githubBtn = document.getElementById('githubBtn');
         githubBtn.addEventListener('click', async () => {
             const today = new Date().toISOString().split('T')[0];
-            const message = `Oppdatert boliger til salgs data ${today}`;
+            const message = `Oppdatert boliger til salgs per uke data ${today}`;
 
             try {
                 showStatus(saveStatus, 'Pusher til GitHub...', 'info');
@@ -821,7 +786,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message, folder: 'volum', filename: 'data_lagt_ut.csv' })
+                    body: JSON.stringify({ message: message, folder: 'volum' })
                 });
 
                 const result = await response.json();

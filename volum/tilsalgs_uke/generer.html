@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generer graf - Boliger til salgs per uke</title>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark {
+            background: #0f1114;
+            color: rgba(255, 255, 255, 0.92);
+            color-scheme: dark;
+        }
+
+        body.light {
+            background: #ffffff;
+            color: #1a1a2e;
+            color-scheme: light;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        body.dark .toolbar {
+            background: rgba(15, 17, 20, 0.98);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .toolbar {
+            background: rgba(255, 255, 255, 0.98);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        body.dark .toolbar-title { color: #60a5fa; }
+        body.light .toolbar-title { color: #2563eb; }
+
+        .toolbar-spacer { flex: 1; }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 28px;
+            margin: 0 0.25rem;
+        }
+
+        body.dark .toolbar-divider { background: rgba(255, 255, 255, 0.15); }
+        body.light .toolbar-divider { background: rgba(0, 0, 0, 0.1); }
+
+        .control {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .control label { white-space: nowrap; }
+        body.dark .control label { color: rgba(255, 255, 255, 0.6); }
+        body.light .control label { color: #6b7280; }
+
+        .control select,
+        .control input[type="number"] {
+            padding: 0.5rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            height: 34px;
+        }
+
+        body.dark .control select,
+        body.dark .control input[type="number"] {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        body.light .control select,
+        body.light .control input[type="number"] {
+            background: #f3f4f6;
+            color: #1a1a2e;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .control input[type="range"] { width: 60px; cursor: pointer; }
+        .control input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+        .control-value { min-width: 24px; text-align: center; }
+        body.dark .control-value { color: rgba(255, 255, 255, 0.5); }
+        body.light .control-value { color: #9ca3af; }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            height: 34px;
+        }
+
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-highlight { background: #2ECC9A; color: #000; }
+        .btn-highlight:hover { background: #25b085; }
+        .btn-outline { background: transparent; }
+        body.dark .btn-outline { color: #e4e4e7; border: 1px solid rgba(255, 255, 255, 0.2); }
+        body.dark .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
+        body.light .btn-outline { color: #374151; border: 1px solid rgba(0, 0, 0, 0.15); }
+        body.light .btn-outline:hover { background: rgba(0, 0, 0, 0.05); }
+
+        /* Dataset selector dropdown */
+        .dataset-dropdown { position: relative; }
+        .dataset-btn { display: flex; align-items: center; gap: 0.4rem; }
+        .dataset-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 180px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 8px;
+            z-index: 1001;
+            display: none;
+        }
+        .dataset-panel.show { display: block; }
+        body.dark .dataset-panel { background: #1a1d21; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); }
+        body.light .dataset-panel { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); }
+
+        .dataset-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+        .dataset-item:hover { background: rgba(255, 255, 255, 0.05); }
+        body.light .dataset-item:hover { background: rgba(0, 0, 0, 0.05); }
+        .dataset-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+        .dataset-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.light .dataset-actions { border-top-color: rgba(0, 0, 0, 0.1); }
+        .dataset-actions .btn { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.75rem; height: auto; }
+
+        /* Chart container */
+        .chart-container {
+            max-width: 1200px;
+            margin: 140px auto 40px;
+            padding: 20px;
+        }
+
+        #captureArea { padding: 0; }
+        body.dark #captureArea { background: #0f1114; }
+        body.light #captureArea { background: #ffffff; }
+
+        .chart-header {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.02em;
+        }
+        body.dark .chart-header { color: rgba(255, 255, 255, 0.92); }
+        body.light .chart-header { color: #1a1a2e; }
+
+        .chart-subheader {
+            font-size: 14px;
+            line-height: 1.2;
+            font-weight: normal;
+            margin: 0 0 20px 0;
+        }
+        body.dark .chart-subheader { color: rgba(255, 255, 255, 0.60); }
+        body.light .chart-subheader { color: #6b7280; }
+
+        .legend-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        body.dark .legend-item { color: rgba(255, 255, 255, 0.60); }
+        body.light .legend-item { color: #6b7280; }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        #chart {
+            width: 100%;
+            aspect-ratio: 2.0;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .loading.show { display: flex; }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal.show { display: flex; }
+
+        .modal-content {
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+        }
+        body.dark .modal-content { background: #1f2937; }
+        body.light .modal-content { background: #ffffff; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
+
+        .modal-content h3 { margin-bottom: 0.5rem; }
+        .modal-content p { margin-bottom: 1rem; font-size: 0.9rem; }
+        body.dark .modal-content p { color: #a1a1aa; }
+        body.light .modal-content p { color: #6b7280; }
+
+        .modal-content textarea {
+            width: 100%;
+            height: 100px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            resize: none;
+            margin-bottom: 1rem;
+        }
+        body.dark .modal-content textarea { background: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: #e4e4e7; }
+        body.light .modal-content textarea { background: #f9fafb; border: 1px solid rgba(0, 0, 0, 0.1); color: #1a1a2e; }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 900px) {
+            .toolbar { padding: 0.5rem 1rem; }
+            .chart-container { margin-top: 200px; padding: 15px; }
+        }
+        @media (max-width: 600px) {
+            .chart-container { margin-top: 260px; }
+        }
+    </style>
+</head>
+<body class="dark">
+    <div class="toolbar">
+        <div class="toolbar-row">
+            <span class="toolbar-title">Generer - Boliger til salgs per uke</span>
+            <span class="toolbar-spacer"></span>
+            <a href="admin.html" class="btn btn-outline">Tilbake</a>
+            <button class="btn btn-outline" id="themeToggle">
+                <span id="themeIcon">&#9728;</span>
+                <span id="themeText">Light</span>
+            </button>
+        </div>
+        <div class="toolbar-row">
+            <div class="control dataset-dropdown">
+                <label>Data:</label>
+                <button class="btn btn-outline dataset-btn" id="datasetBtn">
+                    <span id="datasetCount">6 år</span>
+                    <span style="font-size: 10px;">▼</span>
+                </button>
+                <div class="dataset-panel" id="datasetPanel">
+                    <div id="datasetList"></div>
+                    <div class="dataset-actions">
+                        <button class="btn btn-outline" id="datasetSelectAll">Alle</button>
+                        <button class="btn btn-outline" id="datasetSelectNone">Ingen</button>
+                    </div>
+                </div>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
+                <label>Farger:</label>
+                <select id="paletteSelect">
+                    <option value="default">Standard</option>
+                    <option value="a1">A1 Blå/grå</option>
+                    <option value="a2">A2 Utvidet</option>
+                    <option value="b1">B1 Fargerik</option>
+                    <option value="b2">B2 Utvidet</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>Opacity:</label>
+                <input type="range" id="opacityInput" min="0.3" max="1" step="0.1" value="0.7">
+                <span class="control-value" id="opacityValue">0.7</span>
+            </div>
+            <div class="control">
+                <label>
+                    <input type="checkbox" id="avgToggle" checked>
+                    Snitt
+                </label>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
+                <label>Highlight:</label>
+                <select id="highlightYearSelect"></select>
+                <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
+                <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
+            </div>
+            <span class="toolbar-divider"></span>
+            <div class="control">
+                <label>Aspect:</label>
+                <select id="aspectSelect">
+                    <option value="2.0" selected>2:1</option>
+                    <option value="1.78">16:9</option>
+                    <option value="1.33">4:3</option>
+                    <option value="1.25">5:4</option>
+                    <option value="0.75">3:4</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>
+                    <input type="checkbox" id="transparentToggle">
+                    Transparent
+                </label>
+            </div>
+        </div>
+        <div class="toolbar-row">
+            <div class="control">
+                <label>Oppløsning:</label>
+                <select id="sizeSelect">
+                    <option value="1">1x</option>
+                    <option value="2" selected>2x</option>
+                    <option value="3">3x</option>
+                </select>
+            </div>
+            <span class="toolbar-spacer"></span>
+            <button class="btn btn-success" id="downloadBtn">Last ned PNG</button>
+            <button class="btn btn-primary" id="embedBtn">Embed-kode</button>
+        </div>
+    </div>
+
+    <div class="modal" id="embedModal">
+        <div class="modal-content">
+            <h3>Embed-kode</h3>
+            <p>Kopier denne koden for å embedde grafen:</p>
+            <textarea id="embedCode" readonly></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-success" id="copyEmbedBtn">Kopier</button>
+                <button class="btn btn-outline" id="closeEmbedBtn">Lukk</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div id="captureArea">
+            <h1 class="chart-header">Boliger lagt ut for salg per uke</h1>
+            <div class="chart-subheader">Ukentlig antall boliger lagt ut for salg i Oslo</div>
+            <div class="legend-container" id="legendContainer"></div>
+            <div id="chart"></div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">Genererer bilde...</div>
+
+    <script>
+        // Theme handling
+        let isDark = true;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.className = isDark ? 'dark' : 'light';
+            themeIcon.innerHTML = isDark ? '&#9728;' : '&#9790;';
+            themeText.textContent = isDark ? 'Light' : 'Dark';
+            updateChartTheme();
+        });
+
+        // Aspect ratio handling
+        const aspectSelect = document.getElementById('aspectSelect');
+        aspectSelect.addEventListener('change', () => {
+            const chartDiv = document.getElementById('chart');
+            chartDiv.style.aspectRatio = aspectSelect.value;
+            if (chartEl) {
+                setTimeout(() => { Plotly.Plots.resize(chartEl); }, 50);
+            }
+        });
+
+        // Average line toggle
+        const avgToggle = document.getElementById('avgToggle');
+        avgToggle.addEventListener('change', () => {
+            if (chartEl && years.length > 0) {
+                const avgTraceIdx = years.length;
+                Plotly.restyle(chartEl, { visible: avgToggle.checked }, [avgTraceIdx]);
+                updateLegend();
+            }
+        });
+
+        // Opacity slider
+        let currentOpacity = 0.7;
+        const opacityInput = document.getElementById('opacityInput');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacityInput.addEventListener('input', () => {
+            currentOpacity = parseFloat(opacityInput.value);
+            opacityValue.textContent = currentOpacity;
+            updateChartColors();
+        });
+
+        // Palette change
+        let currentPalette = 'default';
+        const paletteSelect = document.getElementById('paletteSelect');
+        paletteSelect.addEventListener('change', () => {
+            currentPalette = paletteSelect.value;
+            updateChartColors();
+        });
+
+        // Transparent background toggle
+        let isTransparent = false;
+        const transparentToggle = document.getElementById('transparentToggle');
+        const captureArea = document.getElementById('captureArea');
+
+        transparentToggle.addEventListener('change', () => {
+            isTransparent = transparentToggle.checked;
+            updateTransparency();
+        });
+
+        function updateTransparency() {
+            if (isTransparent) {
+                captureArea.style.background = 'transparent';
+                if (chartEl) {
+                    Plotly.relayout(chartEl, { 'paper_bgcolor': 'rgba(0,0,0,0)', 'plot_bgcolor': 'rgba(0,0,0,0)' });
+                }
+            } else {
+                const bgColor = isDark ? '#0f1114' : '#ffffff';
+                captureArea.style.background = bgColor;
+                if (chartEl) {
+                    Plotly.relayout(chartEl, { 'paper_bgcolor': bgColor, 'plot_bgcolor': bgColor });
+                }
+            }
+        }
+
+        // Highlight year
+        let customYearColors = {};
+        const highlightYearSelect = document.getElementById('highlightYearSelect');
+        const quickHighlightBtn = document.getElementById('quickHighlightBtn');
+        const resetHighlightBtn = document.getElementById('resetHighlightBtn');
+        const HIGHLIGHT_COLOR = '#2ECC9A';
+
+        quickHighlightBtn.addEventListener('click', () => {
+            const year = highlightYearSelect.value;
+            if (year) {
+                const r = parseInt(HIGHLIGHT_COLOR.slice(1, 3), 16);
+                const g = parseInt(HIGHLIGHT_COLOR.slice(3, 5), 16);
+                const b = parseInt(HIGHLIGHT_COLOR.slice(5, 7), 16);
+                customYearColors[year] = `rgba(${r}, ${g}, ${b}, ${currentOpacity})`;
+                yearColors[year] = customYearColors[year];
+
+                if (chartEl) {
+                    const yearIdx = years.indexOf(year);
+                    if (yearIdx >= 0) {
+                        Plotly.restyle(chartEl, { 'marker.color': yearColors[year] }, [yearIdx]);
+                        updateLegend();
+                    }
+                }
+            }
+        });
+
+        resetHighlightBtn.addEventListener('click', () => {
+            customYearColors = {};
+            updateChartColors();
+        });
+
+        // Chart data and rendering
+        const weeks = Array.from({length: 53}, (_, i) => i + 1);
+        const weekLabels = weeks.map(w => String(w));
+
+        function getColorPalette(palette, opacity) {
+            const palettes = {
+                default: ['#093a60', '#1869b8', '#2196f5', '#4bc3fe'],
+                a1: ['#D6DEE6', '#B7C6D4', '#8FAFC4', '#5F9FCF', '#4FAEF6', '#2F7DB8', '#0B4F6C'],
+                a2: ['#E6ECF1', '#D9E2EA', '#C9D6E1', '#B7C6D4', '#A5BAC9', '#8FAFC4', '#7AA3BE', '#6398B8', '#5090B5', '#4088B3', '#3080B0', '#2078AD', '#1070AA', '#0068A7', '#0060A0', '#005898', '#00508F', '#004885', '#00407A', '#00386F'],
+                b1: ['#9FB3C8', '#6FA7C9', '#4FAEF6', '#2CB1BC', '#6BCF9C', '#F2A541'],
+                b2: ['#1F77B4', '#AEC7E8', '#FF7F0E', '#FFBB78', '#2CA02C', '#98DF8A', '#D62728', '#FF9896', '#9467BD', '#C5B0D5', '#8C564B', '#C49C94', '#E377C2', '#F7B6D2', '#7F7F7F', '#C7C7C7', '#BCBD22', '#DBDB8D', '#17BECF', '#9EDAE5']
+            };
+
+            const colors = palettes[palette] || palettes.default;
+            return colors.map(hex => {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            });
+        }
+
+        let colorPalette = getColorPalette(currentPalette, 0.7);
+        let colorPaletteLight = getColorPalette(currentPalette, 0.85);
+
+        let dataByYear = {};
+        let allYears = [];
+        let selectedYears = new Set();
+        let years = [];
+        let yearColors = {};
+        let chartEl;
+
+        // Dataset selector
+        const datasetBtn = document.getElementById('datasetBtn');
+        const datasetPanel = document.getElementById('datasetPanel');
+        const datasetList = document.getElementById('datasetList');
+        const datasetCount = document.getElementById('datasetCount');
+        const datasetSelectAll = document.getElementById('datasetSelectAll');
+        const datasetSelectNone = document.getElementById('datasetSelectNone');
+
+        datasetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            datasetPanel.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!datasetPanel.contains(e.target) && e.target !== datasetBtn) {
+                datasetPanel.classList.remove('show');
+            }
+        });
+
+        datasetSelectAll.addEventListener('click', () => {
+            allYears.forEach(y => selectedYears.add(y));
+            updateDatasetCheckboxes();
+            rebuildChart();
+        });
+
+        datasetSelectNone.addEventListener('click', () => {
+            selectedYears.clear();
+            updateDatasetCheckboxes();
+            rebuildChart();
+        });
+
+        function populateDatasetList() {
+            datasetList.innerHTML = '';
+            allYears.forEach(year => {
+                const item = document.createElement('div');
+                item.className = 'dataset-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="ds-${year}" ${selectedYears.has(year) ? 'checked' : ''}>
+                    <label for="ds-${year}">${year}</label>
+                `;
+                item.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const cb = item.querySelector('input');
+                        cb.checked = !cb.checked;
+                    }
+                    const cb = item.querySelector('input');
+                    if (cb.checked) selectedYears.add(year);
+                    else selectedYears.delete(year);
+                    rebuildChart();
+                });
+                datasetList.appendChild(item);
+            });
+        }
+
+        function updateDatasetCheckboxes() {
+            allYears.forEach(year => {
+                const cb = document.getElementById(`ds-${year}`);
+                if (cb) cb.checked = selectedYears.has(year);
+            });
+        }
+
+        function updateDatasetCount() {
+            datasetCount.textContent = `${selectedYears.size} år`;
+        }
+
+        function updateHighlightSelect() {
+            highlightYearSelect.innerHTML = '';
+            years.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = year;
+                highlightYearSelect.appendChild(opt);
+            });
+        }
+
+        function rebuildChart() {
+            if (!chartEl || allYears.length === 0) return;
+
+            years = Array.from(selectedYears).sort();
+            updateDatasetCount();
+            updateHighlightSelect();
+
+            Object.keys(customYearColors).forEach(y => {
+                if (!selectedYears.has(y)) delete customYearColors[y];
+            });
+
+            const palette = isDark ? colorPalette : colorPaletteLight;
+            years.forEach((year, i) => {
+                if (!customYearColors[year]) {
+                    yearColors[year] = palette[i % palette.length];
+                }
+            });
+
+            const traces = years.map(year => {
+                const values = weeks.map(w => dataByYear[year][w] || null);
+                return {
+                    x: weekLabels,
+                    y: values,
+                    type: 'bar',
+                    name: year,
+                    marker: { color: yearColors[year] },
+                    hoverinfo: 'none'
+                };
+            });
+
+            const avgValues = weeks.map(w => {
+                const vals = years.map(y => dataByYear[y][w]).filter(v => v != null);
+                return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+            });
+
+            const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
+            traces.push({
+                x: weekLabels,
+                y: avgValues,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Gjennomsnitt',
+                visible: avgToggle.checked,
+                line: { color: avgLineColor, width: 3, shape: 'spline', smoothing: 1.2, dash: 'dash' },
+                hoverinfo: 'none'
+            });
+
+            const bgColor = isTransparent ? 'rgba(0,0,0,0)' : (isDark ? '#0f1114' : '#ffffff');
+            const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
+            const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
+            const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+            const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+
+            const layout = {
+                barmode: 'group',
+                bargap: 0.08,
+                bargroupgap: 0.02,
+                paper_bgcolor: bgColor,
+                plot_bgcolor: bgColor,
+                font: {
+                    family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+                    color: textColor,
+                    size: 14
+                },
+                margin: { l: 0, r: 0, t: 30, b: 40 },
+                xaxis: {
+                    showgrid: false,
+                    showline: true,
+                    linecolor: lineColor,
+                    tickfont: { color: mutedColor, size: 11 },
+                    tickangle: 0,
+                    zeroline: false,
+                    ticks: '',
+                    range: [-0.6, 52.6],
+                    title: { text: 'Uke', font: { color: mutedColor, size: 12 }, standoff: 10 },
+                    dtick: 2
+                },
+                yaxis: {
+                    showgrid: true,
+                    gridcolor: gridColor,
+                    showline: true,
+                    linecolor: lineColor,
+                    tickfont: { color: mutedColor },
+                    zeroline: false,
+                    ticks: 'outside',
+                    ticklen: 8,
+                    tickcolor: 'rgba(0,0,0,0)',
+                    dtick: 100,
+                    automargin: true
+                },
+                showlegend: false,
+                hovermode: false
+            };
+
+            Plotly.react(chartEl, traces, layout, { responsive: true, displaylogo: false, displayModeBar: false, staticPlot: true });
+            updateLegend();
+        }
+
+        function updateChartTheme() {
+            if (!chartEl || years.length === 0) return;
+
+            const bgColor = isDark ? '#0f1114' : '#ffffff';
+            const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
+            const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
+            const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+            const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+            const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
+
+            colorPalette = getColorPalette(currentPalette, currentOpacity);
+            colorPaletteLight = getColorPalette(currentPalette, Math.min(currentOpacity + 0.15, 1));
+            const palette = isDark ? colorPalette : colorPaletteLight;
+
+            years.forEach((year, i) => {
+                if (!customYearColors[year]) {
+                    yearColors[year] = palette[i % palette.length];
+                }
+            });
+
+            const barColors = years.map(year => yearColors[year]);
+            years.forEach((year, i) => {
+                Plotly.restyle(chartEl, { 'marker.color': barColors[i] }, [i]);
+            });
+
+            Plotly.relayout(chartEl, {
+                'paper_bgcolor': bgColor,
+                'plot_bgcolor': bgColor,
+                'font.color': textColor,
+                'xaxis.tickfont.color': mutedColor,
+                'xaxis.linecolor': lineColor,
+                'yaxis.tickfont.color': mutedColor,
+                'yaxis.linecolor': lineColor,
+                'yaxis.gridcolor': gridColor
+            });
+
+            Plotly.restyle(chartEl, { 'line.color': avgLineColor }, [years.length]);
+            updateLegend();
+        }
+
+        function updateChartColors() {
+            if (!chartEl || years.length === 0) return;
+
+            colorPalette = getColorPalette(currentPalette, currentOpacity);
+            colorPaletteLight = getColorPalette(currentPalette, Math.min(currentOpacity + 0.15, 1));
+            const palette = isDark ? colorPalette : colorPaletteLight;
+
+            years.forEach((year, i) => {
+                if (!customYearColors[year]) {
+                    yearColors[year] = palette[i % palette.length];
+                }
+            });
+
+            const barColors = years.map(year => yearColors[year]);
+            years.forEach((year, i) => {
+                Plotly.restyle(chartEl, { 'marker.color': barColors[i] }, [i]);
+            });
+
+            updateLegend();
+        }
+
+        function updateLegend() {
+            const legendEl = document.getElementById('legendContainer');
+            const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
+
+            legendEl.innerHTML = '';
+            years.forEach(year => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `<div class="legend-dot" style="background:${yearColors[year]}"></div><span>${year}</span>`;
+                legendEl.appendChild(item);
+            });
+
+            if (avgToggle.checked) {
+                const avgItem = document.createElement('div');
+                avgItem.className = 'legend-item';
+                avgItem.innerHTML = `<div style="width: 20px; height: 3px; border-top: 3px dashed ${avgLineColor};"></div><span>Gjennomsnitt</span>`;
+                legendEl.appendChild(avgItem);
+            }
+        }
+
+        function loadChart() {
+            fetch('../data_lagt_ut_uke.csv?t=' + Date.now())
+                .then(r => r.text())
+                .then(csvText => {
+                    const lines = csvText.trim().split('\n');
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        const cols = line.split(',');
+                        const week = parseInt(cols[0], 10);
+                        const year = cols[1];
+                        const value = parseInt(cols[2], 10);
+
+                        if (!dataByYear[year]) dataByYear[year] = {};
+                        dataByYear[year][week] = value;
+                    }
+
+                    allYears = Object.keys(dataByYear).sort();
+
+                    if (allYears.length === 0) {
+                        document.getElementById('chart').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:300px;color:rgba(255,255,255,0.4);font-size:1.1rem;">Ingen data ennå. Last opp ukentlig data via kontrollpanelet.</div>';
+                        return;
+                    }
+
+                    allYears.slice(-6).forEach(y => selectedYears.add(y));
+                    years = Array.from(selectedYears).sort();
+
+                    populateDatasetList();
+                    updateDatasetCount();
+
+                    const palette = isDark ? colorPalette : colorPaletteLight;
+                    years.forEach((year, i) => {
+                        yearColors[year] = palette[i % palette.length];
+                    });
+
+                    updateHighlightSelect();
+
+                    const traces = years.map(year => {
+                        const values = weeks.map(w => dataByYear[year][w] || null);
+                        return {
+                            x: weekLabels,
+                            y: values,
+                            type: 'bar',
+                            name: year,
+                            marker: { color: yearColors[year] },
+                            hoverinfo: 'none'
+                        };
+                    });
+
+                    const avgValues = weeks.map(w => {
+                        const vals = years.map(y => dataByYear[y][w]).filter(v => v != null);
+                        return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+                    });
+
+                    const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
+                    traces.push({
+                        x: weekLabels,
+                        y: avgValues,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Gjennomsnitt',
+                        line: { color: avgLineColor, width: 3, shape: 'spline', smoothing: 1.2, dash: 'dash' },
+                        hoverinfo: 'none'
+                    });
+
+                    const bgColor = isDark ? '#0f1114' : '#ffffff';
+                    const textColor = isDark ? 'rgba(255,255,255,0.92)' : '#1a1a2e';
+                    const mutedColor = isDark ? 'rgba(255,255,255,0.40)' : '#6b7280';
+                    const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+                    const lineColor = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+
+                    const layout = {
+                        barmode: 'group',
+                        bargap: 0.08,
+                        bargroupgap: 0.02,
+                        paper_bgcolor: bgColor,
+                        plot_bgcolor: bgColor,
+                        font: {
+                            family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+                            color: textColor,
+                            size: 14
+                        },
+                        margin: { l: 0, r: 0, t: 30, b: 40 },
+                        xaxis: {
+                            showgrid: false,
+                            showline: true,
+                            linecolor: lineColor,
+                            tickfont: { color: mutedColor, size: 11 },
+                            tickangle: 0,
+                            zeroline: false,
+                            ticks: '',
+                            range: [-0.6, 52.6],
+                            title: { text: 'Uke', font: { color: mutedColor, size: 12 }, standoff: 10 },
+                            dtick: 2
+                        },
+                        yaxis: {
+                            showgrid: true,
+                            gridcolor: gridColor,
+                            showline: true,
+                            linecolor: lineColor,
+                            tickfont: { color: mutedColor },
+                            zeroline: false,
+                            ticks: 'outside',
+                            ticklen: 8,
+                            tickcolor: 'rgba(0,0,0,0)',
+                            dtick: 100,
+                            automargin: true
+                        },
+                        showlegend: false,
+                        hovermode: false
+                    };
+
+                    chartEl = document.getElementById('chart');
+                    Plotly.newPlot(chartEl, traces, layout, {
+                        responsive: true,
+                        displaylogo: false,
+                        displayModeBar: false,
+                        staticPlot: true
+                    });
+                    updateLegend();
+                });
+        }
+
+        // Download functionality
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const loading = document.getElementById('loading');
+            loading.classList.add('show');
+
+            try {
+                const scale = parseInt(document.getElementById('sizeSelect').value);
+
+                const canvas = await html2canvas(captureArea, {
+                    scale: scale,
+                    backgroundColor: isDark ? '#0f1114' : '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().split('T')[0];
+                link.download = `boliger-tilsalgs-uke-${isDark ? 'dark' : 'light'}-${timestamp}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                console.error('Error generating image:', error);
+                alert('Kunne ikke generere bilde. Prøv igjen.');
+            } finally {
+                loading.classList.remove('show');
+            }
+        });
+
+        // Embed code
+        const embedBtn = document.getElementById('embedBtn');
+        const embedModal = document.getElementById('embedModal');
+        const embedCode = document.getElementById('embedCode');
+        const copyEmbedBtn = document.getElementById('copyEmbedBtn');
+        const closeEmbedBtn = document.getElementById('closeEmbedBtn');
+
+        const GITHUB_PAGES_BASE = 'https://tskjelde-bit.github.io/grafer';
+
+        function generateEmbedCode() {
+            const theme = isDark ? 'dark' : 'light';
+            const aspect = aspectSelect.value;
+            const avg = avgToggle.checked ? '1' : '0';
+            const palette = paletteSelect.value;
+            const transparent = isTransparent ? '1' : '0';
+            const chartUrl = `${GITHUB_PAGES_BASE}/volum/tilsalgs_uke/tilsalgs_uke.html?theme=${theme}&aspect=${aspect}&avg=${avg}&palette=${palette}&transparent=${transparent}`;
+            return `<div class="grafer-embed" data-src="${chartUrl}"><script src="${GITHUB_PAGES_BASE}/embed.js"><\/script></div>`;
+        }
+
+        embedBtn.addEventListener('click', () => {
+            embedCode.value = generateEmbedCode();
+            embedModal.classList.add('show');
+        });
+
+        copyEmbedBtn.addEventListener('click', () => {
+            embedCode.select();
+            document.execCommand('copy');
+            copyEmbedBtn.textContent = 'Kopiert!';
+            setTimeout(() => { copyEmbedBtn.textContent = 'Kopier'; }, 2000);
+        });
+
+        closeEmbedBtn.addEventListener('click', () => { embedModal.classList.remove('show'); });
+        embedModal.addEventListener('click', (e) => { if (e.target === embedModal) embedModal.classList.remove('show'); });
+
+        // Initialize
+        loadChart();
+    </script>
+</body>
+</html>
