@@ -893,6 +893,10 @@
                     <option value="solgt">Solgt</option>
                     <option value="lagtut">Lagt ut</option>
                 </select>
+                <select id="highlightColorPreset">
+                    <option value="#A0FAB2" selected>Grønn</option>
+                    <option value="#CB474B">Rød</option>
+                </select>
                 <input type="text" id="highlightColorInput" value="#A0FAB2" maxlength="7" style="width:70px;font-size:0.75rem;text-transform:uppercase;">
                 <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
                 <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
@@ -1226,6 +1230,12 @@
         const quickHighlightBtn = document.getElementById('quickHighlightBtn');
         const resetHighlightBtn = document.getElementById('resetHighlightBtn');
         const highlightColorInput = document.getElementById('highlightColorInput');
+        const highlightColorPreset = document.getElementById('highlightColorPreset');
+
+        highlightColorPreset.addEventListener('change', () => {
+            highlightColorInput.value = highlightColorPreset.value;
+            highlightColorInput.dispatchEvent(new Event('change'));
+        });
 
         highlightColorInput.addEventListener('change', () => {
             let val = highlightColorInput.value.trim();

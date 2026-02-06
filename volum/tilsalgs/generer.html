@@ -909,6 +909,10 @@
             </div>
             <div class="control">
                 <label>Farge:</label>
+                <select id="avgColorPreset">
+                    <option value="#A0FAB2" selected>Grønn</option>
+                    <option value="#CB474B">Rød</option>
+                </select>
                 <input type="text" id="avgColorInput" value="#A0FAB2" maxlength="7" style="width:70px;font-size:0.75rem;text-transform:uppercase;">
             </div>
             <div class="control">
@@ -921,6 +925,10 @@
             <div class="control">
                 <label>Highlight:</label>
                 <select id="highlightYearSelect"></select>
+                <select id="highlightColorPreset">
+                    <option value="#A0FAB2" selected>Grønn</option>
+                    <option value="#CB474B">Rød</option>
+                </select>
                 <input type="text" id="highlightColorInput" value="#A0FAB2" maxlength="7" style="width:70px;font-size:0.75rem;text-transform:uppercase;">
                 <button class="btn btn-highlight" id="quickHighlightBtn">Marker</button>
                 <button class="btn btn-outline" id="resetHighlightBtn">Reset</button>
@@ -1221,6 +1229,12 @@
         // Average line color input
         let avgColor = '#A0FAB2';
         const avgColorInput = document.getElementById('avgColorInput');
+        const avgColorPreset = document.getElementById('avgColorPreset');
+
+        avgColorPreset.addEventListener('change', () => {
+            avgColorInput.value = avgColorPreset.value;
+            avgColorInput.dispatchEvent(new Event('change'));
+        });
 
         avgColorInput.addEventListener('change', () => {
             let val = avgColorInput.value.trim();
@@ -1303,6 +1317,11 @@
         const quickHighlightBtn = document.getElementById('quickHighlightBtn');
         const resetHighlightBtn = document.getElementById('resetHighlightBtn');
         const highlightColorInput = document.getElementById('highlightColorInput');
+        const highlightColorPreset = document.getElementById('highlightColorPreset');
+
+        highlightColorPreset.addEventListener('change', () => {
+            highlightColorInput.value = highlightColorPreset.value;
+        });
 
         quickHighlightBtn.addEventListener('click', () => {
             const year = highlightYearSelect.value;
