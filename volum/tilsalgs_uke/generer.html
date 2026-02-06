@@ -831,7 +831,8 @@
                     ticks: '',
                     range: [-0.6, filteredLabels.length - 0.4],
                     title: { text: 'Uke', font: { color: mutedColor, size: 12 }, standoff: 10 },
-                    dtick: filteredLabels.length > 30 ? 2 : 1
+                    dtick: filteredLabels.length > 30 ? 2 : 1,
+                    tick0: 1
                 },
                 yaxis: {
                     showgrid: true,
@@ -1033,7 +1034,8 @@
                             ticks: '',
                             range: [-0.6, filteredLabels.length - 0.4],
                             title: { text: 'Uke', font: { color: mutedColor, size: 12 }, standoff: 10 },
-                            dtick: filteredLabels.length > 30 ? 2 : 1
+                            dtick: filteredLabels.length > 30 ? 2 : 1,
+                            tick0: 1
                         },
                         yaxis: {
                             showgrid: true,
