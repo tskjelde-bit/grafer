@@ -1047,6 +1047,20 @@
                 <label>Fra år:</label>
                 <select id="startYearSelect"></select>
             </div>
+            <div class="control dataset-dropdown">
+                <label>Måneder:</label>
+                <button class="btn btn-outline dataset-btn" id="xAxisBtn">
+                    <span id="xAxisCount">12 mnd</span>
+                    <span style="font-size: 10px;">▼</span>
+                </button>
+                <div class="dataset-panel" id="xAxisPanel">
+                    <div id="xAxisList"></div>
+                    <div class="dataset-actions">
+                        <button class="btn btn-outline" id="xAxisSelectAll">Alle</button>
+                        <button class="btn btn-outline" id="xAxisSelectNone">Ingen</button>
+                    </div>
+                </div>
+            </div>
             <div class="control">
                 <label>Aspect:</label>
                 <select id="aspectSelect">
@@ -1438,6 +1452,80 @@
             rebuildChart();
         });
 
+        // X-axis month filter
+        const monthNumbers = [1,2,3,4,5,6,7,8,9,10,11,12];
+        const monthDisplayNames = { 1:'Januar', 2:'Februar', 3:'Mars', 4:'April', 5:'Mai', 6:'Juni', 7:'Juli', 8:'August', 9:'September', 10:'Oktober', 11:'November', 12:'Desember' };
+        let selectedMonthsFilter = new Set(monthNumbers);
+        const xAxisBtn = document.getElementById('xAxisBtn');
+        const xAxisPanel = document.getElementById('xAxisPanel');
+        const xAxisList = document.getElementById('xAxisList');
+        const xAxisCount = document.getElementById('xAxisCount');
+        const xAxisSelectAll = document.getElementById('xAxisSelectAll');
+        const xAxisSelectNone = document.getElementById('xAxisSelectNone');
+
+        xAxisBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            xAxisPanel.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!xAxisPanel.contains(e.target) && e.target !== xAxisBtn) {
+                xAxisPanel.classList.remove('show');
+            }
+        });
+
+        function populateXAxisList() {
+            xAxisList.innerHTML = '';
+            monthNumbers.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'dataset-item';
+                item.innerHTML = `<input type="checkbox" id="xm-${m}" ${selectedMonthsFilter.has(m) ? 'checked' : ''}><label for="xm-${m}">${monthDisplayNames[m]}</label>`;
+                item.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const cb = item.querySelector('input');
+                        cb.checked = !cb.checked;
+                    }
+                    const cb = item.querySelector('input');
+                    if (cb.checked) selectedMonthsFilter.add(m);
+                    else selectedMonthsFilter.delete(m);
+                    updateXAxisCount();
+                    filterDataByYear();
+                    rebuildChart();
+                });
+                xAxisList.appendChild(item);
+            });
+        }
+
+        function updateXAxisCheckboxes() {
+            monthNumbers.forEach(m => {
+                const cb = document.getElementById(`xm-${m}`);
+                if (cb) cb.checked = selectedMonthsFilter.has(m);
+            });
+        }
+
+        function updateXAxisCount() {
+            const count = selectedMonthsFilter.size;
+            xAxisCount.textContent = count === 12 ? '12 mnd' : `${count} mnd`;
+        }
+
+        xAxisSelectAll.addEventListener('click', () => {
+            monthNumbers.forEach(m => selectedMonthsFilter.add(m));
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            filterDataByYear();
+            rebuildChart();
+        });
+
+        xAxisSelectNone.addEventListener('click', () => {
+            selectedMonthsFilter.clear();
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            filterDataByYear();
+            rebuildChart();
+        });
+
+        populateXAxisList();
+
         // Dataset selector elements
         const datasetBtn = document.getElementById('datasetBtn');
         const datasetPanel = document.getElementById('datasetPanel');
@@ -1450,6 +1538,7 @@
         datasetBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             datasetPanel.classList.toggle('show');
+            xAxisPanel.classList.remove('show');
         });
 
         // Close panel when clicking outside
@@ -1662,27 +1751,19 @@
         }
 
         function filterDataByYear() {
-            if (!startYear) {
-                // No filter - use all data
-                dates = [...allDates];
-                areaNames.forEach(a => {
-                    areaValues[a] = [...allAreaValues[a]];
-                });
-            } else {
-                // Filter by start year
-                dates = [];
-                areaNames.forEach(a => areaValues[a] = []);
+            dates = [];
+            areaNames.forEach(a => areaValues[a] = []);
 
-                allDates.forEach((d, i) => {
-                    const year = parseInt(d.substring(0, 4));
-                    if (year >= startYear) {
-                        dates.push(d);
-                        areaNames.forEach(a => {
-                            areaValues[a].push(allAreaValues[a][i]);
-                        });
-                    }
+            allDates.forEach((d, i) => {
+                const year = parseInt(d.substring(0, 4));
+                const month = parseInt(d.substring(5, 7));
+                if (startYear && year < startYear) return;
+                if (!selectedMonthsFilter.has(month)) return;
+                dates.push(d);
+                areaNames.forEach(a => {
+                    areaValues[a].push(allAreaValues[a][i]);
                 });
-            }
+            });
         }
 
         function rebuildChart() {

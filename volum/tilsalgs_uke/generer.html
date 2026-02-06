@@ -340,6 +340,26 @@
                     </div>
                 </div>
             </div>
+            <div class="control dataset-dropdown">
+                <label>Uker:</label>
+                <button class="btn btn-outline dataset-btn" id="xAxisBtn">
+                    <span id="xAxisCount">53 uker</span>
+                    <span style="font-size: 10px;">▼</span>
+                </button>
+                <div class="dataset-panel" id="xAxisPanel" style="min-width: 280px;">
+                    <div style="display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <input type="number" id="xAxisFrom" min="1" max="53" value="1" style="width: 55px; padding: 0.35rem; border-radius: 4px; font-size: 0.8rem; background: rgba(255,255,255,0.08); color: #e4e4e7; border: 1px solid rgba(255,255,255,0.15);">
+                        <span style="line-height: 30px; font-size: 0.8rem;">–</span>
+                        <input type="number" id="xAxisTo" min="1" max="53" value="53" style="width: 55px; padding: 0.35rem; border-radius: 4px; font-size: 0.8rem; background: rgba(255,255,255,0.08); color: #e4e4e7; border: 1px solid rgba(255,255,255,0.15);">
+                        <button class="btn btn-outline" id="xAxisApplyRange" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; height: auto;">Bruk</button>
+                    </div>
+                    <div id="xAxisList" style="max-height: 200px; overflow-y: auto;"></div>
+                    <div class="dataset-actions">
+                        <button class="btn btn-outline" id="xAxisSelectAll">Alle</button>
+                        <button class="btn btn-outline" id="xAxisSelectNone">Ingen</button>
+                    </div>
+                </div>
+            </div>
             <span class="toolbar-divider"></span>
             <div class="control">
                 <label>Farger:</label>
@@ -535,6 +555,91 @@
             updateChartColors();
         });
 
+        // X-axis filter (weeks)
+        let selectedWeeks = new Set(Array.from({length: 53}, (_, i) => i + 1));
+        const xAxisBtn = document.getElementById('xAxisBtn');
+        const xAxisPanel = document.getElementById('xAxisPanel');
+        const xAxisList = document.getElementById('xAxisList');
+        const xAxisCount = document.getElementById('xAxisCount');
+        const xAxisSelectAll = document.getElementById('xAxisSelectAll');
+        const xAxisSelectNone = document.getElementById('xAxisSelectNone');
+        const xAxisFrom = document.getElementById('xAxisFrom');
+        const xAxisTo = document.getElementById('xAxisTo');
+        const xAxisApplyRange = document.getElementById('xAxisApplyRange');
+
+        xAxisBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            xAxisPanel.classList.toggle('show');
+            datasetPanel.classList.remove('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!xAxisPanel.contains(e.target) && e.target !== xAxisBtn) {
+                xAxisPanel.classList.remove('show');
+            }
+        });
+
+        function populateXAxisList() {
+            xAxisList.innerHTML = '';
+            for (let w = 1; w <= 53; w++) {
+                const item = document.createElement('div');
+                item.className = 'dataset-item';
+                item.innerHTML = `<input type="checkbox" id="xw-${w}" ${selectedWeeks.has(w) ? 'checked' : ''}><label for="xw-${w}">Uke ${w}</label>`;
+                item.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const cb = item.querySelector('input');
+                        cb.checked = !cb.checked;
+                    }
+                    const cb = item.querySelector('input');
+                    if (cb.checked) selectedWeeks.add(w);
+                    else selectedWeeks.delete(w);
+                    updateXAxisCount();
+                    rebuildChart();
+                });
+                xAxisList.appendChild(item);
+            }
+        }
+
+        function updateXAxisCheckboxes() {
+            for (let w = 1; w <= 53; w++) {
+                const cb = document.getElementById(`xw-${w}`);
+                if (cb) cb.checked = selectedWeeks.has(w);
+            }
+        }
+
+        function updateXAxisCount() {
+            const count = selectedWeeks.size;
+            xAxisCount.textContent = count === 53 ? '53 uker' : `${count} uker`;
+        }
+
+        xAxisSelectAll.addEventListener('click', () => {
+            for (let w = 1; w <= 53; w++) selectedWeeks.add(w);
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            rebuildChart();
+        });
+
+        xAxisSelectNone.addEventListener('click', () => {
+            selectedWeeks.clear();
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            rebuildChart();
+        });
+
+        xAxisApplyRange.addEventListener('click', () => {
+            const from = parseInt(xAxisFrom.value) || 1;
+            const to = parseInt(xAxisTo.value) || 53;
+            selectedWeeks.clear();
+            for (let w = Math.min(from, to); w <= Math.max(from, to); w++) {
+                if (w >= 1 && w <= 53) selectedWeeks.add(w);
+            }
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            rebuildChart();
+        });
+
+        populateXAxisList();
+
         // Chart data and rendering
         const weeks = Array.from({length: 53}, (_, i) => i + 1);
         const weekLabels = weeks.map(w => String(w));
@@ -578,6 +683,7 @@
         datasetBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             datasetPanel.classList.toggle('show');
+            xAxisPanel.classList.remove('show');
         });
 
         document.addEventListener('click', (e) => {
@@ -660,10 +766,14 @@
                 }
             });
 
+            // Filter weeks based on selectedWeeks
+            const filteredWeeks = weeks.filter(w => selectedWeeks.has(w));
+            const filteredLabels = filteredWeeks.map(w => String(w));
+
             const traces = years.map(year => {
-                const values = weeks.map(w => dataByYear[year][w] || null);
+                const values = filteredWeeks.map(w => dataByYear[year][w] || null);
                 return {
-                    x: weekLabels,
+                    x: filteredLabels,
                     y: values,
                     type: 'bar',
                     name: year,
@@ -672,14 +782,14 @@
                 };
             });
 
-            const avgValues = weeks.map(w => {
+            const avgValues = filteredWeeks.map(w => {
                 const vals = years.map(y => dataByYear[y][w]).filter(v => v != null);
                 return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
             });
 
             const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
             traces.push({
-                x: weekLabels,
+                x: filteredLabels,
                 y: avgValues,
                 type: 'scatter',
                 mode: 'lines',
@@ -715,9 +825,9 @@
                     tickangle: 0,
                     zeroline: false,
                     ticks: '',
-                    range: [-0.6, 52.6],
+                    range: [-0.6, filteredLabels.length - 0.4],
                     title: { text: 'Uke', font: { color: mutedColor, size: 12 }, standoff: 10 },
-                    dtick: 2
+                    dtick: filteredLabels.length > 30 ? 2 : 1
                 },
                 yaxis: {
                     showgrid: true,
@@ -859,10 +969,14 @@
 
                     updateHighlightSelect();
 
+                    // Filter weeks based on selectedWeeks
+                    const filteredWeeks = weeks.filter(w => selectedWeeks.has(w));
+                    const filteredLabels = filteredWeeks.map(w => String(w));
+
                     const traces = years.map(year => {
-                        const values = weeks.map(w => dataByYear[year][w] || null);
+                        const values = filteredWeeks.map(w => dataByYear[year][w] || null);
                         return {
-                            x: weekLabels,
+                            x: filteredLabels,
                             y: values,
                             type: 'bar',
                             name: year,
@@ -871,14 +985,14 @@
                         };
                     });
 
-                    const avgValues = weeks.map(w => {
+                    const avgValues = filteredWeeks.map(w => {
                         const vals = years.map(y => dataByYear[y][w]).filter(v => v != null);
                         return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
                     });
 
                     const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
                     traces.push({
-                        x: weekLabels,
+                        x: filteredLabels,
                         y: avgValues,
                         type: 'scatter',
                         mode: 'lines',
@@ -913,9 +1027,9 @@
                             tickangle: 0,
                             zeroline: false,
                             ticks: '',
-                            range: [-0.6, 52.6],
+                            range: [-0.6, filteredLabels.length - 0.4],
                             title: { text: 'Uke', font: { color: mutedColor, size: 12 }, standoff: 10 },
-                            dtick: 2
+                            dtick: filteredLabels.length > 30 ? 2 : 1
                         },
                         yaxis: {
                             showgrid: true,

@@ -861,6 +861,20 @@
                     </div>
                 </div>
             </div>
+            <div class="control dataset-dropdown">
+                <label>Måneder:</label>
+                <button class="btn btn-outline dataset-btn" id="xAxisBtn">
+                    <span id="xAxisCount">12 mnd</span>
+                    <span style="font-size: 10px;">▼</span>
+                </button>
+                <div class="dataset-panel" id="xAxisPanel">
+                    <div id="xAxisList"></div>
+                    <div class="dataset-actions">
+                        <button class="btn btn-outline" id="xAxisSelectAll">Alle</button>
+                        <button class="btn btn-outline" id="xAxisSelectNone">Ingen</button>
+                    </div>
+                </div>
+            </div>
             <span class="toolbar-divider"></span>
             <div class="control">
                 <label>Farger:</label>
@@ -1247,6 +1261,78 @@
             updateChartColors();
         });
 
+        // X-axis filter (months)
+        const allMonths = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+        const monthDisplayNames = { jan: 'Januar', feb: 'Februar', mar: 'Mars', apr: 'April', mai: 'Mai', jun: 'Juni', jul: 'Juli', aug: 'August', sep: 'September', okt: 'Oktober', nov: 'November', des: 'Desember' };
+        let selectedMonths = new Set(allMonths);
+        const xAxisBtn = document.getElementById('xAxisBtn');
+        const xAxisPanel = document.getElementById('xAxisPanel');
+        const xAxisList = document.getElementById('xAxisList');
+        const xAxisCount = document.getElementById('xAxisCount');
+        const xAxisSelectAll = document.getElementById('xAxisSelectAll');
+        const xAxisSelectNone = document.getElementById('xAxisSelectNone');
+
+        xAxisBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            xAxisPanel.classList.toggle('show');
+            datasetPanel.classList.remove('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!xAxisPanel.contains(e.target) && e.target !== xAxisBtn) {
+                xAxisPanel.classList.remove('show');
+            }
+        });
+
+        function populateXAxisList() {
+            xAxisList.innerHTML = '';
+            allMonths.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'dataset-item';
+                item.innerHTML = `<input type="checkbox" id="xm-${m}" ${selectedMonths.has(m) ? 'checked' : ''}><label for="xm-${m}">${monthDisplayNames[m]}</label>`;
+                item.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const cb = item.querySelector('input');
+                        cb.checked = !cb.checked;
+                    }
+                    const cb = item.querySelector('input');
+                    if (cb.checked) selectedMonths.add(m);
+                    else selectedMonths.delete(m);
+                    updateXAxisCount();
+                    rebuildChart();
+                });
+                xAxisList.appendChild(item);
+            });
+        }
+
+        function updateXAxisCheckboxes() {
+            allMonths.forEach(m => {
+                const cb = document.getElementById(`xm-${m}`);
+                if (cb) cb.checked = selectedMonths.has(m);
+            });
+        }
+
+        function updateXAxisCount() {
+            const count = selectedMonths.size;
+            xAxisCount.textContent = count === 12 ? '12 mnd' : `${count} mnd`;
+        }
+
+        xAxisSelectAll.addEventListener('click', () => {
+            allMonths.forEach(m => selectedMonths.add(m));
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            rebuildChart();
+        });
+
+        xAxisSelectNone.addEventListener('click', () => {
+            selectedMonths.clear();
+            updateXAxisCheckboxes();
+            updateXAxisCount();
+            rebuildChart();
+        });
+
+        populateXAxisList();
+
         // Chart data and rendering
         const months = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
 
@@ -1291,6 +1377,7 @@
         datasetBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             datasetPanel.classList.toggle('show');
+            xAxisPanel.classList.remove('show');
         });
 
         // Close panel when clicking outside
@@ -1380,10 +1467,13 @@
                 }
             });
 
+            // Filter months based on selectedMonths
+            const filteredMonths = months.filter(m => selectedMonths.has(m));
+
             const traces = years.map(year => {
-                const values = months.map(m => dataByYear[year][m] || null);
+                const values = filteredMonths.map(m => dataByYear[year][m] || null);
                 return {
-                    x: months,
+                    x: filteredMonths,
                     y: values,
                     type: 'bar',
                     name: year,
@@ -1393,14 +1483,14 @@
             });
 
             // Average line
-            const avgValues = months.map(m => {
+            const avgValues = filteredMonths.map(m => {
                 const vals = years.map(y => dataByYear[y][m]).filter(v => v != null);
                 return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
             });
 
             const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
             traces.push({
-                x: months,
+                x: filteredMonths,
                 y: avgValues,
                 type: 'scatter',
                 mode: 'lines',
@@ -1436,7 +1526,7 @@
                     tickangle: 0,
                     zeroline: false,
                     ticks: '',
-                    range: [-0.6, 11.6]
+                    range: [-0.6, filteredMonths.length - 0.4]
                 },
                 yaxis: {
                     showgrid: true,
@@ -1580,10 +1670,13 @@
                     // Populate highlight year select
                     updateHighlightSelect();
 
+                    // Filter months based on selectedMonths
+                    const filteredMonths = months.filter(m => selectedMonths.has(m));
+
                     const traces = years.map(year => {
-                        const values = months.map(m => dataByYear[year][m] || null);
+                        const values = filteredMonths.map(m => dataByYear[year][m] || null);
                         return {
-                            x: months,
+                            x: filteredMonths,
                             y: values,
                             type: 'bar',
                             name: year,
@@ -1593,14 +1686,14 @@
                     });
 
                     // Average line
-                    const avgValues = months.map(m => {
+                    const avgValues = filteredMonths.map(m => {
                         const vals = years.map(y => dataByYear[y][m]).filter(v => v != null);
                         return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
                     });
 
                     const avgLineColor = isDark ? 'rgba(160, 250, 178, 1)' : 'rgba(16, 185, 129, 1)';
                     traces.push({
-                        x: months,
+                        x: filteredMonths,
                         y: avgValues,
                         type: 'scatter',
                         mode: 'lines',
@@ -1635,7 +1728,7 @@
                             tickangle: 0,
                             zeroline: false,
                             ticks: '',
-                            range: [-0.6, 11.6]
+                            range: [-0.6, filteredMonths.length - 0.4]
                         },
                         yaxis: {
                             showgrid: true,
